@@ -131,6 +131,7 @@ import WcEdit from './WCEdit'
 import WcImportResult from './WCImportResult'
 
 export default {
+  // test
   name: 'WC',
   components: { WcInfo, WcAdd, WcEdit, WcImportResult },
   data () {
