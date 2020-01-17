@@ -401,7 +401,8 @@ export default {
         this.$message.warning('请选择需要导出的记录')
         return
       }
-      let newData = []
+      this.$message.loading('正在生成', 0)
+      // let newData = []
       this.selectedRows.forEach(item => {
         let dateArr = `${item.date}`.split('-')
         let exportData = {
@@ -452,7 +453,20 @@ export default {
           Object.keys(everyEightBatches).forEach(key => {
             let everyEightBatchesTotalAmountArr = `${this.$tools.addZero(everyEightBatchesTotalAmount[key])}`.replace(/[.]/g, '').split('').reverse()
             everyEightBatchesTotalAmountArr.push('￥')
-            newData.push({
+            // newData.push({
+            //   ...exportData,
+            //   everyEightBatches: everyEightBatches[key],
+            //   f: everyEightBatchesTotalAmountArr[0], // 分
+            //   j: everyEightBatchesTotalAmountArr[1], // 角
+            //   y: everyEightBatchesTotalAmountArr[2], // 元
+            //   s: everyEightBatchesTotalAmountArr[3], // 十
+            //   b: everyEightBatchesTotalAmountArr[4], // 百
+            //   q: everyEightBatchesTotalAmountArr[5], // 千
+            //   w: everyEightBatchesTotalAmountArr[6], // 万
+            //   sw: everyEightBatchesTotalAmountArr[7], // 十万
+            //   bw: everyEightBatchesTotalAmountArr[8] // 百万
+            // })
+            exportData = {
               ...exportData,
               everyEightBatches: everyEightBatches[key],
               f: everyEightBatchesTotalAmountArr[0], // 分
@@ -464,20 +478,27 @@ export default {
               w: everyEightBatchesTotalAmountArr[6], // 万
               sw: everyEightBatchesTotalAmountArr[7], // 十万
               bw: everyEightBatchesTotalAmountArr[8] // 百万
-            })
+            }
+            this.$message.destroy() // 等全部执行完后，再把message全局销毁
+            let spread = newSpread('StoreroomOut')
+            spread = fixedForm(spread, 'StoreroomOut', exportData)
+            spread = floatForm(spread, 'StoreroomOut', exportData.everyEightBatches)
+            let fileName = `出库单_${exportData.typeApplicationToDept}_${exportData.date}_${exportData.num}.xlsx`
+            saveExcel(spread, fileName)
+            floatReset(spread, 'StoreroomOut', exportData.everyEightBatches.length)
           })
         })
       })
-      this.$message.loading('正在生成', 3, () => { // 3s后关闭执行关闭回调函数
-        newData.forEach(exportData => {
-          let spread = newSpread('StoreroomOut')
-          spread = fixedForm(spread, 'StoreroomOut', exportData)
-          spread = floatForm(spread, 'StoreroomOut', exportData.everyEightBatches)
-          let fileName = `出库单_${exportData.typeApplicationToDept}_${exportData.date}_${exportData.num}.xlsx`
-          saveExcel(spread, fileName)
-          floatReset(spread, 'StoreroomOut', exportData.everyEightBatches.length)
-        })
-      })
+      // this.$message.loading('正在生成', 3, () => { // 3s后关闭执行关闭回调函数
+      //   newData.forEach(exportData => {
+      //     let spread = newSpread('StoreroomOut')
+      //     spread = fixedForm(spread, 'StoreroomOut', exportData)
+      //     spread = floatForm(spread, 'StoreroomOut', exportData.everyEightBatches)
+      //     let fileName = `出库单_${exportData.typeApplicationToDept}_${exportData.date}_${exportData.num}.xlsx`
+      //     saveExcel(spread, fileName)
+      //     floatReset(spread, 'StoreroomOut', exportData.everyEightBatches.length)
+      //   })
+      // })
     },
     search () {
       let {sortedInfo, filteredInfo} = this
