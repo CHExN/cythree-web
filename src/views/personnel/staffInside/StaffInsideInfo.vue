@@ -36,6 +36,7 @@
           <detail-list-item term="参加工作日期">{{staffInsideInfoData.workDate}}</detail-list-item>
           <detail-list-item term="农转工转工日期">{{staffInsideInfoData.farmerWorkDate}}</detail-list-item>
           <detail-list-item term="调入环卫或报到日期">{{staffInsideInfoData.transferDate}}</detail-list-item>
+          <detail-list-item term="到本场队日期">{{staffInsideInfoData.toTeamDate}}</detail-list-item>
           <detail-list-item term="现任岗位职务">{{staffInsideInfoData.technicalType}}</detail-list-item>
           <detail-list-item term="岗位">{{getPost(staffInsideInfoData.post)}}</detail-list-item>
           <detail-list-item term="岗位级别">{{staffInsideInfoData.postLevel}}</detail-list-item>
@@ -50,7 +51,7 @@
         <detail-list title="合同信息">
           <detail-list-item term="档案编号">{{contractInsideData.fileNum}}</detail-list-item>
           <detail-list-item term="胸牌号码">{{contractInsideData.badNum}}</detail-list-item>
-          <detail-list-item term="无固定期备注">{{contractInsideData.remarkOnFixedPeriod}}</detail-list-item>
+          <detail-list-item term="无固定期">{{contractInsideData.isFixedPeriod}}</detail-list-item>
           <detail-list-item term="劳动合同起始日期">{{contractInsideData.contractLaborStart}}</detail-list-item>
           <detail-list-item term="劳动合同结束日期">{{contractInsideData.contractLaborEnd}}</detail-list-item>
           <detail-list-item term="岗位协议起始日期">{{contractInsideData.jobAgreementStart}}</detail-list-item>

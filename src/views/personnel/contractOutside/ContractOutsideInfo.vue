@@ -10,16 +10,20 @@
     <a-card :bordered="false">
       <a-card :bordered="false">
         <detail-list title="合同信息">
-          <!-- <detail-list-item term="劳动合同起始日期">{{contractOutsideInfoData.contractLaborStart}}</detail-list-item> -->
-          <!-- <detail-list-item term="劳动合同结束日期">{{contractOutsideInfoData.contractLaborEnd}}</detail-list-item> -->
-          <!-- <detail-list-item term="岗位协议起始日期">{{contractOutsideInfoData.jobAgreementStart}}</detail-list-item> -->
-          <!-- <detail-list-item term="岗位协议结束日期">{{contractOutsideInfoData.jobAgreementEnd}}</detail-list-item> -->
           <template v-for="(k, index) in contractPeriod">
             <detail-list-item :key="index" :term="k">{{contractPeriodDate[index]}}</detail-list-item>
           </template>
-          <detail-list-item term="无固定期备注">{{contractOutsideInfoData.remarkOnFixedPeriod}}</detail-list-item>
+          <!-- <detail-list-item term="无固定期">{{contractOutsideInfoData.isFixedPeriod}}</detail-list-item> -->
           <detail-list-item term="续签备注">{{contractOutsideInfoData.remarkRenew}}</detail-list-item>
           <detail-list-item term="备注">{{contractOutsideInfoData.remark}}</detail-list-item>
+        </detail-list>
+      </a-card>
+      <a-divider style="margin-bottom: 32px"/>
+      <a-card :bordered="false">
+        <detail-list title="岗位协议信息">
+          <template v-for="(k, index) in jobAgreement">
+            <detail-list-item :key="index" :term="k">{{jobAgreementDate[index]}}</detail-list-item>
+          </template>
         </detail-list>
       </a-card>
       <a-divider v-hasPermission="'staffOutside:view'" style="margin-bottom: 32px"/>
@@ -85,6 +89,12 @@ export default {
     },
     contractPeriodDate () {
       return this.contractOutsideInfoData.contractPeriodDate ? this.contractOutsideInfoData.contractPeriodDate.split(',') : []
+    },
+    jobAgreement () {
+      return this.contractOutsideInfoData.jobAgreement ? this.contractOutsideInfoData.jobAgreement.split(',') : []
+    },
+    jobAgreementDate () {
+      return this.contractOutsideInfoData.jobAgreementDate ? this.contractOutsideInfoData.jobAgreementDate.split(',') : []
     }
   },
   methods: {

@@ -112,14 +112,6 @@
         <template slot="money" slot-scope="text">
           <span>{{ $tools.addZero($tools.toNumFormant(text)) }}</span>
         </template>
-        <template slot="remark" slot-scope="text">
-          <a-popover placement="topLeft">
-            <template slot="content">
-              <div>{{text}}</div>
-            </template>
-            <p style="width: 200px;margin-bottom: 0">{{text}}</p>
-          </a-popover>
-        </template>
       </a-table>
     </div>
     <!-- 出库 -->
@@ -200,9 +192,7 @@ export default {
         }
       }, {
         title: '备注',
-        dataIndex: 'remark',
-        scopedSlots: { customRender: 'remark' },
-        width: 200
+        dataIndex: 'remark'
       }, {
         title: '入库日期',
         dataIndex: 'date'

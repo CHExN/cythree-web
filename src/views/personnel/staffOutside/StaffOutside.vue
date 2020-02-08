@@ -210,6 +210,9 @@
           </a-popover>
         </template>
         <template slot="operation" slot-scope="text, record">
+          <a-icon v-if="record.type !== '0'" type="up-square" theme="twoTone" twoToneColor="#08c" @click="sort(0, record)" title="向上调整排序"></a-icon>
+          <a-icon v-if="record.type !== '0'" type="down-square" theme="twoTone" twoToneColor="#08c" @click="sort(1, record)" title="向下调整排序"></a-icon>
+          &nbsp;
           <a-icon v-hasPermission="'staffOutside:update'" type="setting" theme="twoTone" twoToneColor="#4a9ff5" @click="edit(record)" title="修改"></a-icon>
           &nbsp;
           <a-icon v-hasPermission="'staffOutside:view'" type="eye" theme="twoTone" twoToneColor="#42b983" @click="view(record)" title="查看"></a-icon>
@@ -311,7 +314,10 @@ export default {
       let { filteredInfo } = this
       filteredInfo = filteredInfo || {}
       return [{
-        title: '序号',
+        title: '总序号',
+        dataIndex: 'sortNum1'
+      }, {
+        title: '分队序号',
         dataIndex: 'sortNum2'
       }, {
         title: '姓名',
@@ -382,7 +388,7 @@ export default {
         dataIndex: 'operation',
         scopedSlots: { customRender: 'operation' },
         fixed: 'right',
-        width: 100
+        width: 130
       }]
     }
   },
@@ -416,6 +422,22 @@ export default {
         this.queryParams.mini = ''
         this.queryParams.max = ''
       }
+    },
+    sort (isUp, record) {
+      this.loading = true
+      this.$put('staffOutside/updateSort', {
+        ...record,
+        isUp: isUp
+      }).then((r) => {
+        this.loading = false
+        let statusArr = {
+          '-1': 'error',
+          '0': 'warning',
+          '1': 'success'
+        }
+        this.$message[statusArr[r.data.status]](r.data.message)
+        this.search()
+      })
     },
     view (record) {
       this.staffOutsideInfo.data = record
@@ -574,7 +596,8 @@ export default {
     loadSelect () {
       this.$get('staffOutside/getTechnicalType', {
       }).then((r) => {
-        this.technicalTypeData = r.data
+        // 这里 这样可以去除null
+        this.technicalTypeData = r.data.filter(d => d)
       })
       this.$get('staffOutside/getPost', {
       }).then((r) => {

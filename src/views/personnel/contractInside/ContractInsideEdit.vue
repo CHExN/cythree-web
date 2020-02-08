@@ -45,11 +45,11 @@
           v-decorator="['badNum']"
         />
       </a-form-item>
-      <a-form-item label='无固定期备注' v-bind="formItemLayout">
+      <a-form-item label='无固定期' v-bind="formItemLayout">
         <a-textarea
-          placeholder='无固定期备注'
+          placeholder='无固定期'
           autocomplete="off"
-          v-decorator="['remarkOnFixedPeriod']"
+          v-decorator="['isFixedPeriod']"
         />
       </a-form-item>
       <a-form-item label='劳始日期' v-bind="formItemLayout">

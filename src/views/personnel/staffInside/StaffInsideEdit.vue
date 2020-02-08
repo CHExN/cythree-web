@@ -227,6 +227,14 @@
           v-decorator="['transferDate']"
         />
       </a-form-item>
+      <a-form-item label='到本场队日期' v-bind="formItemLayout">
+        <a-date-picker
+          placeholder='到本场队日期'
+          format='YYYY-MM-DD'
+          style="width: 100%;"
+          v-decorator="['toTeamDate']"
+        />
+      </a-form-item>
       <a-form-item label='岗位' v-bind="formItemLayout">
         <a-radio-group
           v-decorator="['post']">

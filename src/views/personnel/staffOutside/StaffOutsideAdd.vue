@@ -163,22 +163,20 @@
           :dataSource="technicalTypeData"
           :allowClear='true'
           :filterOption="filterOption"
-          v-decorator="['technicalType',
-            {rules: [{ required: true, message: '现任岗位职务不能为空'}]}
-          ]"
+          v-decorator="['technicalType']"
         />
       </a-form-item>
-      <a-form-item label='排序序号1' v-bind="formItemLayout">
+      <!-- <a-form-item label='排序序号1' v-bind="formItemLayout">
         <a-input-number
           placeholder='排序序号1会排列总数居'
           autocomplete="off"
           style="width: 100%;"
           v-decorator="['sortNum1']"
         />
-      </a-form-item>
-      <a-form-item label='排序序号2' v-bind="formItemLayout">
+      </a-form-item> -->
+      <a-form-item label='分队序号' v-bind="formItemLayout">
         <a-input-number
-          placeholder='排序序号2会排列序号1内的数据'
+          placeholder='会插入到排列顺序当中，不填写默认排最后'
           autocomplete="off"
           style="width: 100%;"
           v-decorator="['sortNum2']"

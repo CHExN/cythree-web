@@ -142,7 +142,7 @@ export default {
             info: `进${this.storeroomItemDetailsInfoData.name}`,
             quantityPut: this.storeroomItemDetailsInfoData.amount,
             unitPricePut: this.storeroomItemDetailsInfoData.money,
-            amountPut: this.$tools.accMul(this.storeroomItemDetailsInfoData.amount, this.storeroomItemDetailsInfoData.money),
+            amountPut: this.$tools.accMultiply(this.storeroomItemDetailsInfoData.amount, this.storeroomItemDetailsInfoData.money),
             quantityOut: null,
             unitPriceOut: null,
             amountOut: null,
@@ -162,7 +162,7 @@ export default {
                 info: '本月合计',
                 quantityPut: this.storeroomItemDetailsInfoData.amount,
                 unitPricePut: this.storeroomItemDetailsInfoData.money,
-                amountPut: this.$tools.accMul(this.storeroomItemDetailsInfoData.amount, this.storeroomItemDetailsInfoData.money),
+                amountPut: this.$tools.accMultiply(this.storeroomItemDetailsInfoData.amount, this.storeroomItemDetailsInfoData.money),
                 quantityOut: quantityOut,
                 unitPriceOut: this.storeroomItemDetailsInfoData.money,
                 amountOut: amountOut,
@@ -176,10 +176,10 @@ export default {
             }
             // 计算结存的
             quantity = quantity - element.amount
-            amount = amount - this.$tools.accMul(element.amount, element.money)
+            amount = amount - this.$tools.accMultiply(element.amount, element.money)
             // 计算发出多少
             quantityOut = quantityOut + element.amount
-            amountOut = amountOut + this.$tools.accMul(element.amount, element.money)
+            amountOut = amountOut + this.$tools.accMultiply(element.amount, element.money)
             // 添加出库到某某部门信息
             this.dataSource.push({
               date: element.date,
@@ -189,7 +189,7 @@ export default {
               amountPut: null,
               quantityOut: element.amount,
               unitPriceOut: element.money,
-              amountOut: this.$tools.accMul(element.amount, element.money),
+              amountOut: this.$tools.accMultiply(element.amount, element.money),
               quantity: null,
               unitPrice: null,
               amount: null

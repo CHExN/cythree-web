@@ -415,13 +415,13 @@ export default {
           day: `${dateArr[2]}日`,
           typeApplicationToDept: this.dictData.typeApplication[item.typeApplication],
           date: item.date,
-          supplier: this.dictData.supplier[item.supplier]
+          supplier: this.dictData.supplier[item.supplier] === '无' ? '' : this.dictData.supplier[item.supplier]
         }
         this.$get('storeroomOut/storeroomByOutId', { outId: item.id }).then((r) => {
           let everyEightBatches = {}
           let everyEightBatchesTotalAmount = {}
           r.data.forEach((storeroom, index) => { // 这里四舍五入后两位小数
-            let storeroomMoney = Math.round(this.$tools.accMul(storeroom.money, storeroom.amount) * 100) / 100
+            let storeroomMoney = Math.round(this.$tools.accMultiply(storeroom.money, storeroom.amount) * 100) / 100
             let storeroomMoneyArr = `${this.$tools.addZero(storeroomMoney)}`.replace(/[.]/g, '').split('').reverse()
             let storeroomExportItem = [
               '', // 货号

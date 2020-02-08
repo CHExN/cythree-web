@@ -36,10 +36,10 @@
               </a-col>
               <a-col :md="12" :sm="24" >
                 <a-form-item
-                  label="无固定期备注"
+                  label="无固定期"
                   :labelCol="{span: 5}"
                   :wrapperCol="{span: 18, offset: 1}">
-                  <a-input v-model="queryParams.remarkOnFixedPeriod"/>
+                  <a-input v-model="queryParams.isFixedPeriod"/>
                 </a-form-item>
               </a-col>
               <a-col :md="12" :sm="24" >
@@ -228,7 +228,7 @@ export default {
       // 每次展开，把隐藏的内容清空
       if (!this.advanced) {
         this.queryParams.badNum = ''
-        this.queryParams.remarkOnFixedPeriod = ''
+        this.queryParams.isFixedPeriod = ''
         this.queryParams.remarkRenew = ''
         this.queryParams.remark = ''
       }

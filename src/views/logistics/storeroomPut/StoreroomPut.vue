@@ -501,14 +501,14 @@ export default {
           day: `${dateArr[2]}日`,
           typeApplicationToDept: this.dictData.typeApplication[item.typeApplication],
           date: item.date,
-          supplier: this.dictData.supplier[item.supplier]
+          supplier: this.dictData.supplier[item.supplier] === '无' ? '' : this.dictData.supplier[item.supplier]
         }
         this.$get('storeroomPut/storeroomByPutId', { putId: item.id }).then((r) => {
           let everyEightBatches = {}
           let everyEightBatchesTotalAmount = {}
           r.data.forEach((storeroom, index) => { // 这里四舍五入后两位小数
-            // let storeroomMoney = this.$tools.accMul(storeroom.money, storeroom.amount).toFixed(2)
-            let storeroomMoney = Math.round(this.$tools.accMul(storeroom.money, storeroom.amount) * 100) / 100
+            // let storeroomMoney = this.$tools.accMultiply(storeroom.money, storeroom.amount).toFixed(2)
+            let storeroomMoney = Math.round(this.$tools.accMultiply(storeroom.money, storeroom.amount) * 100) / 100
             let storeroomMoneyArr = `${this.$tools.addZero(storeroomMoney)}`.replace(/[.]/g, '').split('').reverse()
             let storeroomExportItem = [
               '', // 货号
@@ -531,12 +531,15 @@ export default {
             if (everyEightBatches[divideEight]) {
               everyEightBatches[divideEight].push(storeroomExportItem)
               everyEightBatchesTotalAmount[divideEight] = this.$tools.accAdd(everyEightBatchesTotalAmount[divideEight], storeroomMoney)
+              // console.log(everyEightBatchesTotalAmount)
             } else {
               everyEightBatches[divideEight] = [storeroomExportItem]
               everyEightBatchesTotalAmount[divideEight] = 0
               everyEightBatchesTotalAmount[divideEight] = this.$tools.accAdd(everyEightBatchesTotalAmount[divideEight], storeroomMoney)
+              // console.log(everyEightBatchesTotalAmount)
             }
           })
+          // console.log(everyEightBatchesTotalAmount)
           Object.keys(everyEightBatches).forEach(key => {
             let everyEightBatchesTotalAmountArr = `${this.$tools.addZero(everyEightBatchesTotalAmount[key])}`.replace(/[.]/g, '').split('').reverse()
             everyEightBatchesTotalAmountArr.push('￥')

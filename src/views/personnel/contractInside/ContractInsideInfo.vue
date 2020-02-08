@@ -12,7 +12,7 @@
         <detail-list title="合同信息">
           <detail-list-item term="档案编号">{{contractInsideInfoData.fileNum}}</detail-list-item>
           <detail-list-item term="胸牌号码">{{contractInsideInfoData.badNum}}</detail-list-item>
-          <detail-list-item term="无固定期备注">{{contractInsideInfoData.remarkOnFixedPeriod}}</detail-list-item>
+          <detail-list-item term="无固定期">{{contractInsideInfoData.isFixedPeriod}}</detail-list-item>
           <detail-list-item term="劳动合同起始日期">{{contractInsideInfoData.contractLaborStart}}</detail-list-item>
           <detail-list-item term="劳动合同结束日期">{{contractInsideInfoData.contractLaborEnd}}</detail-list-item>
           <detail-list-item term="岗位协议起始日期">{{contractInsideInfoData.jobAgreementStart}}</detail-list-item>
