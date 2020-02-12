@@ -164,8 +164,7 @@ export default {
       // staffOutsideList: {
       //   visiable: false
       // },
-      idNum: '',
-      fileNumData: ['编外合同制', '编外固定工']
+      idNum: ''
     }
   },
   created () {

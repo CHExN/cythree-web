@@ -13,6 +13,7 @@
           <detail-list-item term="姓名">{{staffOutsideInfoData.name}}</detail-list-item>
           <detail-list-item term="分队">{{staffOutsideInfoData.team}}</detail-list-item>
           <detail-list-item term="人员类型">{{staffOutsideInfoData.temporary}}</detail-list-item>
+          <detail-list-item term="事由">{{staffOutsideInfoData.cause}}</detail-list-item>
           <detail-list-item term="性别">{{getGender(staffOutsideInfoData.gender)}}</detail-list-item>
           <detail-list-item term="民族">{{staffOutsideInfoData.clan}}</detail-list-item>
           <detail-list-item term="籍贯">{{staffOutsideInfoData.birthplace}}</detail-list-item>

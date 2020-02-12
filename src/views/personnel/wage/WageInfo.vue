@@ -376,7 +376,7 @@ export default {
     wageInfoVisiable () {
       if (this.wageInfoVisiable) {
         this.loading = true
-        this.$get('staffInside/getStaffInside', {
+        this.$get('staffInside/getStaffInsideByStaffId', {
           staffId: this.wageInfoData.staffId
         }).then((r) => {
           this.loading = false

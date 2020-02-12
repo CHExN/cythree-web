@@ -41,44 +41,84 @@
           v-decorator="['badNum']"
         />
       </a-form-item>
-      <a-form-item label='无固定期' v-bind="formItemLayout">
-        <a-textarea
-          placeholder='无固定期'
+
+      <a-form-item
+        v-for="(k, index) in form.getFieldValue('contractPeriodKeys')"
+        :key="k"
+        :label="index === 0 ? '合同期' : ''"
+        v-bind="index === 0 ? formItemLayout : formItemLayoutWithOutLabel"
+        :required="false"
+      >
+        <a-input
+          placeholder='合同期'
+          style="width: 90%; margin-right: 8px"
           autocomplete="off"
-          v-decorator="['isFixedPeriod']"
+          v-decorator="[`contractPeriod[${k}]`,
+            {rules: [{ required: true, message: '合同期不能为空'}]}
+          ]"
+        />
+        <a-range-picker
+          :allowClear="false"
+          style="width: 90%; margin-right: 8px"
+          v-decorator="[`contractPeriodDate[${k}]`,
+            {rules: [{ required: true, message: '日期选择不能为空'}]}
+          ]"
+        />
+        <a-icon
+          v-if="form.getFieldValue('contractPeriodKeys').length > 1"
+          class="dynamic-delete-button"
+          type="minus-circle-o"
+          :disabled="form.getFieldValue('contractPeriodKeys').length === 1"
+          @click="() => contractPeriodRemove(k)"
         />
       </a-form-item>
-      <a-form-item label='劳始日期' v-bind="formItemLayout">
-        <a-date-picker
-          placeholder='劳动合同起始日期'
-          format='YYYY-MM-DD'
-          style="width: 100%;"
-          v-decorator="['contractLaborStart']"
+      <a-form-item v-bind="formItemLayoutWithOutLabel">
+        <a-button type="dashed" style="width: 60%" @click="contractPeriodAdd">
+          <a-icon type="plus" /> 添加合同期
+        </a-button>
+      </a-form-item>
+
+      <a-form-item
+        v-for="(k, index) in form.getFieldValue('jobAgreementKeys')"
+        :key="k"
+        :label="index === 0 ? '职位协议' : ''"
+        v-bind="index === 0 ? formItemLayout : formItemLayoutWithOutLabel"
+        :required="false"
+      >
+        <a-input
+          placeholder='职位协议'
+          style="width: 90%; margin-right: 8px"
+          autocomplete="off"
+          v-decorator="[`jobAgreement[${k}]`,
+            {rules: [{ required: true, message: '职位协议不能为空'}]}
+          ]"
+        />
+        <a-range-picker
+          :allowClear="false"
+          style="width: 90%; margin-right: 8px"
+          v-decorator="[`jobAgreementDate[${k}]`,
+            {rules: [{ required: true, message: '日期选择不能为空'}]}
+          ]"
+        />
+        <a-icon
+          v-if="form.getFieldValue('jobAgreementKeys').length > 1"
+          class="dynamic-delete-button"
+          type="minus-circle-o"
+          :disabled="form.getFieldValue('jobAgreementKeys').length === 1"
+          @click="() => jobAgreementRemove(k)"
         />
       </a-form-item>
-      <a-form-item label='劳止日期' v-bind="formItemLayout">
-        <a-date-picker
-          placeholder='劳动合同结束日期'
-          format='YYYY-MM-DD'
-          style="width: 100%;"
-          v-decorator="['contractLaborEnd']"
-        />
+      <a-form-item v-bind="formItemLayoutWithOutLabel">
+        <a-button type="dashed" style="width: 60%" @click="jobAgreementAdd">
+          <a-icon type="plus" /> 添加职位协议
+        </a-button>
       </a-form-item>
-      <a-form-item label='岗始日期' v-bind="formItemLayout">
-        <a-date-picker
-          placeholder='岗位协议起始日期'
-          format='YYYY-MM-DD'
-          style="width: 100%;"
-          v-decorator="['jobAgreementStart']"
-        />
-      </a-form-item>
-      <a-form-item label='岗止日期' v-bind="formItemLayout">
-        <a-date-picker
-          placeholder='岗位协议结束日期'
-          format='YYYY-MM-DD'
-          style="width: 100%;"
-          v-decorator="['jobAgreementEnd']"
-        />
+
+      <a-form-item label='无固定期' v-bind="formItemLayout">
+        <a-radio-group v-decorator="['isFixedPeriod', {initialValue: '1'}]">
+          <a-radio-button value="0">开</a-radio-button>
+          <a-radio-button value="1">关</a-radio-button>
+        </a-radio-group>
       </a-form-item>
       <a-form-item label='续签备注' v-bind="formItemLayout">
         <a-textarea
@@ -116,6 +156,15 @@ const formItemLayout = {
   labelCol: { span: 4 },
   wrapperCol: { span: 17 }
 }
+const formItemLayoutWithOutLabel = {
+  wrapperCol: {
+    xs: { span: 17, offset: 0 },
+    sm: { span: 17, offset: 4 }
+  }
+}
+let contractPeriodIndex = 0
+let jobAgreementIndex = 0
+
 export default {
   name: 'ContractInsideAdd',
   components: { StaffInsideList },
@@ -128,17 +177,68 @@ export default {
     return {
       loading: false,
       formItemLayout,
+      formItemLayoutWithOutLabel,
       form: this.$form.createForm(this),
       staffInsideList: {
         visiable: false
       },
-      staffId: '',
+      idNum: '',
       fileNumData: ['编内合同制', '编内固定工']
     }
   },
+  created () {
+    this.form = this.$form.createForm(this, { name: 'dynamic_form_item' })
+    this.form.getFieldDecorator('contractPeriodKeys', { initialValue: [], preserve: true })
+    this.form.getFieldDecorator('jobAgreementKeys', { initialValue: [], preserve: true })
+  },
   methods: {
+    contractPeriodRemove (k) {
+      const { form } = this
+      // can use data-binding to get
+      const contractPeriodKeys = form.getFieldValue('contractPeriodKeys')
+      // We need at least one passenger
+      if (contractPeriodKeys.length === 1) {
+        return
+      }
+
+      // can use data-binding to set
+      form.setFieldsValue({
+        contractPeriodKeys: contractPeriodKeys.filter(key => key !== k)
+      })
+    },
+    contractPeriodAdd () {
+      const { form } = this
+      // can use data-binding to get
+      const contractPeriodKeys = form.getFieldValue('contractPeriodKeys')
+      const nextKeys = contractPeriodKeys.concat(contractPeriodIndex++)
+      // can use data-binding to set
+      // important! notify form to detect changes
+      form.setFieldsValue({
+        contractPeriodKeys: nextKeys
+      })
+    },
+    jobAgreementRemove (k) {
+      const { form } = this
+      const jobAgreementKeys = form.getFieldValue('jobAgreementKeys')
+      if (jobAgreementKeys.length === 1) {
+        return
+      }
+      form.setFieldsValue({
+        jobAgreementKeys: jobAgreementKeys.filter(key => key !== k)
+      })
+    },
+    jobAgreementAdd () {
+      const { form } = this
+      const jobAgreementKeys = form.getFieldValue('jobAgreementKeys')
+      const nextKeys = jobAgreementKeys.concat(jobAgreementIndex++)
+      form.setFieldsValue({
+        jobAgreementKeys: nextKeys
+      })
+    },
     reset () {
       this.loading = false
+      contractPeriodIndex = 0
+      jobAgreementIndex = 0
       // 清空表单
       this.form.resetFields()
     },
@@ -149,10 +249,10 @@ export default {
     selectName () {
       this.staffInsideList.visiable = true
     },
-    handleStaffInsideListChange (name, staffId) {
+    handleStaffInsideListChange (name, staffId, idNum) {
       this.form.getFieldDecorator('name')
       this.form.setFieldsValue({ name: name })
-      this.staffId = staffId
+      this.idNum = idNum
     },
     handleStaffInsideListClose () {
       this.staffInsideList.visiable = false
@@ -160,21 +260,25 @@ export default {
     handleSubmit () {
       this.form.validateFields((err, values) => {
         if (!err) {
-          const contractLaborStart = values['contractLaborStart']
-          const contractLaborEnd = values['contractLaborEnd']
-          const jobAgreementStart = values['jobAgreementStart']
-          const jobAgreementEnd = values['jobAgreementEnd']
-          const contractInsideData = {
-            ...values,
-            staffId: this.staffId,
-            contractLaborStart: contractLaborStart ? contractLaborStart.format('YYYY-MM-DD') : contractLaborStart,
-            contractLaborEnd: contractLaborEnd ? contractLaborEnd.format('YYYY-MM-DD') : contractLaborEnd,
-            jobAgreementStart: jobAgreementStart ? jobAgreementStart.format('YYYY-MM-DD') : jobAgreementStart,
-            jobAgreementEnd: jobAgreementEnd ? jobAgreementEnd.format('YYYY-MM-DD') : jobAgreementEnd
-          }
+          // filter去数组空值假值
+          let contractPeriodArr = this.form.getFieldValue('contractPeriod').filter(d => d)
+          let contractPeriodDateArr = []
+          this.form.getFieldValue('contractPeriodDate').forEach(element => {
+            contractPeriodDateArr.push(`${element[0].format('YYYY-MM-DD')}~${element[1].format('YYYY-MM-DD')}`)
+          })
+          let jobAgreementArr = this.form.getFieldValue('jobAgreement').filter(d => d)
+          let jobAgreementDateArr = []
+          this.form.getFieldValue('jobAgreementDate').forEach(element => {
+            jobAgreementDateArr.push(`${element[0].format('YYYY-MM-DD')}~${element[1].format('YYYY-MM-DD')}`)
+          })
           this.loading = true
           this.$post('contractInside', {
-            ...contractInsideData
+            idNum: this.idNum,
+            ...values,
+            contractPeriod: contractPeriodArr.join(),
+            contractPeriodDate: contractPeriodDateArr.join(),
+            jobAgreement: jobAgreementArr.join(),
+            jobAgreementDate: jobAgreementDateArr.join()
           }).then((r) => {
             this.reset()
             this.$emit('success')

@@ -6,6 +6,14 @@
           <div :class="advanced ? null: 'fold'">
             <a-col :md="12" :sm="24" >
               <a-form-item
+                label="姓名"
+                :labelCol="{span: 5}"
+                :wrapperCol="{span: 18, offset: 1}">
+                <a-input v-model="queryParams.name"/>
+              </a-form-item>
+            </a-col>
+            <a-col :md="12" :sm="24" >
+              <a-form-item
                 label="档案编号"
                 :labelCol="{span: 5}"
                 :wrapperCol="{span: 18, offset: 1}">
@@ -17,15 +25,15 @@
                 />
               </a-form-item>
             </a-col>
-            <a-col :md="12" :sm="24" >
-              <a-form-item
-                label="姓名"
-                :labelCol="{span: 5}"
-                :wrapperCol="{span: 18, offset: 1}">
-                <a-input v-model="queryParams.name"/>
-              </a-form-item>
-            </a-col>
             <template v-if="advanced">
+              <a-col :md="12" :sm="24" >
+                <a-form-item
+                  label="身份证号"
+                  :labelCol="{span: 5}"
+                  :wrapperCol="{span: 18, offset: 1}">
+                  <a-input v-model="queryParams.idNum"/>
+                </a-form-item>
+              </a-col>
               <a-col :md="12" :sm="24" >
                 <a-form-item
                   label="胸牌号码"
@@ -34,14 +42,14 @@
                   <a-input v-model="queryParams.badNum"/>
                 </a-form-item>
               </a-col>
-              <a-col :md="12" :sm="24" >
+              <!-- <a-col :md="12" :sm="24" >
                 <a-form-item
                   label="无固定期"
                   :labelCol="{span: 5}"
                   :wrapperCol="{span: 18, offset: 1}">
                   <a-input v-model="queryParams.isFixedPeriod"/>
                 </a-form-item>
-              </a-col>
+              </a-col> -->
               <a-col :md="12" :sm="24" >
                 <a-form-item
                   label="续签备注"
@@ -87,13 +95,11 @@
                :scroll="{ x: 900 }"
                rowKey="id"
                @change="handleTableChange">
-        <template slot="remark" slot-scope="text">
-          <a-popover placement="topLeft">
-            <template slot="content">
-              <div>{{text}}</div>
-            </template>
-            <p style="width: 200px;margin-bottom: 0">{{text}}</p>
-          </a-popover>
+        <template slot="contractPeriod" slot-scope="text, record">
+          <span>{{record.isFixedPeriod==='0' ? '无固定' : text.split(',').length}}期</span>
+        </template>
+        <template slot="jobAgreement" slot-scope="text">
+          <span>{{text.split(',').length}}期</span>
         </template>
         <template slot="operation" slot-scope="text, record">
           <a-icon v-hasPermission="'contractInside:update'" type="setting" theme="twoTone" twoToneColor="#4a9ff5" @click="edit(record)" title="修改"></a-icon>
@@ -167,43 +173,29 @@ export default {
   },
   computed: {
     columns () {
-      // 受控属性
-      let { sortedInfo } = this
-      sortedInfo = sortedInfo || {}
       return [{
-        title: '档案编号',
-        dataIndex: 'fileNum'
-      }, {
         title: '姓名',
         dataIndex: 'name'
+      }, {
+        title: '身份证号',
+        dataIndex: 'idNum'
+      }, {
+        title: '档案编号',
+        dataIndex: 'fileNum'
       }, {
         title: '胸牌号码',
         dataIndex: 'badNum'
       }, {
-        title: '劳始日期',
-        dataIndex: 'contractLaborStart',
-        sorter: true,
-        sortOrder: sortedInfo.columnKey === 'contractLaborStart' && sortedInfo.order
+        title: '合同期总数',
+        dataIndex: 'contractPeriod',
+        scopedSlots: { customRender: 'contractPeriod' }
       }, {
-        title: '劳止日期',
-        dataIndex: 'contractLaborEnd',
-        sorter: true,
-        sortOrder: sortedInfo.columnKey === 'contractLaborEnd' && sortedInfo.order
-      }, {
-        title: '岗始日期',
-        dataIndex: 'jobAgreementStart',
-        sorter: true,
-        sortOrder: sortedInfo.columnKey === 'jobAgreementStart' && sortedInfo.order
-      }, {
-        title: '岗止日期',
-        dataIndex: 'jobAgreementEnd',
-        sorter: true,
-        sortOrder: sortedInfo.columnKey === 'jobAgreementEnd' && sortedInfo.order
+        title: '职位协议总数',
+        dataIndex: 'jobAgreement',
+        scopedSlots: { customRender: 'jobAgreement' }
       }, {
         title: '备注',
-        dataIndex: 'remark',
-        scopedSlots: { customRender: 'remark' },
-        width: 200
+        dataIndex: 'remark'
       }, {
         title: '操作',
         dataIndex: 'operation',
@@ -227,8 +219,8 @@ export default {
       this.advanced = !this.advanced
       // 每次展开，把隐藏的内容清空
       if (!this.advanced) {
+        this.queryParams.idNum = ''
         this.queryParams.badNum = ''
-        this.queryParams.isFixedPeriod = ''
         this.queryParams.remarkRenew = ''
         this.queryParams.remark = ''
       }

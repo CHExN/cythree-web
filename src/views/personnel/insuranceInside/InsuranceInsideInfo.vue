@@ -156,7 +156,7 @@ export default {
     insuranceInsideInfoVisiable () {
       if (this.insuranceInsideInfoVisiable) {
         this.loading = true
-        this.$get('staffInside/getStaffInside', {
+        this.$get('staffInside/getStaffInsideByStaffId', {
           staffId: this.insuranceInsideInfoData.staffId
         }).then((r) => {
           this.loading = false

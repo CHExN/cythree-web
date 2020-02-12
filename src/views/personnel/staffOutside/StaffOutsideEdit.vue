@@ -63,6 +63,15 @@
           v-decorator="['team']"
         />
       </a-form-item>
+      <a-form-item label='事由' v-bind="formItemLayout">
+        <a-auto-complete
+          placeholder='事由'
+          :dataSource="causeData"
+          :allowClear='true'
+          :filterOption="filterOption"
+          v-decorator="['cause']"
+        />
+      </a-form-item>
       <a-form-item label='身份证号' v-bind="formItemLayout">
         <a-input
           placeholder='身份证号'
@@ -251,6 +260,7 @@ export default {
       formItemLayout,
       form: this.$form.createForm(this),
       temporaryData: ['临时合同工'],
+      causeData: ['在册', '增加', '解除', '调离', '终止', '退休', '亡故'],
       cultureData: ['小学', '初中', '高中', '专科', '本科', '硕士', '博士'],
       politicalFaceData: ['群众', '团员', '党员', '预备党员']
     }

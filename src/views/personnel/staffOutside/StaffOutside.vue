@@ -28,6 +28,19 @@
             <template v-if="advanced">
               <a-col :md="12" :sm="24" >
                 <a-form-item
+                  label="事由"
+                  :labelCol="{span: 5}"
+                  :wrapperCol="{span: 18, offset: 1}">
+                  <a-auto-complete
+                    v-model="queryParams.cause"
+                    :dataSource="causeData"
+                    :allowClear='true'
+                    :filterOption="filterOption"
+                  />
+                </a-form-item>
+              </a-col>
+              <a-col :md="12" :sm="24" >
+                <a-form-item
                   label="年龄"
                   :labelCol="{span: 5}"
                   :wrapperCol="{span: 18, offset: 1}">
@@ -162,6 +175,14 @@
               </a-col>
               <a-col :md="12" :sm="24" >
                 <a-form-item
+                  label="非在职日期"
+                  :labelCol="{span: 5}"
+                  :wrapperCol="{span: 18, offset: 1}">
+                  <range-date @change="handleDateChange" ref="createTime"></range-date>
+                </a-form-item>
+              </a-col>
+              <a-col :md="12" :sm="24" >
+                <a-form-item
                   label="在职与否"
                   :labelCol="{span: 5}"
                   :wrapperCol="{span: 18, offset: 1}">
@@ -247,6 +268,7 @@
   </a-card>
 </template>
 <script>
+import RangeDate from '@/components/datetime/RangeDate'
 import DeptInputTree from '../../system/dept/DeptInputTree'
 import StaffOutsideInfo from './StaffOutsideInfo'
 import StaffOutsideAdd from './StaffOutsideAdd'
@@ -254,7 +276,7 @@ import StaffOutsideEdit from './StaffOutsideEdit'
 
 export default {
   name: 'StaffOutside',
-  components: { DeptInputTree, StaffOutsideInfo, StaffOutsideAdd, StaffOutsideEdit },
+  components: { RangeDate, DeptInputTree, StaffOutsideInfo, StaffOutsideAdd, StaffOutsideEdit },
   data () {
     return {
       isLeave: '0',
@@ -274,6 +296,7 @@ export default {
       technicalTypeData: [],
       postData: [],
       teamData: [],
+      causeData: ['在册', '增加', '解除', '调离', '终止', '退休', '亡故'],
       cultureData: ['小学', '初中', '高中', '专科', '本科', '硕士', '博士'],
       politicalFaceData: ['群众', '团员', '党员', '预备党员'],
       queryParams: {
@@ -384,6 +407,9 @@ export default {
         // filterMultiple 用于指定多选和单选(true多/false单)
         filterMultiple: true
       }, {
+        title: '事由',
+        dataIndex: 'cause'
+      }, {
         title: '操作',
         dataIndex: 'operation',
         scopedSlots: { customRender: 'operation' },
@@ -407,6 +433,7 @@ export default {
       this.advanced = !this.advanced
       // 每次展开，把隐藏的内容清空
       if (!this.advanced) {
+        this.queryParams.cause = ''
         this.queryParams.clan = ''
         this.queryParams.birthplace = ''
         this.queryParams.culture = ''
@@ -421,6 +448,8 @@ export default {
         this.queryParams.remark = ''
         this.queryParams.mini = ''
         this.queryParams.max = ''
+        this.queryParams.createTimeFrom = ''
+        this.queryParams.createTimeTo = ''
       }
     },
     sort (isUp, record) {
@@ -480,6 +509,12 @@ export default {
     },
     handleTeamChange (value) {
       this.queryParams.team = value || ''
+    },
+    handleDateChange (value) {
+      if (value) {
+        this.queryParams.createTimeFrom = value[0]
+        this.queryParams.createTimeTo = value[1]
+      }
     },
     onMiniChange (e) {
       const { value } = e.target
@@ -575,6 +610,10 @@ export default {
         technicalType: [],
         post: [],
         team: []
+      }
+      if (this.advanced) {
+        // 清空时间选择
+        this.$refs.createTime.reset()
       }
       this.isLeave = '0'
       this.fetch()

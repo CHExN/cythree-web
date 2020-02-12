@@ -137,7 +137,7 @@ export default {
   },
   methods: {
     determine (record) {
-      this.$emit('change', record.name, record.staffId)
+      this.$emit('change', record.name, record.staffId, record.idNum)
       this.onClose()
     },
     onClose () {

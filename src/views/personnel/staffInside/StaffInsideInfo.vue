@@ -47,17 +47,23 @@
         </detail-list>
       </a-card>
       <a-divider v-hasPermission="'contractInside:view'" style="margin-bottom: 32px"/>
-      <a-card v-hasPermission="'contractInside:view'" :loading='loading' :bordered="false">
+      <a-card v-hasPermission="'contractInside:view'" :bordered="false">
         <detail-list title="合同信息">
+          <template v-for="(k, index) in contractPeriod">
+            <detail-list-item :key="index" :term="k">{{contractPeriodDate[index]}}</detail-list-item>
+          </template>
           <detail-list-item term="档案编号">{{contractInsideData.fileNum}}</detail-list-item>
           <detail-list-item term="胸牌号码">{{contractInsideData.badNum}}</detail-list-item>
-          <detail-list-item term="无固定期">{{contractInsideData.isFixedPeriod}}</detail-list-item>
-          <detail-list-item term="劳动合同起始日期">{{contractInsideData.contractLaborStart}}</detail-list-item>
-          <detail-list-item term="劳动合同结束日期">{{contractInsideData.contractLaborEnd}}</detail-list-item>
-          <detail-list-item term="岗位协议起始日期">{{contractInsideData.jobAgreementStart}}</detail-list-item>
-          <detail-list-item term="岗位协议结束日期">{{contractInsideData.jobAgreementEnd}}</detail-list-item>
           <detail-list-item term="续签备注">{{contractInsideData.remarkRenew}}</detail-list-item>
           <detail-list-item term="备注">{{contractInsideData.remark}}</detail-list-item>
+        </detail-list>
+      </a-card>
+      <a-divider v-hasPermission="'contractInside:view'" style="margin-bottom: 32px"/>
+      <a-card v-hasPermission="'contractInside:view'" :bordered="false">
+        <detail-list title="岗位协议信息">
+          <template v-for="(k, index) in jobAgreement">
+            <detail-list-item :key="index" :term="k">{{jobAgreementDate[index]}}</detail-list-item>
+          </template>
         </detail-list>
       </a-card>
     </a-card>
@@ -91,7 +97,19 @@ export default {
   computed: {
     ...mapState({
       permissions: state => state.account.permissions
-    })
+    }),
+    contractPeriod () {
+      return this.contractInsideData.contractPeriod ? this.contractInsideData.contractPeriod.split(',') : []
+    },
+    contractPeriodDate () {
+      return this.contractInsideData.contractPeriodDate ? this.contractInsideData.contractPeriodDate.split(',') : []
+    },
+    jobAgreement () {
+      return this.contractInsideData.jobAgreement ? this.contractInsideData.jobAgreement.split(',') : []
+    },
+    jobAgreementDate () {
+      return this.contractInsideData.jobAgreementDate ? this.contractInsideData.jobAgreementDate.split(',') : []
+    }
   },
   methods: {
     handleCancleClick () {
@@ -153,7 +171,7 @@ export default {
       if (this.staffInsideInfoVisiable && this.permissions.includes('contractInside:view')) {
         this.loading = true
         this.$get('contractInside/getContractInside', {
-          staffInsideId: this.staffInsideInfoData.staffId
+          idNum: this.staffInsideInfoData.idNum
         }).then((r) => {
           this.loading = false
           if (r.data) {

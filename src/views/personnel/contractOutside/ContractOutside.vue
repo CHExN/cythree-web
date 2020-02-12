@@ -21,14 +21,14 @@
               </a-form-item>
             </a-col>
             <template v-if="advanced">
-              <a-col :md="12" :sm="24" >
+              <!-- <a-col :md="12" :sm="24" >
                 <a-form-item
                   label="无固定期"
                   :labelCol="{span: 5}"
                   :wrapperCol="{span: 18, offset: 1}">
                   <a-input v-model="queryParams.isFixedPeriod"/>
                 </a-form-item>
-              </a-col>
+              </a-col> -->
               <a-col :md="12" :sm="24" >
                 <a-form-item
                   label="续签备注"
@@ -191,7 +191,6 @@ export default {
       this.advanced = !this.advanced
       // 每次展开，把隐藏的内容清空
       if (!this.advanced) {
-        this.queryParams.isFixedPeriod = ''
         this.queryParams.remarkRenew = ''
         this.queryParams.remark = ''
       }
