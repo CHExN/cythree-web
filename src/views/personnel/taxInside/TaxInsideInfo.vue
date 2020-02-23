@@ -157,12 +157,20 @@
               <span style="cursor: pointer;">{{taxInsideInfoData.taxDeductionSum}}</span>
             </a-popover>
           </detail-list-item>
-          <detail-list-item term="最终收入">
+          <detail-list-item term="应扣税额">
             <a-popover trigger="hover">
               <template slot="content">
                 <p>{{monthlyInformation.finalWage.join('；')}}</p>
               </template>
               <span style="cursor: pointer;">{{taxInsideInfoData.finalWageSum}}</span>
+            </a-popover>
+          </detail-list-item>
+          <detail-list-item term="月缴税数">
+            <a-popover trigger="hover">
+              <template slot="content">
+                <p value>{{monthlyTaxesPaid.text}}</p>
+              </template>
+              <span style="cursor: pointer;">{{monthlyTaxesPaid.value}}</span>
             </a-popover>
           </detail-list-item>
           <!-- <detail-list-item term="本期收入">{{taxInsideInfoData.currentIncome}}</detail-list-item>
@@ -182,7 +190,7 @@
           <detail-list-item term="其他">{{taxInsideInfoData.other}}</detail-list-item>
           <detail-list-item term="准予扣除的捐赠额">{{taxInsideInfoData.allowanceForDeduction}}</detail-list-item>
           <detail-list-item term="减免税额">{{taxInsideInfoData.taxDeduction}}</detail-list-item>
-          <detail-list-item term="最终收入">{{taxInsideInfoData.finalWage}}</detail-list-item> -->
+          <detail-list-item term="应扣税额">{{taxInsideInfoData.finalWage}}</detail-list-item> -->
           <detail-list-item term="备注">{{taxInsideInfoData.remark}}</detail-list-item>
         </detail-list>
       </a-card>
@@ -225,6 +233,10 @@ export default {
         allowanceForDeduction: [],
         taxDeduction: [],
         finalWage: []
+      },
+      monthlyTaxesPaid: {
+        value: 0,
+        text: ''
       }
     }
   },
@@ -265,6 +277,34 @@ export default {
   watch: {
     taxInsideInfoVisiable () {
       if (this.taxInsideInfoVisiable) {
+        // 扣税率
+        let deductionRate = 0
+        // 速算扣除数
+        let quickCalculationDeductions = 0
+        if (this.taxInsideInfoData.finalWageSum <= 36000) {
+          deductionRate = 0.03
+          quickCalculationDeductions = 0
+        } else if (this.taxInsideInfoData.finalWageSum <= 144000) {
+          deductionRate = 0.1
+          quickCalculationDeductions = 2520
+        } else if (this.taxInsideInfoData.finalWageSum <= 300000) {
+          deductionRate = 0.2
+          quickCalculationDeductions = 16920
+        } else if (this.taxInsideInfoData.finalWageSum <= 420000) {
+          deductionRate = 0.25
+          quickCalculationDeductions = 31920
+        } else if (this.taxInsideInfoData.finalWageSum <= 660000) {
+          deductionRate = 0.3
+          quickCalculationDeductions = 52920
+        } else if (this.taxInsideInfoData.finalWageSum <= 960000) {
+          deductionRate = 0.35
+          quickCalculationDeductions = 85920
+        } else {
+          deductionRate = 0.45
+          quickCalculationDeductions = 181920
+        }
+        this.monthlyTaxesPaid.value = this.$tools.addZero(Math.round(this.$tools.accSubtract(this.$tools.accMultiply(this.taxInsideInfoData.finalWageSum, deductionRate), quickCalculationDeductions) * 100) / 100)
+        this.monthlyTaxesPaid.text = `${this.taxInsideInfoData.finalWageSum} * ${deductionRate} - ${quickCalculationDeductions} = ${this.$tools.accSubtract(this.$tools.accMultiply(this.taxInsideInfoData.finalWageSum, deductionRate), quickCalculationDeductions)}`
         this.$get('taxInside/oneInfo', {
           staffId: this.taxInsideInfoData.staffId,
           year: this.taxInsideInfoData.year,

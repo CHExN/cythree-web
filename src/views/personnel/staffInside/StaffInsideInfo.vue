@@ -24,7 +24,7 @@
           <detail-list-item term="毕业日期">{{staffInsideInfoData.graduationDate}}</detail-list-item>
           <detail-list-item term="政治面貌">{{staffInsideInfoData.politicalFace}}</detail-list-item>
           <detail-list-item term="有无残疾证">{{getIsDisabilityCertificate(staffInsideInfoData.isDisabilityCertificate)}}</detail-list-item>
-          <detail-list-item term="工伤证发证日期">{{staffInsideInfoData.workInjuryCertificateDate}}</detail-list-item>
+          <detail-list-item term="残疾证编号">{{staffInsideInfoData.disabilityCertificateNumber}}</detail-list-item>
           <detail-list-item term="伤残鉴定等级">{{staffInsideInfoData.disabilityIdentificationLevel}}</detail-list-item>
           <detail-list-item term="家庭住址">{{staffInsideInfoData.address}}</detail-list-item>
           <detail-list-item term="身份证号码">{{staffInsideInfoData.idNum}}</detail-list-item>
@@ -36,10 +36,10 @@
           <detail-list-item term="参加工作日期">{{staffInsideInfoData.workDate}}</detail-list-item>
           <detail-list-item term="农转工转工日期">{{staffInsideInfoData.farmerWorkDate}}</detail-list-item>
           <detail-list-item term="调入环卫或报到日期">{{staffInsideInfoData.transferDate}}</detail-list-item>
-          <detail-list-item term="到本场队日期">{{staffInsideInfoData.toTeamDate}}</detail-list-item>
-          <detail-list-item term="现任岗位职务">{{staffInsideInfoData.technicalType}}</detail-list-item>
+          <detail-list-item term="现任职务">{{staffInsideInfoData.technicalType}}</detail-list-item>
           <detail-list-item term="岗位">{{getPost(staffInsideInfoData.post)}}</detail-list-item>
           <detail-list-item term="岗位级别">{{staffInsideInfoData.postLevel}}</detail-list-item>
+          <detail-list-item term="聘任岗位">{{staffInsideInfoData.hiringPositions}}</detail-list-item>
           <detail-list-item term="聘任时间">{{staffInsideInfoData.appointmentDate}}</detail-list-item>
           <detail-list-item term="技术等级取得日期">{{staffInsideInfoData.technicalLevelDate}}</detail-list-item>
           <detail-list-item term="证书编号">{{staffInsideInfoData.certificateNum}}</detail-list-item>
@@ -154,13 +154,13 @@ export default {
     getPost (post) {
       switch (post) {
         case '0':
-          return '管理'
+          return '管理岗'
         case '1':
           return '技工'
         case '2':
-          return '普工'
+          return '工勤岗'
         case '3':
-          return '专技'
+          return '专业技术岗'
         default:
           return post
       }

@@ -92,16 +92,12 @@
           placeholder='职位协议'
           style="width: 90%; margin-right: 8px"
           autocomplete="off"
-          v-decorator="[`jobAgreement[${k}]`,
-            {rules: [{ required: true, message: '职位协议不能为空'}]}
-          ]"
+          v-decorator="[`jobAgreement[${k}]`]"
         />
         <a-range-picker
           :allowClear="false"
           style="width: 90%; margin-right: 8px"
-          v-decorator="[`jobAgreementDate[${k}]`,
-            {rules: [{ required: true, message: '日期选择不能为空'}]}
-          ]"
+          v-decorator="[`jobAgreementDate[${k}]`]"
         />
         <a-icon
           v-if="form.getFieldValue('jobAgreementKeys').length > 1"

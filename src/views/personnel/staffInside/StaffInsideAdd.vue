@@ -170,13 +170,11 @@
           <a-radio-button value="1">有</a-radio-button>
         </a-radio-group>
       </a-form-item>
-      <a-form-item label='工伤证日期' v-bind="formItemLayout">
-        <a-date-picker
-          placeholder='工伤证发证日期'
-          format='YYYY-MM-DD'
-          style="width: 100%;"
-          v-decorator="['workInjuryCertificateDate']"
-        />
+      <a-form-item label='残疾证编号' v-bind="formItemLayout">
+        <a-input
+          placeholder='伤残鉴定等级'
+          autocomplete="off"
+          v-decorator="['disabilityCertificateNumber']"/>
       </a-form-item>
       <a-form-item label='伤残鉴定等级' v-bind="formItemLayout">
         <a-input
@@ -208,31 +206,23 @@
           v-decorator="['transferDate']"
         />
       </a-form-item>
-      <a-form-item label='到本场队日期' v-bind="formItemLayout">
-        <a-date-picker
-          placeholder='到本场队日期'
-          format='YYYY-MM-DD'
-          style="width: 100%;"
-          v-decorator="['toTeamDate']"
-        />
-      </a-form-item>
       <a-form-item label='岗位' v-bind="formItemLayout">
         <a-radio-group
           v-decorator="['post']">
-          <a-radio-button value="0">管理</a-radio-button>
+          <a-radio-button value="0">管理岗</a-radio-button>
           <a-radio-button value="1">技工</a-radio-button>
-          <a-radio-button value="2">普工</a-radio-button>
-          <a-radio-button value="3">专技</a-radio-button>
+          <a-radio-button value="2">工勤岗</a-radio-button>
+          <a-radio-button value="3">专业技术岗</a-radio-button>
         </a-radio-group>
       </a-form-item>
-      <a-form-item label='现任岗位职务' v-bind="formItemLayout">
+      <a-form-item label='现任职务' v-bind="formItemLayout">
         <a-auto-complete
-          placeholder='现任岗位职务'
+          placeholder='现任职务'
           :dataSource="technicalTypeData"
           :allowClear='true'
           :filterOption="filterOption"
           v-decorator="['technicalType',
-            {rules: [{ required: true, message: '现任岗位职务不能为空'}]}
+            {rules: [{ required: true, message: '现任职务不能为空'}]}
           ]"
         />
       </a-form-item>
@@ -256,6 +246,12 @@
           style="width: 100%;"
           v-decorator="['technicalLevelDate']"
         />
+      </a-form-item>
+      <a-form-item label='聘任岗位' v-bind="formItemLayout">
+        <a-input
+          placeholder='聘任岗位'
+          autocomplete="off"
+          v-decorator="['hiringPositions']"/>
       </a-form-item>
       <a-form-item label='聘任时间' v-bind="formItemLayout">
         <a-date-picker
@@ -368,12 +364,11 @@ export default {
     handleSubmit () {
       this.form.validateFields((err, values) => {
         if (!err) {
-          const {birthDate, graduationDate, workInjuryCertificateDate, workDate, farmerWorkDate, transferDate, technicalLevelDate, appointmentDate} = values
+          const {birthDate, graduationDate, workDate, farmerWorkDate, transferDate, technicalLevelDate, appointmentDate} = values
           const staffInsideData = {
             ...values,
             birthDate: birthDate ? birthDate.format('YYYY-MM-DD') : birthDate,
             graduationDate: graduationDate ? graduationDate.format('YYYY-MM-DD') : graduationDate,
-            workInjuryCertificateDate: workInjuryCertificateDate ? workInjuryCertificateDate.format('YYYY-MM-DD') : workInjuryCertificateDate,
             workDate: workDate ? workDate.format('YYYY-MM-DD') : workDate,
             farmerWorkDate: farmerWorkDate ? farmerWorkDate.format('YYYY-MM-DD') : farmerWorkDate,
             transferDate: transferDate ? transferDate.format('YYYY-MM-DD') : transferDate,

@@ -16,7 +16,7 @@
                 </a-select>
               </a-form-item>
             </a-col>
-            <a-col :md="12" :sm="24" >
+            <!-- <a-col :md="12" :sm="24" >
               <a-form-item
                 label="日期"
                 :labelCol="{span: 5}"
@@ -26,16 +26,16 @@
                   ref="createTime">
                 </range-date>
               </a-form-item>
+            </a-col> -->
+            <a-col :md="12" :sm="24" >
+              <a-form-item
+                label="姓名"
+                :labelCol="{span: 5}"
+                :wrapperCol="{span: 18, offset: 1}">
+                <a-input v-model="queryParams.name"/>
+              </a-form-item>
             </a-col>
             <template v-if="advanced">
-              <a-col :md="12" :sm="24" >
-                <a-form-item
-                  label="姓名"
-                  :labelCol="{span: 5}"
-                  :wrapperCol="{span: 18, offset: 1}">
-                  <a-input v-model="queryParams.name"/>
-                </a-form-item>
-              </a-col>
               <a-col :md="12" :sm="24" >
                 <a-form-item
                   label="休假类型"
@@ -233,6 +233,9 @@ export default {
         title: '休假类型',
         dataIndex: 'type'
       }, {
+        title: '日期',
+        dataIndex: 'date'
+      }, {
         title: '天数',
         dataIndex: 'day'
       // }, {
@@ -274,8 +277,8 @@ export default {
       // 每次展开，把隐藏的内容清空
       if (!this.advanced) {
         this.queryParams.type = ''
-        this.queryParams.createTimeFrom = ''
-        this.queryParams.createTimeTo = ''
+        // this.queryParams.createTimeFrom = ''
+        // this.queryParams.createTimeTo = ''
       }
     },
     add () {
@@ -310,12 +313,12 @@ export default {
     handleTypeChange (value) {
       this.queryParams.type = value || ''
     },
-    handleDateChange (value) {
-      if (value) {
-        this.queryParams.createTimeFrom = value[0]
-        this.queryParams.createTimeTo = value[1]
-      }
-    },
+    // handleDateChange (value) {
+    //   if (value) {
+    //     this.queryParams.createTimeFrom = value[0]
+    //     this.queryParams.createTimeTo = value[1]
+    //   }
+    // },
     batchDelete () {
       if (!this.selectedRowKeys.length) {
         this.$message.warning('请选择需要删除的记录')

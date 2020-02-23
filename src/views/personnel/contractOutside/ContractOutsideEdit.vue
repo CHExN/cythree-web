@@ -71,16 +71,12 @@
           placeholder='职位协议'
           style="width: 90%; margin-right: 8px"
           autocomplete="off"
-          v-decorator="[`jobAgreement[${k}]`,
-            {rules: [{ required: true, message: '职位协议不能为空'}]}
-          ]"
+          v-decorator="[`jobAgreement[${k}]`]"
         />
         <a-range-picker
           :allowClear="false"
           style="width: 90%; margin-right: 8px"
-          v-decorator="[`jobAgreementDate[${k}]`,
-            {rules: [{ required: true, message: '日期选择不能为空'}]}
-          ]"
+          v-decorator="[`jobAgreementDate[${k}]`]"
         />
         <a-icon
           v-if="form.getFieldValue('jobAgreementKeys').length > 1"
@@ -307,8 +303,8 @@ export default {
         obj['contractPeriod'].push(contractPeriodArr[index])
         obj['contractPeriodDate'].push(element.split('~').map(e => moment(e)))
       })
-      let jobAgreementArr = contractOutside.jobAgreement.split(',')
-      let jobAgreementDateArr = contractOutside.jobAgreementDate.split(',')
+      let jobAgreementArr = contractOutside.jobAgreement ? contractOutside.jobAgreement.split(',') : []
+      let jobAgreementDateArr = contractOutside.jobAgreementDate ? contractOutside.jobAgreementDate.split(',') : []
       obj['jobAgreementKeys'] = []
       obj['jobAgreement'] = []
       obj['jobAgreementDate'] = []
@@ -329,9 +325,12 @@ export default {
           this.form.getFieldValue('contractPeriodDate').forEach(element => {
             contractPeriodDateArr.push(`${element[0].format('YYYY-MM-DD')}~${element[1].format('YYYY-MM-DD')}`)
           })
-          let jobAgreementArr = this.form.getFieldValue('jobAgreement').filter(d => d)
+          let jobAgreementFieldValue = this.form.getFieldValue('jobAgreement') || []
+          let jobAgreementDateFieldValue = this.form.getFieldValue('jobAgreementDate') || []
+          let jobAgreementArr = jobAgreementFieldValue.filter(d => d)
           let jobAgreementDateArr = []
-          this.form.getFieldValue('jobAgreementDate').forEach(element => {
+          jobAgreementDateFieldValue.forEach(element => {
+            if (!element) return
             jobAgreementDateArr.push(`${element[0].format('YYYY-MM-DD')}~${element[1].format('YYYY-MM-DD')}`)
           })
           this.loading = true

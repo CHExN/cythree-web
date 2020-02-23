@@ -237,7 +237,7 @@ export default {
         title: '本期收入',
         dataIndex: 'currentIncomeSum'
       }, {
-        title: '最终收入',
+        title: '应扣税额',
         dataIndex: 'finalWageSum'
       }, {
         title: '月份',

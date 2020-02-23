@@ -448,23 +448,23 @@ export default {
         customRender: (text, row, index) => {
           switch (text) {
             case '0':
-              return '管理'
+              return '管理岗'
             case '1':
               return '技工'
             case '2':
-              return '普工'
+              return '工勤岗'
             case '3':
-              return '专技'
+              return '专业技术岗'
             default:
               return text
           }
         },
         // filters 属性指定需要筛选菜单的列
         filters: [
-          { text: '管理', value: '0' },
+          { text: '管理岗', value: '0' },
           { text: '技工', value: '1' },
-          { text: '普工', value: '2' },
-          { text: '专技', value: '3' }
+          { text: '工勤岗', value: '2' },
+          { text: '专业技术岗', value: '3' }
         ],
         // filterMultiple 用于指定多选和单选(true多/false单)
         filterMultiple: true,
@@ -475,7 +475,7 @@ export default {
         title: '岗位等级',
         dataIndex: 'postLevel'
       }, {
-        title: '岗位职务',
+        title: '现任职务',
         dataIndex: 'technicalType'
       }, {
         title: '户籍性质',

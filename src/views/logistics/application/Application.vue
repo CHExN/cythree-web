@@ -113,6 +113,7 @@
             v-if="record.process===1 && (
                   (user.username==='wxclkg' && record.typeApplication==='4') ||
                   (user.username==='lbbjkg' && (record.typeApplication==='1' || record.typeApplication==='2')) ||
+                  (user.username==='xzhqbm' && (record.typeApplication==='3' || record.typeApplication==='5' || record.typeApplication==='6' || record.typeApplication==='7' || record.typeApplication==='8' || record.typeApplication==='9')) ||
                   (user.username==='captain' || user.username==='vice' || user.username==='xzhisoft'))"
             v-hasPermission="'storeroomPut:add'"
             type="database" theme="twoTone" twoToneColor="#01c9c4" @click="storage(record)" title="入库"></a-icon>

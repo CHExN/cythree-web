@@ -63,6 +63,20 @@
           v-decorator="['team']"
         />
       </a-form-item>
+      <!-- <a-form-item label='所管理部门' v-bind="formItemLayout">
+        <a-select
+          v-decorator="['type']">
+          <a-select-option v-for="i in typeData" :key="i.key">{{ i.value }}</a-select-option>
+        </a-select>
+      </a-form-item> -->
+      <a-form-item label='所管理部门' v-bind="formItemLayout">
+        <a-radio-group v-decorator="['type']">
+          <a-radio-button value="0">劳资</a-radio-button>
+          <a-radio-button value="1">北分队</a-radio-button>
+          <a-radio-button value="2">南分队</a-radio-button>
+          <a-radio-button value="3">保洁分队</a-radio-button>
+        </a-radio-group>
+      </a-form-item>
       <a-form-item label='事由' v-bind="formItemLayout">
         <a-auto-complete
           placeholder='事由'

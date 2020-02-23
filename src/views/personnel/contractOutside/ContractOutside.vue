@@ -75,10 +75,10 @@
                rowKey="id"
                @change="handleTableChange">
         <template slot="contractPeriod" slot-scope="text, record">
-          <span>{{record.isFixedPeriod==='0' ? '无固定' : text.split(',').length}}期</span>
+          <span>{{record.isFixedPeriod==='0' ? '无固定' : (text===null?'0':text.split(',').length)}}期</span>
         </template>
         <template slot="jobAgreement" slot-scope="text">
-          <span>{{text.split(',').length}}期</span>
+          <span>{{text===null?'0':text.split(',').length}}期</span>
         </template>
         <!-- <template slot="contractPeriod" slot-scope="text">
           <span>{{text.replace(/,/g, '; ')}}</span>
@@ -155,6 +155,12 @@ export default {
   computed: {
     columns () {
       return [{
+        title: '总序号',
+        dataIndex: 'sortNum1'
+      }, {
+        title: '分队序号',
+        dataIndex: 'sortNum2'
+      }, {
         title: '姓名',
         dataIndex: 'name'
       }, {

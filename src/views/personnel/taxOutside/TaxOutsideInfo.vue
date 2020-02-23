@@ -157,7 +157,7 @@
               <span style="cursor: pointer;">{{taxOutsideInfoData.taxDeductionSum}}</span>
             </a-popover>
           </detail-list-item>
-          <detail-list-item term="最终收入">
+          <detail-list-item term="应扣税额">
             <a-popover trigger="hover">
               <template slot="content">
                 <p>{{monthlyInformation.finalWage.join('；')}}</p>
@@ -182,7 +182,7 @@
           <detail-list-item term="其他">{{taxOutsideInfoData.other}}</detail-list-item>
           <detail-list-item term="准予扣除的捐赠额">{{taxOutsideInfoData.allowanceForDeduction}}</detail-list-item>
           <detail-list-item term="减免税额">{{taxOutsideInfoData.taxDeduction}}</detail-list-item>
-          <detail-list-item term="最终收入">{{taxOutsideInfoData.finalWage}}</detail-list-item> -->
+          <detail-list-item term="应扣税额">{{taxOutsideInfoData.finalWage}}</detail-list-item> -->
           <detail-list-item term="备注">{{taxOutsideInfoData.remark}}</detail-list-item>
         </detail-list>
       </a-card>

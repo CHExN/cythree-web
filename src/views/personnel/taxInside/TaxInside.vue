@@ -235,8 +235,41 @@ export default {
         title: '本期收入',
         dataIndex: 'currentIncomeSum'
       }, {
-        title: '最终收入',
+        title: '应扣税额',
         dataIndex: 'finalWageSum'
+      }, {
+        title: '月缴税数',
+        dataIndex: 'id',
+        customRender: (text, row, index) => {
+          // 扣税率
+          let deductionRate = 0
+          // 速算扣除数
+          let quickCalculationDeductions = 0
+
+          if (row.finalWageSum <= 36000) {
+            deductionRate = 0.03
+            quickCalculationDeductions = 0
+          } else if (row.finalWageSum <= 144000) {
+            deductionRate = 0.1
+            quickCalculationDeductions = 2520
+          } else if (row.finalWageSum <= 300000) {
+            deductionRate = 0.2
+            quickCalculationDeductions = 16920
+          } else if (row.finalWageSum <= 420000) {
+            deductionRate = 0.25
+            quickCalculationDeductions = 31920
+          } else if (row.finalWageSum <= 660000) {
+            deductionRate = 0.3
+            quickCalculationDeductions = 52920
+          } else if (row.finalWageSum <= 960000) {
+            deductionRate = 0.35
+            quickCalculationDeductions = 85920
+          } else {
+            deductionRate = 0.45
+            quickCalculationDeductions = 181920
+          }
+          return this.$tools.addZero(Math.round(this.$tools.accSubtract(this.$tools.accMultiply(row.finalWageSum, deductionRate), quickCalculationDeductions) * 100) / 100)
+        }
       }, {
         title: '月份',
         dataIndex: 'year',

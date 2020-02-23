@@ -9,14 +9,14 @@
     :visible="wageEditVisiable"
     style="height: calc(100% - 55px);overflow: auto;padding-bottom: 53px;">
     <a-form :form="form">
-      <a-form-item label='编制类别' v-bind="formItemLayout">
+      <!-- <a-form-item label='编制类别' v-bind="formItemLayout">
         <a-radio-group @change="onRadioChange" v-decorator="['insideOrOutside',
           {rules: [{ required: true, message: '请选择编制类别' }]}
         ]">
           <a-radio-button value="0">编内</a-radio-button>
           <a-radio-button value="1">编外</a-radio-button>
         </a-radio-group>
-      </a-form-item>
+      </a-form-item> -->
       <a-form-item label='选择人员' v-bind="formItemLayout">
         <a-input
           @click="selectName"
@@ -170,6 +170,38 @@
           placeholder='扣税'
           v-decorator="['taxDeduction']"/>
       </a-form-item>
+
+      <a-form-item label='空列01' v-bind="formItemLayout">
+        <a-input-number
+          style="width: 100%;"
+          placeholder='空列01'
+          v-decorator="['emptyColumn01']"/>
+      </a-form-item>
+      <a-form-item label='空列02' v-bind="formItemLayout">
+        <a-input-number
+          style="width: 100%;"
+          placeholder='空列02'
+          v-decorator="['emptyColumn02']"/>
+      </a-form-item>
+      <a-form-item label='空列03' v-bind="formItemLayout">
+        <a-input-number
+          style="width: 100%;"
+          placeholder='空列03'
+          v-decorator="['emptyColumn03']"/>
+      </a-form-item>
+      <a-form-item label='空列04' v-bind="formItemLayout">
+        <a-input-number
+          style="width: 100%;"
+          placeholder='空列04'
+          v-decorator="['emptyColumn04']"/>
+      </a-form-item>
+      <a-form-item label='空列05' v-bind="formItemLayout">
+        <a-input-number
+          style="width: 100%;"
+          placeholder='空列05'
+          v-decorator="['emptyColumn05']"/>
+      </a-form-item>
+
       <a-form-item label='实发工资' v-bind="formItemLayout">
         <a-input-number
           style="width: 100%;"
@@ -183,12 +215,12 @@
       </a-popconfirm>
       <a-button @click="handleSubmit" type="primary" :loading="loading">提交</a-button>
     </div>
-    <staff-outside-list
+    <!-- <staff-outside-list
       :staffOutsideListVisiable="staffOutsideList.visiable"
       @change="handleStaffOutsideListChange"
       @close="handleStaffOutsideListClose"
     >
-    </staff-outside-list>
+    </staff-outside-list> -->
     <staff-inside-list
       :staffInsideListVisiable="staffInsideList.visiable"
       @change="handleStaffInsideListChange"
@@ -198,7 +230,7 @@
   </a-drawer>
 </template>
 <script>
-import StaffOutsideList from '../staffOutside/StaffOutsideList'
+// import StaffOutsideList from '../staffOutside/StaffOutsideList'
 import StaffInsideList from '../staffInside/StaffInsideList'
 import moment from 'moment'
 moment.locale('zh-cn')
@@ -209,7 +241,8 @@ const formItemLayout = {
 }
 export default {
   name: 'WageEdit',
-  components: { StaffOutsideList, StaffInsideList },
+  // components: { StaffOutsideList, StaffInsideList },
+  components: { StaffInsideList },
   props: {
     wageEditVisiable: {
       default: false
@@ -220,9 +253,9 @@ export default {
       loading: false,
       formItemLayout,
       form: this.$form.createForm(this),
-      staffOutsideList: {
-        visiable: false
-      },
+      // staffOutsideList: {
+      //   visiable: false
+      // },
       staffInsideList: {
         visiable: false
       },
@@ -241,18 +274,18 @@ export default {
       this.reset()
       this.$emit('close')
     },
-    onRadioChange (e) {
-      // 切换radio时 重置选择人员
-      this.form.getFieldDecorator('staffName')
-      this.form.setFieldsValue({ staffName: '' })
-      this.staffId = ''
-    },
+    // onRadioChange (e) {
+    //   // 切换radio时 重置选择人员
+    //   this.form.getFieldDecorator('staffName')
+    //   this.form.setFieldsValue({ staffName: '' })
+    //   this.staffId = ''
+    // },
     setFormValues ({...wage}) {
       this.id = wage.id
       this.form.getFieldDecorator('yearMonth')
       this.form.setFieldsValue({yearMonth: moment(`${wage.year}-${wage.month}`)})
       let obj = {}
-      let fields = ['createTime', 'modifyTime', 'finalWage']
+      let fields = ['createTime', 'modifyTime']
       Object.keys(wage).forEach((key) => {
         if (fields.includes(key)) return
         this.form.getFieldDecorator(key)
@@ -261,14 +294,15 @@ export default {
       this.form.setFieldsValue(obj)
     },
     selectName () {
-      let insideOrOutside = this.form.getFieldValue('insideOrOutside')
-      if (insideOrOutside === '0') {
-        this.staffInsideList.visiable = true
-      } else if (insideOrOutside === '1') {
-        this.staffOutsideList.visiable = true
-      } else {
-        this.$message.warning('请先选择编制类别')
-      }
+      // let insideOrOutside = this.form.getFieldValue('insideOrOutside')
+      // if (insideOrOutside === '0') {
+      //   this.staffInsideList.visiable = true
+      // } else if (insideOrOutside === '1') {
+      //   this.staffOutsideList.visiable = true
+      // } else {
+      //   this.$message.warning('请先选择编制类别')
+      // }
+      this.staffInsideList.visiable = true
     },
     handleStaffInsideListChange (staffName, staffId) {
       this.form.getFieldDecorator('staffName')
@@ -278,14 +312,14 @@ export default {
     handleStaffInsideListClose () {
       this.staffInsideList.visiable = false
     },
-    handleStaffOutsideListChange (staffName, staffId) {
-      this.form.getFieldDecorator('staffName')
-      this.form.setFieldsValue({ staffName: staffName })
-      this.staffId = staffId
-    },
-    handleStaffOutsideListClose () {
-      this.staffOutsideList.visiable = false
-    },
+    // handleStaffOutsideListChange (staffName, staffId) {
+    //   this.form.getFieldDecorator('staffName')
+    //   this.form.setFieldsValue({ staffName: staffName })
+    //   this.staffId = staffId
+    // },
+    // handleStaffOutsideListClose () {
+    //   this.staffOutsideList.visiable = false
+    // },
     handleSubmit () {
       this.form.validateFields((err, values) => {
         if (!err) {
@@ -317,6 +351,11 @@ export default {
           values.corporateAnnuity = values.corporateAnnuity || 0
           values.taxDeduction = values.taxDeduction || 0
           values.realWage = values.realWage || 0
+          values.emptyColumn01 = values.emptyColumn01 || 0
+          values.emptyColumn02 = values.emptyColumn02 || 0
+          values.emptyColumn03 = values.emptyColumn03 || 0
+          values.emptyColumn04 = values.emptyColumn04 || 0
+          values.emptyColumn05 = values.emptyColumn05 || 0
           this.$put('wage', {
             ...values,
             id: this.id,

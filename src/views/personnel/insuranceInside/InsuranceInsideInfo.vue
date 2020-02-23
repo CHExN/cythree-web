@@ -42,7 +42,7 @@
           <detail-list-item term="毕业日期">{{staffInsideData.graduationDate}}</detail-list-item>
           <detail-list-item term="政治面貌">{{staffInsideData.politicalFace}}</detail-list-item>
           <detail-list-item term="有无残疾证">{{getIsDisabilityCertificate(staffInsideData.isDisabilityCertificate)}}</detail-list-item>
-          <detail-list-item term="工伤证发证日期">{{staffInsideData.workInjuryCertificateDate}}</detail-list-item>
+          <detail-list-item term="残疾证编号">{{staffInsideData.disabilityCertificateNumber}}</detail-list-item>
           <detail-list-item term="伤残鉴定等级">{{staffInsideData.disabilityIdentificationLevel}}</detail-list-item>
           <detail-list-item term="家庭住址">{{staffInsideData.address}}</detail-list-item>
           <detail-list-item term="身份证号码">{{staffInsideData.idNum}}</detail-list-item>
@@ -54,9 +54,10 @@
           <detail-list-item term="参加工作日期">{{staffInsideData.workDate}}</detail-list-item>
           <detail-list-item term="农转工转工日期">{{staffInsideData.farmerWorkDate}}</detail-list-item>
           <detail-list-item term="调入环卫或报到日期">{{staffInsideData.transferDate}}</detail-list-item>
-          <detail-list-item term="现任岗位职务">{{staffInsideData.technicalType}}</detail-list-item>
+          <detail-list-item term="现任职务">{{staffInsideData.technicalType}}</detail-list-item>
           <detail-list-item term="岗位">{{getPost(staffInsideData.post)}}</detail-list-item>
           <detail-list-item term="岗位级别">{{staffInsideData.postLevel}}</detail-list-item>
+          <detail-list-item term="聘任岗位">{{staffInsideData.hiringPositions}}</detail-list-item>
           <detail-list-item term="聘任时间">{{staffInsideData.appointmentDate}}</detail-list-item>
           <detail-list-item term="技术等级取得日期">{{staffInsideData.technicalLevelDate}}</detail-list-item>
           <detail-list-item term="证书编号">{{staffInsideData.certificateNum}}</detail-list-item>
@@ -140,13 +141,13 @@ export default {
     getPost (post) {
       switch (post) {
         case '0':
-          return '管理'
+          return '管理岗'
         case '1':
           return '技工'
         case '2':
-          return '普工'
+          return '工勤岗'
         case '3':
-          return '专技'
+          return '专业技术岗'
         default:
           return post
       }

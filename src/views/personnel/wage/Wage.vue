@@ -4,7 +4,7 @@
       <a-form layout="horizontal">
         <a-row>
           <div :class="advanced ? null: 'fold'">
-            <a-col :md="12" :sm="24" >
+            <!-- <a-col :md="12" :sm="24" >
               <a-form-item
                 label="编制类别"
                 :labelCol="{span: 5}"
@@ -14,6 +14,14 @@
                   <a-select-option value="0">编内</a-select-option>
                   <a-select-option value="1">编外</a-select-option>
                 </a-select>
+              </a-form-item>
+            </a-col> -->
+            <a-col :md="12" :sm="24" >
+              <a-form-item
+                label="姓名"
+                :labelCol="{span: 5}"
+                :wrapperCol="{span: 18, offset: 1}">
+                <a-input v-model="queryParams.staffName"/>
               </a-form-item>
             </a-col>
             <a-col :md="12" :sm="24" >
@@ -29,14 +37,6 @@
               </a-form-item>
             </a-col>
             <template v-if="advanced">
-              <a-col :md="12" :sm="24" >
-                <a-form-item
-                  label="姓名"
-                  :labelCol="{span: 5}"
-                  :wrapperCol="{span: 18, offset: 1}">
-                  <a-input v-model="queryParams.staffName"/>
-                </a-form-item>
-              </a-col>
               <a-col :md="12" :sm="24" >
                 <a-form-item
                   label="身份证号"
@@ -175,7 +175,7 @@ export default {
   components: { WageAdd, WageEdit, WageInfo, WageImportResult },
   data () {
     return {
-      insOut: '0',
+      // insOut: '0',
       nowMonth: moment(),
       monthData: ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12'],
       modalVisible: false,
@@ -333,7 +333,7 @@ export default {
       this.advanced = !this.advanced
       // 每次展开，把隐藏的内容清空
       if (!this.advanced) {
-        this.queryParams.staffName = ''
+        // this.queryParams.staffName = ''
         this.queryParams.staffIdCard = ''
         this.queryParams.postLevel = ''
       }
@@ -410,7 +410,8 @@ export default {
         sortOrder = sortedInfo.order
       }
       if (this.nowMonth) {
-        params.insideOrOutside = this.insOut
+        // params.insideOrOutside = this.insOut
+        params.insideOrOutside = '0'
         params.year = this.nowMonth.format('YYYY')
         params.month = this.nowMonth.format('MM')
         params.monthArr = this.monthData.slice(0, this.monthData.indexOf(params.month) + 1).join()
@@ -458,7 +459,7 @@ export default {
       // 重置月份
       this.nowMonth = moment()
       // 重置编制类别
-      this.insOut = '0'
+      // this.insOut = '0'
       this.fetch()
     },
     handleTableChange (pagination, filters, sorter) {
@@ -499,7 +500,8 @@ export default {
         params.monthArr = this.monthData.slice(0, this.monthData.indexOf(params.month) + 1).join()
       }
       this.$get('wage', {
-        insideOrOutside: this.insOut,
+        // insideOrOutside: this.insOut,
+        insideOrOutside: '0',
         ...params
       }).then((r) => {
         let data = r.data

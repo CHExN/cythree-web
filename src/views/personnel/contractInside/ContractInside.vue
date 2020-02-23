@@ -96,10 +96,10 @@
                rowKey="id"
                @change="handleTableChange">
         <template slot="contractPeriod" slot-scope="text, record">
-          <span>{{record.isFixedPeriod==='0' ? '无固定' : text.split(',').length}}期</span>
+          <span>{{record.isFixedPeriod==='0' ? '无固定' : (text===null?'0':text.split(',').length)}}期</span>
         </template>
         <template slot="jobAgreement" slot-scope="text">
-          <span>{{text.split(',').length}}期</span>
+          <span>{{text===null?'0':text.split(',').length}}期</span>
         </template>
         <template slot="operation" slot-scope="text, record">
           <a-icon v-hasPermission="'contractInside:update'" type="setting" theme="twoTone" twoToneColor="#4a9ff5" @click="edit(record)" title="修改"></a-icon>

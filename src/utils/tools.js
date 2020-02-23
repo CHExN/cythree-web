@@ -15,11 +15,13 @@ let tools = {
 
   // 千分位加点
   toNumFormant (value) {
+    if (!value) return value
     return `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')
   },
 
-  // 千分位加点,小数点留后两位
+  // 小数点留后两位
   addZero (value) {
+    if (!value) return value
     const thousandsOfPointsArr = `${value}`.split('.')
     if (thousandsOfPointsArr.length === 1) { // 判断整数
       return `${value}.00`
