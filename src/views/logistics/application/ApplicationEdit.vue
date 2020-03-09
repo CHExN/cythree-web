@@ -1,18 +1,70 @@
 <template>
   <a-drawer
-    title="修改办公用品申请"
+    title="修改采购申请"
     :maskClosable="false"
     width=920
     placement="right"
     :closable="false"
     @close="onClose"
-    :visible="officeSuppliesEditVisiable"
+    :visible="applicationEditVisiable"
     style="height: calc(100% - 55px);overflow: auto;padding-bottom: 53px;">
     <a-form :form="form">
       <a-row class="form-row">
         <a-col :md="12" :sm="24">
+          <a-form-item label='编号' v-bind="formItemLayout">
+            <a-input
+              placeholder='申请单编号'
+              autocomplete="off"
+              autoFocus
+              v-decorator="['num',
+                {rules: [{ required: true, message: '申请单编号不能为空'}]}
+              ]"/>
+          </a-form-item>
+        </a-col>
+        <a-col :md="12" :sm="24">
           <a-form-item label='申请部门' v-bind="formItemLayout">
             <a-input placeholder='申请部门' autocomplete="off" disabled :value="this.deptName"/>
+          </a-form-item>
+        </a-col>
+        <a-col :md="12" :sm="24">
+          <a-form-item label='物资类别' v-bind="formItemLayout">
+            <a-select
+              placeholder='物资类别'
+              v-decorator="['typeApplication', {
+                initialValue: [dictData.typeApplication && JSON.stringify(dictData.typeApplication)!=='{}' ? Object.keys(dictData.typeApplication)[0] : ''],
+                rules: [{ required: true, message: '请选择物资类别' }]
+              }]">
+              <a-select-option v-for="i in Object.keys(dictData.typeApplication||[])" :key="i">{{ dictData.typeApplication[i] }}</a-select-option>
+            </a-select>
+          </a-form-item>
+        </a-col>
+        <a-col :md="12" :sm="24">
+          <a-form-item label='预计金额' v-bind="formItemLayout">
+            <a-input-number
+              :min="0"
+              :precision="2"
+              :formatter="value => value"
+              autocomplete="off"
+              placeholder='预计金额'
+              style="width: 100%;"
+              v-decorator="['money']"
+            />
+          </a-form-item>
+        </a-col>
+        <a-col :md="12" :sm="24">
+          <a-form-item label='采购说明' v-bind="formItemLayout">
+            <a-textarea
+              placeholder='采购用途、采购数量、功能要求等'
+              autocomplete="off"
+              v-decorator="['description']"/>
+          </a-form-item>
+        </a-col>
+        <a-col :md="12" :sm="24">
+          <a-form-item label='经办人' v-bind="formItemLayout">
+            <a-input
+              placeholder='分管采购工作经办人'
+              autocomplete="off"
+              v-decorator="['handle']"/>
           </a-form-item>
         </a-col>
         <a-col :md="12" :sm="24">
@@ -29,7 +81,7 @@
         </a-col>
       </a-row>
     </a-form>
-    <a-card title="物资名单" :bordered="false">
+    <a-card title="采购计划" :bordered="false">
       <a-table
         :columns="columns"
         :dataSource="dataSource"
@@ -75,10 +127,13 @@ const formItemLayout = {
   wrapperCol: { span: 17, offset: 1 }
 }
 export default {
-  name: 'OfficeSuppliesEdit',
+  name: 'ApplicationEdit',
   props: {
-    officeSuppliesEditVisiable: {
+    applicationEditVisiable: {
       default: false
+    },
+    dictData: {
+      require: true
     }
   },
   data () {
@@ -145,11 +200,18 @@ export default {
         this.dataSource = newData
       }
     },
-    setFormValues ({...officeSupplies}) {
-      this.id = officeSupplies.id
-      this.deptName = officeSupplies.deptName
-      this.form.getFieldDecorator('createDate')
-      this.form.setFieldsValue({'createDate': moment(officeSupplies.createDate)})
+    setFormValues ({...application}) {
+      this.id = application.id
+      this.deptName = application.deptName
+      let obj = {}
+      Object.keys(application).forEach((key) => {
+        this.form.getFieldDecorator(key)
+        obj[key] = application[key]
+      })
+      obj['createDate'] = moment(obj['createDate'])
+      this.form.setFieldsValue(obj)
+      // this.form.getFieldDecorator('createDate')
+      // this.form.setFieldsValue({'createDate': moment(application.createDate)})
     },
     handleSubmit () {
       this.form.validateFields((err, values) => {
@@ -157,6 +219,7 @@ export default {
           this.editLoading = true
           let planList = JSON.stringify(this.dataSource)
           this.$put('application', {
+            ...values,
             createDate: values.createDate.format('YYYY-MM-DD'),
             planList: planList,
             id: this.id
@@ -172,8 +235,8 @@ export default {
     }
   },
   watch: {
-    officeSuppliesEditVisiable () {
-      if (this.officeSuppliesEditVisiable) {
+    applicationEditVisiable () {
+      if (this.applicationEditVisiable) {
         this.loading = true
         this.$get('application/applicationPlan', {
           applicationId: this.id

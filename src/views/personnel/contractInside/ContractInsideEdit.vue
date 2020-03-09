@@ -274,6 +274,7 @@ export default {
       this.staffInsideList.visiable = false
     },
     setFormValues ({...contractInside}) {
+      this.idNum = contractInside.idNum
       this.id = contractInside.id
       let fields = ['contractPeriod', 'contractPeriodDate', 'jobAgreement', 'jobAgreementDate']
       let obj = {}

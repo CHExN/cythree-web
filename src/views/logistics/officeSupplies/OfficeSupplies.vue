@@ -53,7 +53,7 @@
                rowKey="id"
                @change="handleTableChange">
         <template slot="operation" slot-scope="text, record">
-          <a-icon v-hasPermission="'officeSupplies:view'" type="setting" theme="twoTone" twoToneColor="#4a9ff5" @click="edit(record)" title="修改"></a-icon>
+          <a-icon v-hasPermission="'officeSupplies:edit'" type="setting" theme="twoTone" twoToneColor="#4a9ff5" @click="edit(record)" title="修改"></a-icon>
           &nbsp;
           <a-icon v-hasPermission="'officeSupplies:view'" type="eye" theme="twoTone" twoToneColor="#42b983" @click="view(record)" title="查看"></a-icon>
           &nbsp;

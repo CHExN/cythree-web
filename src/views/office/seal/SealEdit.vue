@@ -93,7 +93,7 @@ export default {
           this.loading = true
           this.$put('seal', {
             ...values,
-            'sealId': this.id
+            sealId: this.id
           }).then((r) => {
             this.reset()
             this.$emit('success')

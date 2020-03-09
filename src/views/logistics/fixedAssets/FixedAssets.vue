@@ -60,6 +60,8 @@
                rowKey="id"
                @change="handleTableChange">
         <template slot="operation" slot-scope="text, record">
+          <a-icon v-hasPermission="'fixedAssets:edit'" type="setting" theme="twoTone" twoToneColor="#4a9ff5" @click="edit(record)" title="修改"></a-icon>
+          &nbsp;
           <a-icon v-hasPermission="'fixedAssets:view'" type="eye" theme="twoTone" twoToneColor="#42b983" @click="view(record)" title="查看"></a-icon>
           &nbsp;
           <a-popconfirm
@@ -89,6 +91,13 @@
       @close="handleFixedAssetsAddClose"
       @success="handleFixedAssetsAddSuccess">
     </fixed-assets-add>
+    <!-- 修改固定资产申请 -->
+    <fixed-assets-edit
+      ref="fixedAssetsEdit"
+      :fixedAssetsEditVisiable="fixedAssetsEdit.visiable"
+      @close="handleFixedAssetsEditClose"
+      @success="handleFixedAssetsEditSuccess">
+    </fixed-assets-edit>
     <!-- 入库 -->
     <put-add
       ref="putAdd"
@@ -102,13 +111,14 @@
 import RangeDate from '@/components/datetime/RangeDate'
 import FixedAssetsInfo from './FixedAssetsInfo'
 import FixedAssetsAdd from './FixedAssetsAdd'
+import FixedAssetsEdit from './FixedAssetsEdit'
 import PutAdd from '../storeroomPut/StoreroomPutAdd'
 import { mapState } from 'vuex'
 import { newSpread, fixedForm, floatForm, floatReset, saveExcel } from '@/utils/spreadJS'
 
 export default {
   name: 'FixedAssets',
-  components: { RangeDate, FixedAssetsInfo, FixedAssetsAdd, PutAdd },
+  components: { RangeDate, FixedAssetsInfo, FixedAssetsAdd, FixedAssetsEdit, PutAdd },
 
   data () {
     return {
@@ -118,6 +128,9 @@ export default {
         data: {}
       },
       fixedAssetsAdd: {
+        visiable: false
+      },
+      fixedAssetsEdit: {
         visiable: false
       },
       putAdd: {
@@ -249,6 +262,18 @@ export default {
     handleFixedAssetsAddSuccess () {
       this.fixedAssetsAdd.visiable = false
       this.$message.success('新增固定资产申请成功')
+      this.search()
+    },
+    edit (record) {
+      this.$refs.fixedAssetsEdit.setFormValues(record)
+      this.fixedAssetsEdit.visiable = true
+    },
+    handleFixedAssetsEditClose () {
+      this.fixedAssetsEdit.visiable = false
+    },
+    handleFixedAssetsEditSuccess () {
+      this.fixedAssetsEdit.visiable = false
+      this.$message.success('修改固定资产申请成功')
       this.search()
     },
     storage (record) {

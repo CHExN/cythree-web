@@ -44,12 +44,6 @@
                :scroll="{ x: 900 }"
                rowKey="letterId"
                @change="handleTableChange">
-        <template slot="timeFrom" slot-scope="text">
-          {{text.substr(0, 5)}}
-        </template>
-        <template slot="timeTo" slot-scope="text">
-          {{text.substr(0, 5)}}
-        </template>
         <template slot="remark" slot-scope="text">
           <a-popover placement="topLeft">
             <template slot="content">
@@ -168,11 +162,11 @@ export default {
           }
         },
         filters: [
-          { text: '未通过', value: -1 },
-          { text: '待审核', value: 0 },
-          { text: '已通过', value: 1 }
+          { text: '未通过', value: '-1' },
+          { text: '待审核', value: '0' },
+          { text: '已通过', value: '1' }
         ],
-        filterMultiple: true,
+        filterMultiple: false,
         filteredValue: filteredInfo.process || null
       }, {
         title: '备注',

@@ -1,18 +1,64 @@
 <template>
   <a-drawer
-    title="修改办公用品申请"
+    title="修改固定资产申请"
     :maskClosable="false"
     width=920
     placement="right"
     :closable="false"
     @close="onClose"
-    :visible="officeSuppliesEditVisiable"
+    :visible="fixedAssetsEditVisiable"
     style="height: calc(100% - 55px);overflow: auto;padding-bottom: 53px;">
     <a-form :form="form">
       <a-row class="form-row">
         <a-col :md="12" :sm="24">
           <a-form-item label='申请部门' v-bind="formItemLayout">
             <a-input placeholder='申请部门' autocomplete="off" disabled :value="this.deptName"/>
+          </a-form-item>
+        </a-col>
+        <a-col :md="12" :sm="24">
+          <a-form-item label='联系人' v-bind="formItemLayout">
+            <a-input
+              placeholder='联系人'
+              autocomplete="off"
+              autoFocus
+              v-decorator="['handle']"/>
+          </a-form-item>
+        </a-col>
+        <a-col :md="12" :sm="24">
+          <a-form-item label='电话' v-bind="formItemLayout">
+            <a-input
+              placeholder='电话'
+              autocomplete="off"
+              v-decorator="['num']"/> <!-- 原先为申请单编号 -->
+          </a-form-item>
+        </a-col>
+        <a-col :md="12" :sm="24">
+          <a-form-item label='预计金额' v-bind="formItemLayout">
+            <a-input-number
+              :min="0"
+              :precision="2"
+              :formatter="value => value"
+              autocomplete="off"
+              placeholder='预计金额'
+              style="width: 100%;"
+              v-decorator="['money',{rules: [{ required: true, message: '预计金额不能为空' }]}]"
+            />
+          </a-form-item>
+        </a-col>
+        <a-col :md="12" :sm="24">
+          <a-form-item label='购买理由' v-bind="formItemLayout">
+            <a-textarea
+              placeholder='申请购买理由'
+              autocomplete="off"
+              v-decorator="['description']"/>
+          </a-form-item>
+        </a-col>
+        <a-col :md="12" :sm="24">
+          <a-form-item label='规格要求' v-bind="formItemLayout">
+            <a-textarea
+              placeholder='规格要求'
+              autocomplete="off"
+              v-decorator="['appDept']"/>
           </a-form-item>
         </a-col>
         <a-col :md="12" :sm="24">
@@ -29,7 +75,7 @@
         </a-col>
       </a-row>
     </a-form>
-    <a-card title="物资名单" :bordered="false">
+    <a-card title="采购计划" :bordered="false">
       <a-table
         :columns="columns"
         :dataSource="dataSource"
@@ -37,7 +83,7 @@
         :loading="loading"
         rowKey="id"
       >
-        <template  v-for="(col, i) in ['name', 'type', 'amount', 'unit', 'remark']" :slot="col" slot-scope="text, record">
+        <template  v-for="(col, i) in ['name', 'amount', 'remark']" :slot="col" slot-scope="text, record">
           <a-input
             :key="col"
             style="margin: -5px 0"
@@ -54,6 +100,17 @@
             :precision="2"
             :formatter="value => value"
             placeholder='数量'
+          />
+        </template>
+
+        <template slot="remark" slot-scope="text, record">
+          <a-input-number
+            v-model="record.remark"
+            :min="0.01"
+            :max="1000000"
+            :precision="2"
+            :formatter="value => value"
+            placeholder='金额'
           />
         </template>
 
@@ -75,9 +132,9 @@ const formItemLayout = {
   wrapperCol: { span: 17, offset: 1 }
 }
 export default {
-  name: 'OfficeSuppliesEdit',
+  name: 'FixedAssetsEdit',
   props: {
-    officeSuppliesEditVisiable: {
+    fixedAssetsEditVisiable: {
       default: false
     }
   },
@@ -97,27 +154,14 @@ export default {
       return [{
         title: '物品名称',
         dataIndex: 'name',
-        width: '20%',
         scopedSlots: { customRender: 'name' }
-      }, {
-        title: '型号',
-        dataIndex: 'type',
-        width: '15%',
-        scopedSlots: { customRender: 'type' }
       }, {
         title: '数量',
         dataIndex: 'amount',
-        width: '15%',
         scopedSlots: { customRender: 'amount' }
       }, {
-        title: '单位',
-        dataIndex: 'unit',
-        width: '12%',
-        scopedSlots: { customRender: 'unit' }
-      }, {
-        title: '备注',
+        title: '金额',
         dataIndex: 'remark',
-        width: '23%',
         scopedSlots: { customRender: 'remark' }
       }]
     }
@@ -145,11 +189,18 @@ export default {
         this.dataSource = newData
       }
     },
-    setFormValues ({...officeSupplies}) {
-      this.id = officeSupplies.id
-      this.deptName = officeSupplies.deptName
-      this.form.getFieldDecorator('createDate')
-      this.form.setFieldsValue({'createDate': moment(officeSupplies.createDate)})
+    setFormValues ({...fixedAssets}) {
+      this.id = fixedAssets.id
+      this.deptName = fixedAssets.deptName
+      let obj = {}
+      Object.keys(fixedAssets).forEach((key) => {
+        this.form.getFieldDecorator(key)
+        obj[key] = fixedAssets[key]
+      })
+      obj['createDate'] = moment(obj['createDate'])
+      this.form.setFieldsValue(obj)
+      // this.form.getFieldDecorator('createDate')
+      // this.form.setFieldsValue({'createDate': moment(fixedAssets.createDate)})
     },
     handleSubmit () {
       this.form.validateFields((err, values) => {
@@ -157,6 +208,7 @@ export default {
           this.editLoading = true
           let planList = JSON.stringify(this.dataSource)
           this.$put('application', {
+            ...values,
             createDate: values.createDate.format('YYYY-MM-DD'),
             planList: planList,
             id: this.id
@@ -172,8 +224,8 @@ export default {
     }
   },
   watch: {
-    officeSuppliesEditVisiable () {
-      if (this.officeSuppliesEditVisiable) {
+    fixedAssetsEditVisiable () {
+      if (this.fixedAssetsEditVisiable) {
         this.loading = true
         this.$get('application/applicationPlan', {
           applicationId: this.id

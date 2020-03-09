@@ -15,19 +15,19 @@
             </a-col>
             <a-col :md="12" :sm="24" >
               <a-form-item
-                label="合同编号"
+                label="承办部门"
                 :labelCol="{span: 5}"
                 :wrapperCol="{span: 18, offset: 1}">
-                <a-input v-model="queryParams.contractNum"/>
+                <dept-input-tree @change="handleDeptChange" ref="deptTree"></dept-input-tree>
               </a-form-item>
             </a-col>
             <template v-if="advanced">
               <a-col :md="12" :sm="24" >
                 <a-form-item
-                  label="承办部门"
+                  label="合同编号"
                   :labelCol="{span: 5}"
                   :wrapperCol="{span: 18, offset: 1}">
-                  <dept-input-tree @change="handleDeptChange" ref="deptTree"></dept-input-tree>
+                  <a-input v-model="queryParams.contractNum"/>
                 </a-form-item>
               </a-col>
             </template>
@@ -223,9 +223,7 @@ export default {
     toggleAdvanced () {
       this.advanced = !this.advanced
       if (!this.advanced) {
-        // 清空部门树选择
-        this.$refs.deptTree.reset()
-        this.queryParams.deptId = ''
+        this.queryParams.contractNum = ''
       }
     },
     isReview (record) {

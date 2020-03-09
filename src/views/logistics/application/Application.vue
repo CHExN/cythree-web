@@ -97,6 +97,8 @@
                rowKey="id"
                @change="handleTableChange">
         <template slot="operation" slot-scope="text, record">
+          <a-icon v-hasPermission="'application:edit'" type="setting" theme="twoTone" twoToneColor="#4a9ff5" @click="edit(record)" title="修改"></a-icon>
+          &nbsp;
           <a-icon v-hasPermission="'application:view'" type="eye" theme="twoTone" twoToneColor="#42b983" @click="view(record)" title="查看"></a-icon>
           &nbsp;
           <a-popconfirm
@@ -133,6 +135,14 @@
       @close="handleApplicationAddClose"
       @success="handleApplicationAddSuccess">
     </application-add>
+    <!-- 修改采购申请 -->
+    <application-edit
+      ref="applicationEdit"
+      :dictData="dictData"
+      :applicationEditVisiable="applicationEdit.visiable"
+      @close="handleApplicationEditClose"
+      @success="handleApplicationEditSuccess">
+    </application-edit>
     <!-- 入库 -->
     <put-add
       ref="putAdd"
@@ -146,13 +156,14 @@
 import RangeDate from '@/components/datetime/RangeDate'
 import ApplicationInfo from './ApplicationInfo'
 import ApplicationAdd from './ApplicationAdd'
+import ApplicationEdit from './ApplicationEdit'
 import PutAdd from '../storeroomPut/StoreroomPutAdd'
 import { mapState } from 'vuex'
 import { newSpread, fixedForm, floatForm, floatReset, saveExcel } from '@/utils/spreadJS'
 
 export default {
   name: 'Application',
-  components: { RangeDate, ApplicationInfo, ApplicationAdd, PutAdd },
+  components: { RangeDate, ApplicationInfo, ApplicationAdd, ApplicationEdit, PutAdd },
 
   data () {
     return {
@@ -162,6 +173,9 @@ export default {
         data: {}
       },
       applicationAdd: {
+        visiable: false
+      },
+      applicationEdit: {
         visiable: false
       },
       putAdd: {
@@ -307,6 +321,18 @@ export default {
     handleApplicationAddSuccess () {
       this.applicationAdd.visiable = false
       this.$message.success('新增采购申请成功')
+      this.search()
+    },
+    edit (record) {
+      this.$refs.applicationEdit.setFormValues(record)
+      this.applicationEdit.visiable = true
+    },
+    handleApplicationEditClose () {
+      this.applicationEdit.visiable = false
+    },
+    handleApplicationEditSuccess () {
+      this.applicationEdit.visiable = false
+      this.$message.success('修改采购申请成功')
       this.search()
     },
     storage (record) {
