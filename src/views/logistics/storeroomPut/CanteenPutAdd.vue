@@ -17,9 +17,9 @@
           </a-form-item>
         </a-col>
         <a-col :md="12" :sm="24">
-          <a-form-item label='日期' v-bind="formItemLayout">
-            <a-date-picker placeholder='日期' autocomplete="off" format='YYYY-MM-DD' style="width: 100%;"
-              v-decorator="['date',{rules: [{ required: true, message: '请选择录入日期'}]}]"/>
+          <a-form-item label='入库日期' v-bind="formItemLayout">
+            <a-date-picker placeholder='入库日期' autocomplete="off" format='YYYY-MM-DD' style="width: 100%;"
+              v-decorator="['date',{rules: [{ required: true, message: '请选择入库日期'}]}]"/>
           </a-form-item>
         </a-col>
         <a-col :md="12" :sm="24">
@@ -248,28 +248,34 @@ export default {
       this.form.validateFields((err, values) => {
         if (!err) {
           let data = []
+          let isType = true
           this.dataSource.forEach(item => {
             if (item.isNew === false && item.editable === false) {
+              if (!item.type) isType = false
               data.push(item)
             }
           })
           if (data.length > 0) {
-            let canteenList = JSON.stringify(data, function (key, value) {
-              return key === 'key' || key === 'editable' || key === 'isNew' ? undefined : value
-            })
-            const date = values['date']
-            this.putLoading = true
-            this.$post('storeroomPut', {
-              ...values,
-              typeApplication: 8, // 食堂用品
-              storeroomList: canteenList,
-              date: date.format('YYYY-MM-DD')
-            }).then((r) => {
-              this.reset()
-              this.$emit('success')
-            }).catch(() => {
-              this.putLoading = false
-            })
+            if (isType) {
+              let canteenList = JSON.stringify(data, function (key, value) {
+                return key === 'key' || key === 'editable' || key === 'isNew' ? undefined : value
+              })
+              const date = values['date']
+              this.putLoading = true
+              this.$post('storeroomPut', {
+                ...values,
+                typeApplication: 8, // 食堂用品
+                storeroomList: canteenList,
+                date: date.format('YYYY-MM-DD')
+              }).then((r) => {
+                this.reset()
+                this.$emit('success')
+              }).catch(() => {
+                this.putLoading = false
+              })
+            } else {
+              this.$message.warning('请检查类别列是否有空的')
+            }
           } else {
             this.$message.warning('入库名单至少要有一条数据')
           }

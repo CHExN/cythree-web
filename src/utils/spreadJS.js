@@ -79,7 +79,8 @@ const fileNameData = {
   InsideAnnualLeave: '编内人员年假.json',
   Vacation: '人员休假.json',
   Insurance: '社保明细.json',
-  Condolences: '职工慰问管理单.json'
+  Condolences: '职工慰问管理单.json',
+  BilateralMeeting: '上会议题.json'
 }
 
 // 表名对应的开始行index
@@ -96,7 +97,8 @@ const startRowData = {
   Attendance: 5,
   Staff: 2,
   InsideAnnualLeave: 3,
-  Vacation: 3
+  Vacation: 3,
+  BilateralMeeting: 7
 }
 
 // 表名对应的各列名，列名又对应行数和列数

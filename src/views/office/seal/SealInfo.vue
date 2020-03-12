@@ -49,20 +49,7 @@
         <detail-list-item term="使用事由">{{sealInfoData.remark}}</detail-list-item>
         <detail-list-item term="份数">{{sealInfoData.amount}}</detail-list-item>
       </detail-list>
-      <div style="margin-top: 32px;">
-        <a-upload-dragger
-          :fileList="fileList"
-          :remove="handleRemove"
-          :customRequest="customRequest"
-          :beforeUpload="handleBeforeUpload"
-          :disabled="fileList.length > 5"
-        >
-          <p class="ant-upload-drag-icon">
-            <a-icon type="inbox" />
-          </p>
-          <p class="ant-upload-hint">单击或拖动文件到此区域进行上传</p>
-        </a-upload-dragger>
-      </div>
+      <a-upload :multiple="true" :fileList="fileList"/>
     </a-card>
   </a-modal>
 </template>
@@ -120,53 +107,6 @@ export default {
           return '正职'
         default:
           return index
-      }
-    },
-    handleRemove (file) {
-      let that = this
-      if (file.status === 'removed') {
-        that.$delete('seal/deleteFile/' + file.uid).then(() => {
-          that.$message.success(`${file.name.slice(file.name.indexOf('_') + 1)} 删除成功`)
-        })
-        const index = that.fileList.indexOf(file)
-        const newFileList = that.fileList.slice()
-        newFileList.splice(index, 1)
-        that.fileList = newFileList
-      }
-    },
-    handleBeforeUpload (file) {
-      // const isFile = file.type.slice(0, 15) === 'application/vnd'
-      // if (!isFile) {
-      // this.$message.error('Please upload the file in the correct format!')
-      // }
-      const isLt20M = file.size / 1024 / 1024 < 20
-      if (!isLt20M) {
-        this.$message.error('File must smaller than 20Mb!')
-      }
-      return isLt20M
-    },
-    customRequest ({data, file, filename, onError, onProgress, onSuccess}) {
-      const formData = new FormData()
-      if (data) {
-        Object.keys(data).map(key => {
-          formData.append(key, data[key])
-        })
-      }
-      formData.append('file', file)
-      formData.append('id', this.sealInfoData.sealId)
-      this.$upload('seal/uploadSealFile', formData, {
-        onUploadProgress: ({ total, loaded }) => {
-          onProgress({ percent: Math.round((loaded / total) * 100).toFixed(2) }, file)
-        }
-      }).then((response) => {
-        this.$message.success(`${file.name} 上传成功`)
-        this.fileList = [...this.fileList, response.data.data]
-        onSuccess(response.data.data, file)
-      }).catch(onError)
-      return {
-        abort () {
-          this.$message.warning('upload progress is aborted.')
-        }
       }
     },
     bell (username) {

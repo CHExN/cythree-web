@@ -110,7 +110,7 @@ import BilateralMeetingInfo from './BilateralMeetingInfo'
 import BilateralMeetingAdd from './BilateralMeetingAdd'
 import BilateralMeetingEdit from './BilateralMeetingEdit'
 import { mapState } from 'vuex'
-import { newSpread, fixedForm, floatForm, floatReset, saveExcel } from '@/utils/spreadJS'
+import { newSpread, floatForm, floatReset, saveExcel } from '@/utils/spreadJS'
 
 export default {
   name: 'BilateralMeeting',
@@ -138,6 +138,7 @@ export default {
       meetingTime: null,
       dataSource: [],
       selectedRowKeys: [],
+      selectedRows: [],
       loading: false,
       pagination: {
         pageSizeOptions: ['10', '20', '30', '40', '100'],
@@ -222,8 +223,9 @@ export default {
         this.$message.success('上会时间确认成功')
       })
     },
-    onSelectChange (selectedRowKeys) {
+    onSelectChange (selectedRowKeys, selectedRows) {
       this.selectedRowKeys = selectedRowKeys
+      this.selectedRows = selectedRows
     },
     isPass (is, record) {
       let data = {
@@ -300,11 +302,13 @@ export default {
           that.$delete('bilateralMeeting/' + that.selectedRowKeys.join(',')).then(() => {
             that.$message.success('删除成功')
             that.selectedRowKeys = []
+            that.selectedRows = []
             that.search()
           })
         },
         onCancel () {
           that.selectedRowKeys = []
+          that.selectedRows = []
         }
       })
     },
@@ -313,108 +317,29 @@ export default {
         this.$message.warning('请选择需要导出的记录')
         return
       }
-      this.$message.loading('正在生成', 0)
-      // let newData = []
-      this.selectedRows.forEach(item => {
-        let dateArr = `${item.date}`.split('-')
-        let exportData = {
-          num: item.num,
-          toDeptName: item.toDeptName,
-          storage: item.storage,
-          handle: item.handle,
-          year: `${dateArr[0]}年`,
-          month: `${dateArr[1]}月`,
-          day: `${dateArr[2]}日`,
-          typeApplicationToDept: this.dictData.typeApplication[item.typeApplication],
-          date: item.date,
-          supplier: this.dictData.supplier[item.supplier] === '无' ? '' : this.dictData.supplier[item.supplier]
-        }
-        this.$get('storeroomPut/storeroomByPutId', { putId: item.id }).then((r) => {
-          let everyEightBatches = {}
-          let everyEightBatchesTotalAmount = {}
-          r.data.forEach((storeroom, index) => { // 这里四舍五入后两位小数
-            // let storeroomMoney = this.$tools.accMultiply(storeroom.money, storeroom.amount).toFixed(2)
-            let storeroomMoney = Math.round(this.$tools.accMultiply(storeroom.money, storeroom.amount) * 100) / 100
-            let storeroomMoneyArr = `${this.$tools.addZero(storeroomMoney)}`.replace(/[.]/g, '').split('').reverse()
-            let storeroomExportItem = [
-              '', // 货号
-              storeroom.name,
-              storeroom.unit,
-              storeroom.amount,
-              storeroom.money,
-              storeroomMoneyArr[8], // 百万
-              storeroomMoneyArr[7], // 十万
-              storeroomMoneyArr[6], // 万
-              storeroomMoneyArr[5], // 千
-              storeroomMoneyArr[4], // 百
-              storeroomMoneyArr[3], // 十
-              storeroomMoneyArr[2], // 元
-              storeroomMoneyArr[1], // 角
-              storeroomMoneyArr[0], // 分
-              storeroom.remark
-            ]
-            let divideEight = Math.ceil((index + 1) / 8)
-            if (everyEightBatches[divideEight]) {
-              everyEightBatches[divideEight].push(storeroomExportItem)
-              everyEightBatchesTotalAmount[divideEight] = this.$tools.accAdd(everyEightBatchesTotalAmount[divideEight], storeroomMoney)
-              // console.log(everyEightBatchesTotalAmount)
-            } else {
-              everyEightBatches[divideEight] = [storeroomExportItem]
-              everyEightBatchesTotalAmount[divideEight] = 0
-              everyEightBatchesTotalAmount[divideEight] = this.$tools.accAdd(everyEightBatchesTotalAmount[divideEight], storeroomMoney)
-              // console.log(everyEightBatchesTotalAmount)
-            }
-          })
-          // console.log(everyEightBatchesTotalAmount)
-          Object.keys(everyEightBatches).forEach(key => {
-            let everyEightBatchesTotalAmountArr = `${this.$tools.addZero(everyEightBatchesTotalAmount[key])}`.replace(/[.]/g, '').split('').reverse()
-            everyEightBatchesTotalAmountArr.push('￥')
-            // newData.push({
-            //   ...exportData,
-            //   everyEightBatches: everyEightBatches[key],
-            //   f: everyEightBatchesTotalAmountArr[0], // 分
-            //   j: everyEightBatchesTotalAmountArr[1], // 角
-            //   y: everyEightBatchesTotalAmountArr[2], // 元
-            //   s: everyEightBatchesTotalAmountArr[3], // 十
-            //   b: everyEightBatchesTotalAmountArr[4], // 百
-            //   q: everyEightBatchesTotalAmountArr[5], // 千
-            //   w: everyEightBatchesTotalAmountArr[6], // 万
-            //   sw: everyEightBatchesTotalAmountArr[7], // 十万
-            //   bw: everyEightBatchesTotalAmountArr[8] // 百万
-            // })
-            exportData = {
-              ...exportData,
-              everyEightBatches: everyEightBatches[key],
-              f: everyEightBatchesTotalAmountArr[0], // 分
-              j: everyEightBatchesTotalAmountArr[1], // 角
-              y: everyEightBatchesTotalAmountArr[2], // 元
-              s: everyEightBatchesTotalAmountArr[3], // 十
-              b: everyEightBatchesTotalAmountArr[4], // 百
-              q: everyEightBatchesTotalAmountArr[5], // 千
-              w: everyEightBatchesTotalAmountArr[6], // 万
-              sw: everyEightBatchesTotalAmountArr[7], // 十万
-              bw: everyEightBatchesTotalAmountArr[8] // 百万
-            }
-            this.$message.destroy() // 等全部执行完后，再把message全局销毁
-            let spread = newSpread('StoreroomPut')
-            spread = fixedForm(spread, 'StoreroomPut', exportData)
-            spread = floatForm(spread, 'StoreroomPut', exportData.everyEightBatches)
-            let fileName = `入库单_${exportData.typeApplicationToDept}_${exportData.date}_${exportData.num}.xlsx`
-            saveExcel(spread, fileName)
-            floatReset(spread, 'StoreroomPut', exportData.everyEightBatches.length)
-          })
-        })
+      // this.$message.loading('正在生成', 0)
+      let newData = []
+      this.selectedRows.forEach((item, index) => {
+        newData.push([
+          `${index + 1}.`,
+          item.bilateralMeeting,
+          '',
+          item.applicant
+        ])
+        // this.$message.destroy() // 等全部执行完后，再把message全局销毁
+        // let spread = newSpread('StoreroomPut')
+        // spread = floatForm(spread, 'StoreroomPut', exportData.everyEightBatches)
+        // let fileName = `入库单_${exportData.typeApplicationToDept}_${exportData.date}_${exportData.num}.xlsx`
+        // saveExcel(spread, fileName)
+        // floatReset(spread, 'StoreroomPut', exportData.everyEightBatches.length)
       })
-      // this.$message.loading('正在生成', 3, () => { // 3s后关闭执行关闭回调函数
-      //   newData.forEach(exportData => {
-      //     let spread = newSpread('StoreroomPut')
-      //     spread = fixedForm(spread, 'StoreroomPut', exportData)
-      //     spread = floatForm(spread, 'StoreroomPut', exportData.everyEightBatches)
-      //     let fileName = `入库单_${exportData.typeApplicationToDept}_${exportData.date}_${exportData.num}.xlsx`
-      //     saveExcel(spread, fileName)
-      //     floatReset(spread, 'StoreroomPut', exportData.everyEightBatches.length)
-      //   })
-      // })
+      this.$message.loading('正在生成', 1, () => { // 3s后关闭执行关闭回调函数
+        let spread = newSpread('BilateralMeeting')
+        spread = floatForm(spread, 'BilateralMeeting', newData)
+        let fileName = `会议议题汇总单_${new Date().getFullYear()}-${new Date().getMonth() + 1}.xlsx`
+        saveExcel(spread, fileName)
+        floatReset(spread, 'BilateralMeeting', newData.length)
+      })
     },
     showModal (record) {
       this.meetingTimeById = record.id
@@ -438,6 +363,7 @@ export default {
     reset () {
       // 取消选中
       this.selectedRowKeys = []
+      this.selectedRows = []
       // 重置分页
       this.$refs.TableInfo.pagination.current = this.pagination.defaultCurrent
       if (this.paginationInfo) {

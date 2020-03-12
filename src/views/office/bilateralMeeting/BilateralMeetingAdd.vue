@@ -41,7 +41,6 @@
           :customRequest="customRequest"
           :beforeUpload="handleBeforeUpload"
         >
-          <!-- :disabled="fileList.length > 0" -->
           <p class="ant-upload-drag-icon">
             <a-icon type="inbox" />
           </p>

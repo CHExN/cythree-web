@@ -454,7 +454,7 @@ export default {
       }
       this.$get('application', {
         ...params,
-        typeApplication: 3 // 办公用品
+        typeApplication: '3' // 办公用品
       }).then((r) => {
         let data = r.data
         const pagination = { ...this.pagination }

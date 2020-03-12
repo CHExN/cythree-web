@@ -10,13 +10,14 @@
       <a-card :bordered="false" style="margin-bottom: 32px">
         <detail-list>
           <detail-list-item term="单号">{{outInfoData.num}}</detail-list-item>
-          <detail-list-item term="操作日期">{{outInfoData.date}}</detail-list-item>
+          <detail-list-item term="出库日期">{{outInfoData.date}}</detail-list-item>
           <detail-list-item term="总价">{{$tools.addZero($tools.toNumFormant(outInfoData.money))}}</detail-list-item>
           <detail-list-item term="物资类别">{{outInfoData.typeApplicationToDict}}</detail-list-item>
           <detail-list-item term="供应商">{{outInfoData.supplierToDict}}</detail-list-item>
           <detail-list-item term="出库部门">{{outInfoData.toDeptName}}</detail-list-item>
           <detail-list-item term="经手人">{{outInfoData.handle}}</detail-list-item>
           <detail-list-item term="保管员">{{outInfoData.storage}}</detail-list-item>
+          <detail-list-item term="创建时间">{{outInfoData.createTime}}</detail-list-item>
         </detail-list>
         <a-divider style="margin-bottom: 32px"/>
         <detail-list title="出库名单">

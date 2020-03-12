@@ -66,6 +66,38 @@
                   <a-input v-model="queryParams.remark"/>
                 </a-form-item>
               </a-col>
+              <a-col :md="12" :sm="24" >
+                <a-form-item
+                  label="合同开始"
+                  :labelCol="{span: 5}"
+                  :wrapperCol="{span: 18, offset: 1}">
+                  <range-date @change="handleContractPeriodFromChange" ref="contractPeriodFrom"></range-date>
+                </a-form-item>
+              </a-col>
+              <a-col :md="12" :sm="24" >
+                <a-form-item
+                  label="合同结束"
+                  :labelCol="{span: 5}"
+                  :wrapperCol="{span: 18, offset: 1}">
+                  <range-date @change="handleContractPeriodToChange" ref="contractPeriodTo"></range-date>
+                </a-form-item>
+              </a-col>
+              <a-col :md="12" :sm="24" >
+                <a-form-item
+                  label="协议开始"
+                  :labelCol="{span: 5}"
+                  :wrapperCol="{span: 18, offset: 1}">
+                  <range-date @change="handleJobAgreementFromChange" ref="jobAgreementFrom"></range-date>
+                </a-form-item>
+              </a-col>
+              <a-col :md="12" :sm="24" >
+                <a-form-item
+                  label="协议结束"
+                  :labelCol="{span: 5}"
+                  :wrapperCol="{span: 18, offset: 1}">
+                  <range-date @change="handleJobAgreementToChange" ref="jobAgreementTo"></range-date>
+                </a-form-item>
+              </a-col>
             </template>
           </div>
           <span style="float: right; margin: 3px auto 1em;">
@@ -131,13 +163,14 @@
   </a-card>
 </template>
 <script>
+import RangeDate from '@/components/datetime/RangeDate'
 import ContractInsideInfo from './ContractInsideInfo'
 import ContractInsideAdd from './ContractInsideAdd'
 import ContractInsideEdit from './ContractInsideEdit'
 
 export default {
   name: 'ContractInside',
-  components: {ContractInsideInfo, ContractInsideAdd, ContractInsideEdit},
+  components: {RangeDate, ContractInsideInfo, ContractInsideAdd, ContractInsideEdit},
   data () {
     return {
       advanced: false,
@@ -223,6 +256,14 @@ export default {
         this.queryParams.badNum = ''
         this.queryParams.remarkRenew = ''
         this.queryParams.remark = ''
+        this.queryParams.contractPeriodFromFrom = ''
+        this.queryParams.contractPeriodFromTo = ''
+        this.queryParams.contractPeriodToFrom = ''
+        this.queryParams.contractPeriodToTo = ''
+        this.queryParams.jobAgreementFromFrom = ''
+        this.queryParams.jobAgreementFromTo = ''
+        this.queryParams.jobAgreementToFrom = ''
+        this.queryParams.jobAgreementToTo = ''
       }
     },
     view (record) {
@@ -257,6 +298,30 @@ export default {
     },
     handleContractInsideInfoClose () {
       this.contractInsideInfo.visiable = false
+    },
+    handleContractPeriodFromChange (value) {
+      if (value) {
+        this.queryParams.contractPeriodFromFrom = value[0]
+        this.queryParams.contractPeriodFromTo = value[1]
+      }
+    },
+    handleContractPeriodToChange (value) {
+      if (value) {
+        this.queryParams.contractPeriodToFrom = value[0]
+        this.queryParams.contractPeriodToTo = value[1]
+      }
+    },
+    handleJobAgreementFromChange (value) {
+      if (value) {
+        this.queryParams.jobAgreementFromFrom = value[0]
+        this.queryParams.jobAgreementFromTo = value[1]
+      }
+    },
+    handleJobAgreementToChange (value) {
+      if (value) {
+        this.queryParams.jobAgreementToFrom = value[0]
+        this.queryParams.jobAgreementToTo = value[1]
+      }
     },
     batchDelete () {
       if (!this.selectedRowKeys.length) {
@@ -332,6 +397,13 @@ export default {
       this.sortedInfo = null
       // 重置查询参数
       this.queryParams = {}
+      if (this.advanced) {
+        // 清空时间选择
+        this.$refs.contractPeriodFrom.reset()
+        this.$refs.contractPeriodTo.reset()
+        this.$refs.jobAgreementFrom.reset()
+        this.$refs.jobAgreementTo.reset()
+      }
       this.fetch()
     },
     handleTableChange (pagination, filters, sorter) {

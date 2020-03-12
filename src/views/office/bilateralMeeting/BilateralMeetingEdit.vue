@@ -93,6 +93,7 @@ export default {
   methods: {
     reset () {
       this.loading = false
+      this.fileList = []
       // 清空表单
       this.form.resetFields()
     },

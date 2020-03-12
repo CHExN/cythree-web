@@ -17,9 +17,9 @@
           </a-form-item>
         </a-col>
         <a-col :md="12" :sm="24">
-          <a-form-item label='日期' v-bind="formItemLayout">
-            <a-date-picker placeholder='日期' autocomplete="off" format='YYYY-MM-DD' style="width: 100%;"
-              v-decorator="['date',{rules: [{ required: true, message: '请选择录入日期'}]}]"/>
+          <a-form-item label='出库日期' v-bind="formItemLayout">
+            <a-date-picker placeholder='出库日期' autocomplete="off" format='YYYY-MM-DD' style="width: 100%;"
+              v-decorator="['date',{rules: [{ required: true, message: '请选择出库日期'}]}]"/>
           </a-form-item>
         </a-col>
         <a-col :md="12" :sm="24">

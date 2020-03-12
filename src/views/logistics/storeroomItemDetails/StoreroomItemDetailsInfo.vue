@@ -155,8 +155,12 @@ export default {
           let quantityOut = 0
           let amountOut = 0
           r.data.forEach((element, index) => {
-            // 判断月份如果变化了，就加一条‘本月合计’行
-            if (this.dataSource[0].date.split('-')[1] !== element.date.split('-')[1]) {
+            // 被比较的月份
+            let compareMonth = index === 0 ? this.dataSource[0].date.split('-')[1] : r.data[index - 1].date.split('-')[1]
+            // 循环的月份
+            let elementMonth = element.date.split('-')[1]
+            // 判断月份，如果变化了，就加一条‘本月合计’行
+            if (compareMonth !== elementMonth) {
               this.dataSource.push({
                 date: null,
                 info: '本月合计',
@@ -175,11 +179,11 @@ export default {
               amountOut = 0
             }
             // 计算结存的
-            quantity = quantity - element.amount
-            amount = amount - this.$tools.accMultiply(element.amount, element.money)
+            quantity = this.$tools.accSubtract(quantity, element.amount)
+            amount = this.$tools.accSubtract(amount, this.$tools.accMultiply(element.amount, element.money))
             // 计算发出多少
-            quantityOut = quantityOut + element.amount
-            amountOut = amountOut + this.$tools.accMultiply(element.amount, element.money)
+            quantityOut = this.$tools.accAdd(quantityOut, element.amount)
+            amountOut = this.$tools.accAdd(amountOut, this.$tools.accMultiply(element.amount, element.money))
             // 添加出库到某某部门信息
             this.dataSource.push({
               date: element.date,

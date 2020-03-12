@@ -260,9 +260,10 @@ export default {
         this.$refs[`popconfirm${record.id}`].visible = false
         return
       }
-      let now = new Date()
-      let is = false
-      is = record.createTime.substr(0, 7) === moment(`${now.getFullYear()}-${now.getMonth() + 1}`).format('YYYY-MM')
+      // let now = new Date()
+      // let is = false
+      // is = record.createTime.substr(0, 7) === moment(`${now.getFullYear()}-${now.getMonth() + 1}`).format('YYYY-MM')
+      let is = moment().isBefore(moment(record.createTime).add(30, 'days'))
       if (is) {
         this.edit(record)
       } else {

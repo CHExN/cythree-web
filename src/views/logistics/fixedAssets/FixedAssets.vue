@@ -469,7 +469,7 @@ export default {
       }
       this.$get('application', {
         ...params,
-        typeApplication: 5 // 固定资产
+        typeApplication: '5' // 固定资产
       }).then((r) => {
         let data = r.data
         const pagination = { ...this.pagination }
