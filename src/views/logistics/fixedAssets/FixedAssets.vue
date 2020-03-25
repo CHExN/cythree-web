@@ -74,8 +74,6 @@
             <a-icon v-hasPermission="'fixedAssets:update'" v-if="record.process===0 && record.review.split(',')[record.step-1]===user.username"
               type="check-circle" theme="twoTone" twoToneColor="#9451ff" title="确认"></a-icon>
           </a-popconfirm>
-          <a-icon v-hasPermission="'storeroomPut:add'" v-if="record.process===1 && user.username!=='wxclkg' && user.username!=='lbbjkg'"
-            type="database" theme="twoTone" twoToneColor="#01c9c4" @click="storage(record)" title="入库"></a-icon>
         </template>
       </a-table>
     </div>
@@ -98,13 +96,6 @@
       @close="handleFixedAssetsEditClose"
       @success="handleFixedAssetsEditSuccess">
     </fixed-assets-edit>
-    <!-- 入库 -->
-    <put-add
-      ref="putAdd"
-      :putAddVisiable="putAdd.visiable"
-      @close="handlePutAddClose"
-      @success="handlePutAddSuccess">
-    </put-add>
   </a-card>
 </template>
 <script>
@@ -112,13 +103,12 @@ import RangeDate from '@/components/datetime/RangeDate'
 import FixedAssetsInfo from './FixedAssetsInfo'
 import FixedAssetsAdd from './FixedAssetsAdd'
 import FixedAssetsEdit from './FixedAssetsEdit'
-import PutAdd from '../storeroomPut/StoreroomPutAdd'
 import { mapState } from 'vuex'
 import { newSpread, fixedForm, floatForm, floatReset, saveExcel } from '@/utils/spreadJS'
 
 export default {
   name: 'FixedAssets',
-  components: { RangeDate, FixedAssetsInfo, FixedAssetsAdd, FixedAssetsEdit, PutAdd },
+  components: { RangeDate, FixedAssetsInfo, FixedAssetsAdd, FixedAssetsEdit },
 
   data () {
     return {
@@ -133,9 +123,6 @@ export default {
       fixedAssetsEdit: {
         visiable: false
       },
-      putAdd: {
-        visiable: false
-      },
       queryParams: {
         createTimeFrom: '',
         createTimeTo: ''
@@ -146,7 +133,6 @@ export default {
       dataSource: [],
       selectedRowKeys: [],
       selectedRows: [],
-      putingData: {},
       loading: false,
       pagination: {
         pageSizeOptions: ['10', '20', '30', '40', '100'],
@@ -185,8 +171,6 @@ export default {
         dataIndex: 'process',
         customRender: (text, row, index) => {
           switch (text) {
-            case 2:
-              return <a-tag color="green">已入库</a-tag>
             case 1:
               return <a-tag color="cyan">已通过</a-tag>
             case 0:
@@ -200,8 +184,7 @@ export default {
         filters: [
           { text: '未通过', value: '-1' },
           { text: '待审核', value: '0' },
-          { text: '已通过', value: '1' },
-          { text: '已入库', value: '2' }
+          { text: '已通过', value: '1' }
         ],
         filterMultiple: false,
         filteredValue: filteredInfo.process || null
@@ -234,7 +217,8 @@ export default {
         createDate: record.createDate,
         typeApplication: record.typeApplication,
         process: 0,
-        username: record.username
+        username: record.username,
+        isFixedAssets: '1'
       }
       if (is) {
         if (record.review.split(',').length === record.step) { data.process = 1 } else { data.step = record.step + 1 }
@@ -275,36 +259,6 @@ export default {
       this.fixedAssetsEdit.visiable = false
       this.$message.success('修改固定资产申请成功')
       this.search()
-    },
-    storage (record) {
-      this.putingData = record
-      this.$get('application/applicationPlan', {
-        applicationId: this.putingData.id
-      }).then((r) => {
-        r.data.forEach(item => {
-          item.money = parseFloat(item.remark)
-        })
-        this.$refs.putAdd.setTableValues(record.typeApplication, r.data)
-      })
-      this.putAdd.visiable = true
-    },
-    handlePutAddClose () {
-      this.putAdd.visiable = false
-    },
-    handlePutAddSuccess () {
-      this.putAdd.visiable = false
-      this.$message.success('新增入库成功')
-      this.loading = true
-      this.$put('application', {
-        id: this.putingData.id,
-        createDate: this.putingData.createDate,
-        typeApplication: this.putingData.typeApplication,
-        username: this.putingData.username,
-        process: 2
-      }).then((r) => {
-        this.search()
-        this.putingData = {}
-      })
     },
     handleFixedAssetsInfoClose () {
       this.fixedAssetsInfo.visiable = false
@@ -347,7 +301,7 @@ export default {
         this.$message.warning('请选择需要导出的记录')
         return
       }
-      // this.$message.loading('正在生成', 0)
+      this.$message.loading('正在生成', 0)
       let newData = []
       let storeroomArr = {}
       this.selectedRows.forEach(item => {
@@ -374,29 +328,17 @@ export default {
             ])
           })
           storeroomArr[item.id] = arr
-          // 这里这段代码等项目上线体验后一段时间后解释掉，还有上面的message.loadoing
-          // if (this.selectedRows.length === Object.keys(storeroomArr).length) {
-          //   this.$message.destroy() // 等全部执行完后，再把message全局销毁
-          //   newData.forEach(item => {
-          //     let spread = newSpread('FixedAssets')
-          //     spread = fixedForm(spread, 'FixedAssets', item)
-          //     spread = floatForm(spread, 'FixedAssets', storeroomArr[`${item.id}`])
-          //     let fileName = `固定资产申请单_${item.deptName}_${item.handle}.xlsx`
-          //     saveExcel(spread, fileName)
-          //     floatReset(spread, 'FixedAssets', storeroomArr[`${item.id}`].length) // sheet.addRows有bug，用这个解决
-          //   })
-          // }
-        })
-      })
-      // 上面解释后 下面这些删掉
-      this.$message.loading('正在生成', 3, () => { // 3s后关闭执行关闭回调函数
-        newData.forEach(item => {
-          let spread = newSpread('FixedAssets')
-          spread = fixedForm(spread, 'FixedAssets', item)
-          spread = floatForm(spread, 'FixedAssets', storeroomArr[`${item.id}`])
-          let fileName = `固定资产申请单_${item.deptName}_${item.handle}.xlsx`
-          saveExcel(spread, fileName)
-          floatReset(spread, 'FixedAssets', storeroomArr[`${item.id}`].length) // sheet.addRows有bug，用这个解决
+          if (this.selectedRows.length === Object.keys(storeroomArr).length) {
+            this.$message.destroy() // 等全部执行完后，再把message全局销毁
+            newData.forEach(item => {
+              let spread = newSpread('FixedAssets')
+              spread = fixedForm(spread, 'FixedAssets', item)
+              spread = floatForm(spread, 'FixedAssets', storeroomArr[`${item.id}`])
+              let fileName = `固定资产申请单_${item.deptName}_${item.handle}.xlsx`
+              saveExcel(spread, fileName)
+              floatReset(spread, 'FixedAssets', storeroomArr[`${item.id}`].length) // sheet.addRows有bug，用这个解决
+            })
+          }
         })
       })
     },
@@ -434,7 +376,6 @@ export default {
         createTimeFrom: '',
         createTimeTo: ''
       }
-      this.putingData = {}
       // 清空时间选择
       this.$refs.createTime.reset()
       this.fetch()
@@ -469,7 +410,8 @@ export default {
       }
       this.$get('application', {
         ...params,
-        typeApplication: '5' // 固定资产
+        typeApplication: '5', // 固定资产
+        isFixedAssets: '1' // 是固定资产申请
       }).then((r) => {
         let data = r.data
         const pagination = { ...this.pagination }

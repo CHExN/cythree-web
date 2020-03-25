@@ -1,6 +1,6 @@
 <template>
   <a-drawer
-    title="选择车牌号"
+    title="选择车辆"
     width=500
     placement="right"
     @close="onClose"
@@ -50,6 +50,19 @@ export default {
         title: '车牌号',
         dataIndex: 'carNum',
         scopedSlots: { customRender: 'carNum' }
+      }, {
+        title: '状态',
+        dataIndex: 'status',
+        customRender: (text, row, index) => {
+          switch (text) {
+            case '1':
+              return <a-badge status="success" text="行驶中"/>
+            case '2':
+              return <a-badge status="default" text="停驶中"/>
+            default:
+              return text
+          }
+        }
       }, {
         title: '操作',
         dataIndex: 'district',

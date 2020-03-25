@@ -22,9 +22,7 @@
         <a-input
           placeholder='合同编号'
           autocomplete="off"
-          v-decorator="['num',
-            {rules: [{ required: true, message: '合同编号不能为空'}]}
-          ]"/>
+          v-decorator="['num']"/>
       </a-form-item>
       <a-form-item label='项目负责人' v-bind="formItemLayout">
         <a-input
@@ -189,13 +187,13 @@ export default {
       storeroomOutList: {
         visiable: false
       },
-      storeroomOutId: ''
+      storeroomOutId: null
     }
   },
   methods: {
     reset () {
       this.loading = false
-      this.storeroomOutId = ''
+      this.storeroomOutId = null
       // 清空表单
       this.form.resetFields()
     },

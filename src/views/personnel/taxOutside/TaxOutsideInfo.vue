@@ -165,31 +165,21 @@
               <span style="cursor: pointer;">{{taxOutsideInfoData.finalWageSum}}</span>
             </a-popover>
           </detail-list-item>
-          <!-- <detail-list-item term="本期收入">{{taxOutsideInfoData.currentIncome}}</detail-list-item>
-          <detail-list-item term="本期免税收入">{{taxOutsideInfoData.currentTaxFreeIncome}}</detail-list-item>
-          <detail-list-item term="基本养老保险费">{{taxOutsideInfoData.basicPensionIp}}</detail-list-item>
-          <detail-list-item term="基本医疗保险费">{{taxOutsideInfoData.basicMedicalIp}}</detail-list-item>
-          <detail-list-item term="失业保险费">{{taxOutsideInfoData.unemploymentIp}}</detail-list-item>
-          <detail-list-item term="住房公积金">{{taxOutsideInfoData.housingFund}}</detail-list-item>
-          <detail-list-item term="累计子女教育">{{taxOutsideInfoData.cumulativeChildE}}</detail-list-item>
-          <detail-list-item term="累计继续教育">{{taxOutsideInfoData.cumulativeContinuingE}}</detail-list-item>
-          <detail-list-item term="累计住房贷款利息">{{taxOutsideInfoData.cumulativeHomeLoanInterest}}</detail-list-item>
-          <detail-list-item term="累计住房租金">{{taxOutsideInfoData.cumulativeHousingRent}}</detail-list-item>
-          <detail-list-item term="累计赡养老人">{{taxOutsideInfoData.cumulativeElderlySupport}}</detail-list-item>
-          <detail-list-item term="企业(职业)年金">{{taxOutsideInfoData.corporateAnnuity}}</detail-list-item>
-          <detail-list-item term="商业健康保险">{{taxOutsideInfoData.commercialHealthInsurance}}</detail-list-item>
-          <detail-list-item term="税延养老保险">{{taxOutsideInfoData.taxExtensionPensionInsurance}}</detail-list-item>
-          <detail-list-item term="其他">{{taxOutsideInfoData.other}}</detail-list-item>
-          <detail-list-item term="准予扣除的捐赠额">{{taxOutsideInfoData.allowanceForDeduction}}</detail-list-item>
-          <detail-list-item term="减免税额">{{taxOutsideInfoData.taxDeduction}}</detail-list-item>
-          <detail-list-item term="应扣税额">{{taxOutsideInfoData.finalWage}}</detail-list-item> -->
+          <detail-list-item term="月缴税数">
+            <a-popover trigger="hover">
+              <template slot="content">
+                <p value>{{monthlyTaxesPaid.text}}</p>
+              </template>
+              <span style="cursor: pointer;">{{monthlyTaxesPaid.value}}</span>
+            </a-popover>
+          </detail-list-item>
           <detail-list-item term="备注">{{taxOutsideInfoData.remark}}</detail-list-item>
         </detail-list>
       </a-card>
   </a-modal>
 </template>
 <script>
-import DetailList from '../../../components/tool/DetailList'
+import DetailList from '@/components/tool/DetailList'
 
 const DetailListItem = DetailList.Item
 export default {
@@ -225,6 +215,10 @@ export default {
         allowanceForDeduction: [],
         taxDeduction: [],
         finalWage: []
+      },
+      monthlyTaxesPaid: {
+        value: 0,
+        text: ''
       }
     }
   },
@@ -265,6 +259,33 @@ export default {
   watch: {
     taxOutsideInfoVisiable () {
       if (this.taxOutsideInfoVisiable) {
+        // 扣税率, 速算扣除数
+        let deductionRate, quickCalculationDeductions
+        if (this.taxOutsideInfoData.finalWageSum <= 36000) {
+          deductionRate = 0.03
+          quickCalculationDeductions = 0
+        } else if (this.taxOutsideInfoData.finalWageSum <= 144000) {
+          deductionRate = 0.1
+          quickCalculationDeductions = 2520
+        } else if (this.taxOutsideInfoData.finalWageSum <= 300000) {
+          deductionRate = 0.2
+          quickCalculationDeductions = 16920
+        } else if (this.taxOutsideInfoData.finalWageSum <= 420000) {
+          deductionRate = 0.25
+          quickCalculationDeductions = 31920
+        } else if (this.taxOutsideInfoData.finalWageSum <= 660000) {
+          deductionRate = 0.3
+          quickCalculationDeductions = 52920
+        } else if (this.taxOutsideInfoData.finalWageSum <= 960000) {
+          deductionRate = 0.35
+          quickCalculationDeductions = 85920
+        } else {
+          deductionRate = 0.45
+          quickCalculationDeductions = 181920
+        }
+        // this.monthlyTaxesPaid.value = this.$tools.addZero(Math.round(this.taxOutsideInfoData.monthTaxPaid * 100) / 100)
+        this.monthlyTaxesPaid.value = this.$tools.addZero(this.taxOutsideInfoData.monthTaxPaid)
+        this.monthlyTaxesPaid.text = `${this.taxOutsideInfoData.finalWageSum} * ${deductionRate} - ${quickCalculationDeductions} - （以往月份的月缴税数） = ${this.taxOutsideInfoData.monthTaxPaid}`
         this.$get('taxOutside/oneInfo', {
           staffId: this.taxOutsideInfoData.staffId,
           year: this.taxOutsideInfoData.year,

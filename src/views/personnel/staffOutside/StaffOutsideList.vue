@@ -28,6 +28,19 @@
                 </a-form-item>
               </a-col>
               <a-col :md="24" >
+              <a-form-item
+                label="分队"
+                :labelCol="{span: 4}"
+                :wrapperCol="{span: 18, offset: 1}">
+                <a-select
+                  mode="multiple"
+                  :allowClear="true"
+                  @change="handleTeamChange">
+                  <a-select-option v-for="i in filteredTeamOptions" :key="i">{{ i }}</a-select-option>
+                </a-select>
+              </a-form-item>
+            </a-col>
+              <a-col :md="24" >
                 <a-form-item
                   label="岗位职务"
                   :labelCol="{span: 4}"
@@ -97,8 +110,12 @@ export default {
     temporary: {
       default: ''
     },
-    // 当有传入team值的时候，后台就会执行‘未绑定保险的人员列信息’，但如果没传值，或者传空，则会查询‘全部的人员列信息’
-    team: {
+    // 当有传入post值的时候，后台就会执行‘未绑定保险的人员列信息’，但如果没传值，或者传空，则会查询‘全部的人员列信息’
+    post: {
+      default: ''
+    },
+    // 当有传入clan值的时候，后台就会执行‘除保洁员外的人员列信息’，但如果没传值，或者传空，则会查询‘全部的人员列信息’
+    clan: {
       default: ''
     }
   },
@@ -106,10 +123,12 @@ export default {
     return {
       isLeave: '0',
       advanced: false,
+      teamData: [],
       technicalTypeData: [],
       dataSource: [],
       paginationInfo: null,
       queryParams: {
+        team: [],
         technicalType: []
       },
       pagination: {
@@ -124,6 +143,9 @@ export default {
     }
   },
   computed: {
+    filteredTeamOptions () {
+      return this.teamData.filter(o => !this.queryParams.team.includes(o))
+    },
     filteredTechnicalTypeOptions () {
       return this.technicalTypeData.filter(o => !this.queryParams.technicalType.includes(o))
     },
@@ -156,6 +178,7 @@ export default {
     toggleAdvanced () {
       this.advanced = !this.advanced
       if (!this.advanced) {
+        this.queryParams.team = []
         this.queryParams.technicalType = []
       }
     },
@@ -175,6 +198,7 @@ export default {
       this.paginationInfo = null
       // 重置查询参数
       this.queryParams = {
+        team: [],
         technicalType: []
       }
       this.isLeave = '0'
@@ -186,10 +210,17 @@ export default {
         ...this.queryParams
       })
     },
+    handleTeamChange (value) {
+      this.queryParams.team = value || ''
+    },
     handleTechnicalTypeChange (value) {
       this.queryParams.technicalType = value || ''
     },
     loadSelect () {
+      this.$get('staffOutside/getTeam', {
+      }).then((r) => {
+        this.teamData = r.data.filter(d => d)
+      })
       this.$get('staffOutside/getTechnicalType', {
       }).then((r) => {
         this.technicalTypeData = r.data
@@ -212,7 +243,8 @@ export default {
         ...params,
         isLeave: this.isLeave,
         temporary: this.temporary,
-        team: this.team
+        clan: this.clan,
+        post: this.post
       }).then((r) => {
         let data = r.data
         const pagination = { ...this.pagination }

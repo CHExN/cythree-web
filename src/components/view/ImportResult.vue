@@ -43,7 +43,7 @@
         </a-alert>
       </span>
     </div>
-    <a-tabs defaultActiveKey="1">
+    <a-tabs :defaultActiveKey="tabKey">
       <a-tab-pane tab="成功记录" key="1" v-if="importData.length">
         <a-table ref="successTable"
                  rowKey="id"
@@ -67,7 +67,7 @@
 <script>
 export default {
   props: {
-    wageImportResultVisible: {
+    importResultVisible: {
       required: true,
       default: false
     },
@@ -78,6 +78,9 @@ export default {
       required: true
     },
     times: {
+      required: true
+    },
+    successColumns: {
       required: true
     }
   },
@@ -94,6 +97,11 @@ export default {
     }
   },
   computed: {
+    tabKey () {
+      let key = '1'
+      if (this.importData.length === 0 && this.errors.length !== 0) key = '2'
+      return key
+    },
     errorsData () {
       let arr = []
       for (let i = 0; i < this.errors.length; i++) {
@@ -106,21 +114,6 @@ export default {
         }
       }
       return arr
-    },
-    successColumns () {
-      return [{
-        title: '姓名',
-        dataIndex: 'staffName'
-      }, {
-        title: '月份',
-        dataIndex: 'year',
-        customRender: (text, row, index) => {
-          return `${text}-${row.month}`
-        }
-      }, {
-        title: '插入日期',
-        dataIndex: 'createTime'
-      }]
     },
     errorColumns () {
       return [{
@@ -148,7 +141,7 @@ export default {
     },
     show: {
       get: function () {
-        return this.wageImportResultVisible
+        return this.importResultVisible
       },
       set: function () {
       }

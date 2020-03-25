@@ -251,17 +251,13 @@ export default {
         this.$message.warning('请选择需要导出的记录')
         return
       }
-      // this.$message.loading('正在生成', 0)
-      let newData = []
+      this.$message.loading('正在生成', 0)
+      let newDataList = []
       this.selectedRows.forEach(item => {
         this.$get('storeroomOut/storeroomByOutId', {
           outId: item.storeroomOutId
         }).then((r) => {
-          let assetList = ''
-          r.data.forEach(item1 => {
-            assetList = assetList + `${item1.name} ${item1.amount}${item1.unit} ${item1.money}\r`
-          })
-          newData.push({
+          let newData = {
             name: item.name,
             num: item.num,
             manager: item.manager,
@@ -278,28 +274,21 @@ export default {
             location: item.location,
             installCompleteDate: item.installCompleteDate,
             acceptanceDate: item.acceptanceDate,
-            acceptanceResult: item.acceptanceResult,
-            assetList: assetList
+            acceptanceResult: item.acceptanceResult
+          }
+          r.data.forEach((item1, index) => {
+            newData[`asset${index}`] = `${item1.name} ${item1.amount}${item1.unit} ${item1.money} ${item1.toDeptName}`
           })
-          // 这里这段代码等项目上线体验后一段时间后解释掉，还有上面的message.loadoing
-          // if (this.selectedRows.length === newData.length) {
-          //   this.$message.destroy() // 等全部执行完后，再把message全局销毁
-          //   newData.forEach(item => {
-          //     let spread = newSpread('FixedAssetsAcceptance')
-          //     spread = fixedForm(spread, 'FixedAssetsAcceptance', item)
-          //     let fileName = `固定资产验收单_${item.name}_${item.num}.xlsx`
-          //     saveExcel(spread, fileName)
-          //   })
-          // }
-        })
-      })
-      // 上面解释后 下面这些删掉
-      this.$message.loading('正在生成', 3, () => { // 3s后关闭执行关闭回调函数
-        newData.forEach(item => {
-          let spread = newSpread('FixedAssetsAcceptance')
-          spread = fixedForm(spread, 'FixedAssetsAcceptance', item)
-          let fileName = `固定资产验收单_${item.name}_${item.num}.xlsx`
-          saveExcel(spread, fileName)
+          newDataList.push(newData)
+          if (this.selectedRows.length === newDataList.length) {
+            this.$message.destroy() // 等全部执行完后，再把message全局销毁
+            newDataList.forEach(item => {
+              let spread = newSpread('FixedAssetsAcceptance')
+              spread = fixedForm(spread, 'FixedAssetsAcceptance', item)
+              let fileName = `固定资产验收单_${item.name}_${item.num}.xlsx`
+              saveExcel(spread, fileName)
+            })
+          }
         })
       })
     },

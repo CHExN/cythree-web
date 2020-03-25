@@ -18,13 +18,13 @@
           <a-radio-button value="1">非在职</a-radio-button>
         </a-radio-group>
       </a-form-item>
-      <a-form-item v-if="form.getFieldValue('isLeave')==='1'" label='非在职日期' v-bind="formItemLayout">
+      <a-form-item v-if="form.getFieldValue('isLeave')==='1'" label='减少日期' v-bind="formItemLayout">
         <a-date-picker
-          placeholder='[减少]日期'
+          placeholder='减少日期，【减少人员报表】就是根据此项进行查询'
           format='YYYY-MM-DD'
           style="width: 100%;"
           v-decorator="['leaveDate',{
-            rules: [{required: true, message: '[减少]日期不能为空'}]
+            rules: [{required: true, message: '减少日期不能为空'}]
           }]"
         />
       </a-form-item>
@@ -219,7 +219,7 @@
       </a-form-item>
       <a-form-item label='调入日期' v-bind="formItemLayout">
         <a-date-picker
-          placeholder='调入或报到日期'
+          placeholder='调入或报到日期，【增加人员报表】就是根据此项进行查询'
           format='YYYY-MM-DD'
           style="width: 100%;"
           v-decorator="['transferDate']"

@@ -150,26 +150,27 @@
       @close="handleTaxOutsideInfoClose">
     </tax-outside-info>
     <!-- 导入结果 -->
-    <tax-outside-import-result
+    <import-result
       @close="handleClose"
       :importData="importData"
       :errors="errors"
       :times="times"
-      :taxOutsideImportResultVisible="taxOutsideImportResultVisible">
-    </tax-outside-import-result>
+      :successColumns="successColumns"
+      :importResultVisible="importResultVisible">
+    </import-result>
   </a-card>
 </template>
 <script>
 import TaxOutsideAdd from './TaxOutsideAdd'
 import TaxOutsideEdit from './TaxOutsideEdit'
 import TaxOutsideInfo from './TaxOutsideInfo'
-import TaxOutsideImportResult from './TaxOutsideImportResult'
+import ImportResult from '@/components/view/ImportResult'
 import moment from 'moment'
 moment.locale('zh-cn')
 
 export default {
   name: 'TaxOutside',
-  components: { TaxOutsideAdd, TaxOutsideEdit, TaxOutsideInfo, TaxOutsideImportResult },
+  components: { TaxOutsideAdd, TaxOutsideEdit, TaxOutsideInfo, ImportResult },
   data () {
     return {
       nowMonth: moment(),
@@ -180,7 +181,8 @@ export default {
       importData: [],
       times: '',
       errors: [],
-      taxOutsideImportResultVisible: false,
+      successColumns: [],
+      importResultVisible: false,
       advanced: false,
       taxOutsideAdd: {
         visiable: false,
@@ -240,6 +242,13 @@ export default {
         title: '应扣税额',
         dataIndex: 'finalWageSum'
       }, {
+        title: '月缴税数',
+        dataIndex: 'id',
+        customRender: (text, row, index) => {
+          // return this.$tools.addZero(Math.round(row.monthTaxPaid * 100) / 100)
+          return this.$tools.addZero(row.monthTaxPaid)
+        }
+      }, {
         title: '月份',
         dataIndex: 'year',
         customRender: (text, row, index) => {
@@ -259,7 +268,7 @@ export default {
   },
   methods: {
     handleClose () {
-      this.taxOutsideImportResultVisible = false
+      this.importResultVisible = false
     },
     downloadTemplate () {
       this.$download('taxOutside/template', {}, '编外个税表_导入模板.xlsx')
@@ -289,7 +298,23 @@ export default {
         this.importData = data.data
         this.errors = data.error
         this.times = data.time / 1000
-        this.taxOutsideImportResultVisible = true
+        this.successColumns = [{
+          title: '姓名',
+          dataIndex: 'staffName'
+        }, {
+          title: '月份',
+          dataIndex: 'year',
+          customRender: (text, row, index) => {
+            return `${text}-${row.month}`
+          }
+        }, {
+          title: '备注',
+          dataIndex: 'remark'
+        }, {
+          title: '插入日期',
+          dataIndex: 'createTime'
+        }]
+        this.importResultVisible = true
       }).catch((r) => {
         this.file = ''
         this.$message.destroy()

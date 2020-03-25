@@ -220,6 +220,7 @@ export default {
               ...values,
               typeApplication: 5, // 固定资产
               deptId: this.user.deptId,
+              isFixedAssets: '1',
               planList: planList
             }).then((r) => {
               this.reset()

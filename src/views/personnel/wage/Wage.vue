@@ -82,6 +82,7 @@
               <a-upload class="upload-area" :fileList="fileList" :beforeUpload="beforeUpload">导入Excel</a-upload>
             </a-menu-item>
             <a-menu-item v-hasPermission="'wage:export'" key="export-data" @click="exportExcel">导出Excel</a-menu-item>
+            <a-menu-item v-hasPermission="'wageRemark:view'" key="wage-remark" @click="onWageRemark">工资备注</a-menu-item>
           </a-menu>
           <a-button>
             更多操作 <a-icon type="down" />
@@ -153,26 +154,33 @@
       @close="handleWageInfoClose">
     </wage-info>
     <!-- 导入结果 -->
-    <wage-import-result
+    <import-result
       @close="handleClose"
       :importData="importData"
       :errors="errors"
       :times="times"
-      :wageImportResultVisible="wageImportResultVisible">
-    </wage-import-result>
+      :successColumns="successColumns"
+      :importResultVisible="importResultVisible">
+    </import-result>
+    <!-- 工资备注管理 -->
+    <wage-remark
+      :wageRemarkVisiable="wageRemark.visiable"
+      @close="handleWageRemarkClose">
+    </wage-remark>
   </a-card>
 </template>
 <script>
 import WageAdd from './WageAdd'
 import WageEdit from './WageEdit'
 import WageInfo from './WageInfo'
-import WageImportResult from './WageImportResult'
+import ImportResult from '@/components/view/ImportResult'
+import WageRemark from '../wageRemark/WageRemark'
 import moment from 'moment'
 moment.locale('zh-cn')
 
 export default {
   name: 'Wage',
-  components: { WageAdd, WageEdit, WageInfo, WageImportResult },
+  components: { WageAdd, WageEdit, WageInfo, ImportResult, WageRemark },
   data () {
     return {
       // insOut: '0',
@@ -184,7 +192,8 @@ export default {
       importData: [],
       times: '',
       errors: [],
-      wageImportResultVisible: false,
+      successColumns: [],
+      importResultVisible: false,
       advanced: false,
       wageAdd: {
         visiable: false,
@@ -201,6 +210,9 @@ export default {
       dateData: {
         dateForm: {},
         dateTo: {}
+      },
+      wageRemark: {
+        visiable: false
       },
       postLevelData: [],
       queryParams: {
@@ -279,7 +291,7 @@ export default {
   },
   methods: {
     handleClose () {
-      this.wageImportResultVisible = false
+      this.importResultVisible = false
     },
     downloadTemplate () {
       this.$download('wage/template', {}, '工资表_导入模板.xlsx')
@@ -297,6 +309,7 @@ export default {
       this.modalVisible = false
       const formData = new FormData()
       formData.append('file', this.file)
+      formData.append('insideOrOutside', '0')
       formData.append('date', `${this.dateData.dateTo.year}-${this.dateData.dateTo.month}`)
       this.$message.loading('处理中', 0)
       this.$upload('wage/import', formData).then((r) => {
@@ -309,7 +322,20 @@ export default {
         this.importData = data.data
         this.errors = data.error
         this.times = data.time / 1000
-        this.wageImportResultVisible = true
+        this.successColumns = [{
+          title: '姓名',
+          dataIndex: 'staffName'
+        }, {
+          title: '月份',
+          dataIndex: 'year',
+          customRender: (text, row, index) => {
+            return `${text}-${row.month}`
+          }
+        }, {
+          title: '插入日期',
+          dataIndex: 'createTime'
+        }]
+        this.importResultVisible = true
       }).catch((r) => {
         this.file = ''
         this.$message.destroy()
@@ -333,7 +359,6 @@ export default {
       this.advanced = !this.advanced
       // 每次展开，把隐藏的内容清空
       if (!this.advanced) {
-        // this.queryParams.staffName = ''
         this.queryParams.staffIdCard = ''
         this.queryParams.postLevel = ''
       }
@@ -371,6 +396,12 @@ export default {
     },
     handlePostLevelChange (value) {
       this.queryParams.postLevel = value || ''
+    },
+    onWageRemark () {
+      this.wageRemark.visiable = true
+    },
+    handleWageRemarkClose () {
+      this.wageRemark.visiable = false
     },
     batchDelete () {
       if (!this.selectedRowKeys.length) {

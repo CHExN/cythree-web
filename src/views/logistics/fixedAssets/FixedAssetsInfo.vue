@@ -38,22 +38,6 @@
               </a-step-item-group>
             </a-step>
           </template>
-          <a-step title="待入库">
-            <a-step-item-group slot="description">
-              <a-step-item
-                v-if="fixedAssetsInfoData.process===1"
-                title="催一下"
-                icon="bell"
-                v-on:click.native="bell('logistics')"
-              />
-              <a-step-item
-                v-else-if="fixedAssetsInfoData.process===2"
-                title="已入库"
-                icon="check-circle"
-                style="cursor: default;"
-              />
-            </a-step-item-group>
-          </a-step>
           <a-step title="完成"></a-step>
         </a-steps>
         <a-divider style="margin-bottom: 32px"/>
@@ -120,7 +104,7 @@
   </a-modal>
 </template>
 <script>
-import DetailList from '../../../components/tool/DetailList'
+import DetailList from '@/components/tool/DetailList'
 import AStepItem from '../../../components/tool/AStepItem'
 import { mapState } from 'vuex'
 
@@ -184,7 +168,7 @@ export default {
     processEnglishToChinese (index) {
       switch (index) {
         case 0:
-          return '后勤'
+          return '管理部门'
         case 1:
           return '财务'
         case 2:

@@ -116,8 +116,8 @@ export default {
       carList: {
         visiable: false
       },
-      carId: '',
-      id: ''
+      carId: null,
+      id: null
     }
   },
   methods: {

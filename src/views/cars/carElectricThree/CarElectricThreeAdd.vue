@@ -13,13 +13,15 @@
         <a-input
           placeholder='车辆类型'
           autocomplete="off"
-          autoFocus
-          v-decorator="['carType']"/>
+          v-decorator="['carType',
+          {initialValue: '电动三轮车'}
+        ]"/>
       </a-form-item>
       <a-form-item label='车辆品牌' v-bind="formItemLayout">
         <a-input
           placeholder='车辆品牌'
           autocomplete="off"
+          autoFocus
           v-decorator="['carBrands']"/>
       </a-form-item>
       <a-form-item label='钢架号' v-bind="formItemLayout">
@@ -42,7 +44,25 @@
             {rules: [{ required: true, message: '车牌号不能为空'}]}
           ]"/>
       </a-form-item>
+      <a-form-item label='编制类别' v-bind="formItemLayout">
+        <a-radio-group @change="onRadioChange" v-decorator="['insideOrOutside',
+          {initialValue: '1', rules: [{ required: true, message: '请选择编制类别' }]}
+        ]">
+          <a-radio-button value="0">编内</a-radio-button>
+          <a-radio-button value="1">编外</a-radio-button>
+        </a-radio-group>
+      </a-form-item>
       <a-form-item label='使用人' v-bind="formItemLayout">
+        <a-input
+          @click="selectName"
+          readOnly
+          placeholder='使用人'
+          autocomplete="off"
+          v-decorator="['user',
+            {rules: [{ required: true, message: '请选择使用人'}]}
+          ]"/>
+      </a-form-item>
+      <!-- <a-form-item label='使用人' v-bind="formItemLayout">
         <a-input
           placeholder='使用人'
           autocomplete="off"
@@ -57,7 +77,7 @@
           v-decorator="['useDeptName',
             {rules: [{ required: true, message: '使用部门不能为空'}]}
           ]"/>
-      </a-form-item>
+      </a-form-item> -->
       <a-form-item label='车辆配发日期' v-bind="formItemLayout">
         <a-date-picker
           placeholder='车辆日期'
@@ -121,15 +141,30 @@
       </a-popconfirm>
       <a-button @click="handleSubmit" type="primary" :loading="loading">提交</a-button>
     </div>
+    <staff-inside-list
+      :staffInsideListVisiable="staffInsideList.visiable"
+      @change="handleStaffInsideListChange"
+      @close="handleStaffInsideListClose"
+    >
+    </staff-inside-list>
+    <staff-outside-list
+      :staffOutsideListVisiable="staffOutsideList.visiable"
+      @change="handleStaffOutsideListChange"
+      @close="handleStaffOutsideListClose"
+    >
+    </staff-outside-list>
   </a-drawer>
 </template>
 <script>
+import StaffInsideList from '../../personnel/staffInside/StaffInsideList'
+import StaffOutsideList from '../../personnel/staffOutside/StaffOutsideList'
 const formItemLayout = {
   labelCol: { span: 4 },
   wrapperCol: { span: 17 }
 }
 export default {
   name: 'CarElectricThreeAdd',
+  components: { StaffInsideList, StaffOutsideList },
   props: {
     carElectricThreeAddVisiable: {
       default: false
@@ -139,18 +174,58 @@ export default {
     return {
       loading: false,
       formItemLayout,
-      form: this.$form.createForm(this)
+      form: this.$form.createForm(this),
+      staffInsideList: {
+        visiable: false
+      },
+      staffOutsideList: {
+        visiable: false
+      },
+      idNum: null
     }
   },
   methods: {
     reset () {
       this.loading = false
+      this.idNum = null
       // 清空表单
       this.form.resetFields()
     },
     onClose () {
       this.reset()
       this.$emit('close')
+    },
+    onRadioChange (e) {
+      // 切换radio时 重置选择人员
+      this.form.getFieldDecorator('user')
+      this.form.setFieldsValue({ user: '' })
+      this.idNum = null
+    },
+    selectName () {
+      let insideOrOutside = this.form.getFieldValue('insideOrOutside')
+      if (insideOrOutside === '0') {
+        this.staffInsideList.visiable = true
+      } else if (insideOrOutside === '1') {
+        this.staffOutsideList.visiable = true
+      } else {
+        this.$message.warning('请先选择编制类别')
+      }
+    },
+    handleStaffInsideListChange (staffName, staffId, idNum) {
+      this.form.getFieldDecorator('user')
+      this.form.setFieldsValue({ user: staffName })
+      this.idNum = idNum
+    },
+    handleStaffInsideListClose () {
+      this.staffInsideList.visiable = false
+    },
+    handleStaffOutsideListChange (staffName, staffId, idNum) {
+      this.form.getFieldDecorator('user')
+      this.form.setFieldsValue({ user: staffName })
+      this.idNum = idNum
+    },
+    handleStaffOutsideListClose () {
+      this.staffOutsideList.visiable = false
     },
     handleSubmit () {
       this.form.validateFields((err, values) => {
@@ -162,6 +237,7 @@ export default {
           this.loading = true
           this.$post('carElectric', {
             ...values,
+            idNum: this.idNum,
             ifThree: 1
           }).then((r) => {
             this.reset()

@@ -137,7 +137,6 @@
           </a-popconfirm>
           &nbsp;
           <a-icon v-hasPermission="'storeroomPut:view'" type="eye" theme="twoTone" twoToneColor="#42b983" @click="view(record)" title="查看"></a-icon>
-          <a-badge v-hasNoPermission="'storeroomPut:update'" status="warning" text="无权限"></a-badge>
         </template>
       </a-table>
     </div>
@@ -511,8 +510,8 @@ export default {
           let everyEightBatches = {}
           let everyEightBatchesTotalAmount = {}
           r.data.forEach((storeroom, index) => { // 这里四舍五入后两位小数
-            // let storeroomMoney = this.$tools.accMultiply(storeroom.money, storeroom.amount).toFixed(2)
-            let storeroomMoney = Math.round(this.$tools.accMultiply(storeroom.money, storeroom.amount) * 100) / 100
+            // let storeroomMoney = Math.round(this.$tools.accMultiply(storeroom.money, storeroom.amount) * 100) / 100
+            let storeroomMoney = this.$tools.rounding(this.$tools.accMultiply(storeroom.money, storeroom.amount), 2)
             let storeroomMoneyArr = `${this.$tools.addZero(storeroomMoney)}`.replace(/[.]/g, '').split('').reverse()
             let storeroomExportItem = [
               '', // 货号

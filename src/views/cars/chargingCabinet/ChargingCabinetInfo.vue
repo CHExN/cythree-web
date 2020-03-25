@@ -12,6 +12,7 @@
           <detail-list-item term="资产名称">{{chargingCabinetInfoData.assetName}}</detail-list-item>
           <detail-list-item term="品牌型号">{{chargingCabinetInfoData.brandModel}}</detail-list-item>
           <detail-list-item term="配发日期">{{chargingCabinetInfoData.allotmentDate}}</detail-list-item>
+          <detail-list-item term="身份证号">{{chargingCabinetInfoData.idNum}}</detail-list-item>
           <detail-list-item term="责任人">{{chargingCabinetInfoData.user}}</detail-list-item>
           <detail-list-item term="使用部门">{{chargingCabinetInfoData.useDeptName}}</detail-list-item>
           <detail-list-item term="充电端口数">{{chargingCabinetInfoData.chargingSectionsNumber}}</detail-list-item>
@@ -23,7 +24,7 @@
   </a-modal>
 </template>
 <script>
-import DetailList from '../../../components/tool/DetailList'
+import DetailList from '@/components/tool/DetailList'
 
 const DetailListItem = DetailList.Item
 export default {

@@ -1,12 +1,12 @@
 <template>
   <a-drawer
-    title="新增职工慰问"
+    title="修改职工慰问"
     :maskClosable="false"
     width=650
     placement="right"
     :closable="false"
     @close="onClose"
-    :visible="condolencesAddVisiable"
+    :visible="condolencesEditVisiable"
     style="height: calc(100% - 55px);overflow: auto;padding-bottom: 53px;">
     <a-form :form="form">
       <a-form-item label='姓名' v-bind="formItemLayout">
@@ -80,9 +80,9 @@ const formItemLayout = {
 }
 
 export default {
-  name: 'CondolencesAdd',
+  name: 'CondolencesEdit',
   props: {
-    condolencesAddVisiable: {
+    condolencesEditVisiable: {
       default: false
     }
   },
@@ -90,24 +90,36 @@ export default {
     return {
       loading: false,
       formItemLayout,
-      form: this.$form.createForm(this)
+      form: this.$form.createForm(this),
+      id: null
     }
   },
   methods: {
     reset () {
       this.loading = false
+      this.id = null
       this.form.resetFields()
     },
     onClose () {
       this.reset()
       this.$emit('close')
     },
+    setFormValues ({...condolences}) {
+      this.id = condolences.id
+      let obj = {}
+      Object.keys(condolences).forEach((key) => {
+        this.form.getFieldDecorator(key)
+        obj[key] = condolences[key]
+      })
+      this.form.setFieldsValue(obj)
+    },
     handleSubmit () {
       this.form.validateFields((err, values) => {
         if (!err) {
           this.loading = true
-          this.$post('condolences', {
-            ...values
+          this.$put('condolences', {
+            ...values,
+            id: this.id
           }).then((r) => {
             this.reset()
             this.$emit('success')

@@ -201,7 +201,17 @@ const rowColData = {
     installCompleteDate: {row: 21, col: 2},
     acceptanceDate: {row: 21, col: 4},
     acceptanceResult: {row: 22, col: 2},
-    assetList: {row: 6, col: 1}
+    asset0: {row: 6, col: 1},
+    asset1: {row: 7, col: 1},
+    asset2: {row: 8, col: 1},
+    asset3: {row: 9, col: 1},
+    asset4: {row: 10, col: 1},
+    asset5: {row: 11, col: 1},
+    asset6: {row: 12, col: 1},
+    asset7: {row: 13, col: 1},
+    asset8: {row: 14, col: 1},
+    asset9: {row: 15, col: 1},
+    asset10: {row: 16, col: 1}
   },
   InsideAnnualLeave: {
     title: {row: 0, col: 1}

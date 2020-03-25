@@ -101,7 +101,7 @@
     </div>
     <staff-outside-list
       :staffOutsideListVisiable="staffOutsideList.visiable"
-      team="123123"
+      post="123123"
       @change="handleStaffOutsideListChange"
       @close="handleStaffOutsideListClose"
     >

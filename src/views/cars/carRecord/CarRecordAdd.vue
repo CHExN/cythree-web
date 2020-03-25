@@ -123,7 +123,7 @@ export default {
       carList: {
         visiable: false
       },
-      carId: ''
+      carId: null
     }
   },
   methods: {
@@ -154,7 +154,7 @@ export default {
           this.loading = true
           this.$post('carRecord', {
             ...values,
-            'date': date ? date.format('YYYY-MM-DD') : date,
+            date: date ? date.format('YYYY-MM-DD') : date,
             carId: this.carId
           }).then((r) => {
             this.reset()

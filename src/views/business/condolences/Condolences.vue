@@ -59,7 +59,8 @@
       <div class="operator">
         <a-button type="primary" ghost @click="add" v-hasPermission="'condolences:add'">新增</a-button>
         <a-button @click="batchDelete" v-hasPermission="'condolences:delete'">删除</a-button>
-        <a-button @click="exportCondolences" v-hasPermission="'fixedAssetsAcceptance:export'">导出管理单</a-button>
+        <a-button @click="exportCondolences" v-hasPermission="'condolences:export'">导出管理单</a-button>
+        <!-- fixedAssetsAcceptance:export -->
         <!-- <a-button @click="saveExcel">导出Excel</a-button> -->
         <!-- <a-button @click="importTemplate">导入模板</a-button> -->
         <!-- <a-button @click="setColor">设置颜色</a-button> -->
@@ -75,14 +76,6 @@
                :scroll="{ x: 900 }"
                rowKey="id"
                @change="handleTableChange">
-        <template slot="address" slot-scope="text">
-          <a-popover placement="topLeft">
-            <template slot="content">
-              <div>{{text}}</div>
-            </template>
-            <p style="width: 150px;margin-bottom: 0">{{text}}</p>
-          </a-popover>
-        </template>
         <template slot="text" slot-scope="text">
           <a-popover placement="topLeft">
             <template slot="content">
@@ -92,6 +85,10 @@
           </a-popover>
         </template>
         <template slot="operation" slot-scope="text, record">
+          <a-icon v-hasPermission="'condolences:update'" type="setting" theme="twoTone" twoToneColor="#4a9ff5" @click="edit(record)" title="修改"></a-icon>
+          &nbsp;
+          <a-icon v-hasPermission="'condolences:view'" type="eye" theme="twoTone" twoToneColor="#42b983" @click="view(record)" title="查看"></a-icon>
+          &nbsp;
           <a-popconfirm
             title="是否通过此申请 ?"
             @confirm="isPass(1,record)"
@@ -111,21 +108,35 @@
       @close="handleCondolencesAddClose"
       @success="handleCondolencesAddSuccess">
     </condolences-add>
+    <!-- 修改职工慰问 -->
+    <condolences-edit
+      ref="condolencesEdit"
+      :condolencesEditVisiable="condolencesEdit.visiable"
+      @close="handleCondolencesEditClose"
+      @success="handleCondolencesEditSuccess">
+    </condolences-edit>
+    <!-- 职工慰问信息查看 -->
+    <condolences-info
+      :condolencesInfoData="condolencesInfo.data"
+      :condolencesInfoVisiable="condolencesInfo.visiable"
+      @close="handleCondolencesInfoClose">
+    </condolences-info>
   </a-card>
 </template>
 <script>
 import CondolencesAdd from './CondolencesAdd'
+import CondolencesEdit from './CondolencesEdit'
+import CondolencesInfo from './CondolencesInfo'
 import { newSpread, fixedForm, saveExcel } from '@/utils/spreadJS'
 
 export default {
   name: 'Condolences',
-  components: { CondolencesAdd },
+  components: { CondolencesAdd, CondolencesEdit, CondolencesInfo },
 
   data () {
     return {
       excelIo: {},
       spread: {},
-      // data,
       spreadStyle: {
         width: '100%',
         height: '430px'
@@ -136,6 +147,9 @@ export default {
         data: {}
       },
       condolencesAdd: {
+        visiable: false
+      },
+      condolencesEdit: {
         visiable: false
       },
       queryParams: {},
@@ -195,19 +209,13 @@ export default {
         title: '电话',
         dataIndex: 'phone'
       }, {
-        title: '地址',
-        dataIndex: 'address',
-        scopedSlots: { customRender: 'address' },
-        width: 200
-      }, {
         title: '情况说明',
         dataIndex: 'text',
         scopedSlots: { customRender: 'text' },
-        width: 200
+        width: 150
       }, {
         title: '状态',
         dataIndex: 'status',
-        width: 150,
         customRender: (text, row, index) => {
           switch (text) {
             case '1':
@@ -233,7 +241,7 @@ export default {
         dataIndex: 'operation',
         scopedSlots: { customRender: 'operation' },
         fixed: 'right',
-        width: 100
+        width: 120
       }]
     }
   },
@@ -328,11 +336,6 @@ export default {
         username: record.username,
         status: is ? 2 : 3
       }
-      if (is) {
-        this.$message.success('通过')
-      } else {
-        this.$message.success('不通过')
-      }
       this.loading = true
       this.$put('condolences', {
         ...data
@@ -351,6 +354,25 @@ export default {
       this.condolencesAdd.visiable = false
       this.$message.success('新增职工慰问管理单成功')
       this.search()
+    },
+    edit (record) {
+      this.$refs.condolencesEdit.setFormValues(record)
+      this.condolencesEdit.visiable = true
+    },
+    handleCondolencesEditClose () {
+      this.condolencesEdit.visiable = false
+    },
+    handleCondolencesEditSuccess () {
+      this.condolencesEdit.visiable = false
+      this.$message.success('修改职工慰问管理单成功')
+      this.search()
+    },
+    view (record) {
+      this.condolencesInfo.data = record
+      this.condolencesInfo.visiable = true
+    },
+    handleCondolencesInfoClose () {
+      this.condolencesInfo.visiable = false
     },
     handleDeptChange (value) {
       this.queryParams.deptId = value || ''

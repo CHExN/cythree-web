@@ -78,7 +78,7 @@
   </a-modal>
 </template>
 <script>
-import DetailList from '../../../components/tool/DetailList'
+import DetailList from '@/components/tool/DetailList'
 
 const DetailListItem = DetailList.Item
 export default {

@@ -304,6 +304,8 @@ export default {
       if (!this.advanced) {
         this.queryParams.year = ''
         this.queryParams.month = ''
+        this.queryParams.createTimeFrom = ''
+        this.queryParams.createTimeTo = ''
       }
     },
     add () {

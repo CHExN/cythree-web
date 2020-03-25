@@ -369,19 +369,6 @@ export default {
           29: '维修分队'
         }
       }
-      // this.$get('dict/cy_storeroom_put_out', {
-      // }).then((r) => {
-      //   let dictList = {}
-      //   r.data.forEach((item) => {
-      //     let fieldName = this.$tools.toHump(item.fieldName.toLowerCase())
-      //     if (dictList[fieldName]) {
-      //       dictList[fieldName][item.keyy] = item.valuee
-      //     } else {
-      //       dictList[fieldName] = {[item.keyy]: item.valuee}
-      //     }
-      //   })
-      //   this.dictData = dictList
-      // })
     },
     fetch (params = {}) {
       this.loading = true

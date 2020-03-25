@@ -11,7 +11,7 @@
         <detail-list>
           <detail-list-item term="车牌号">{{carInfoData.carNum}}</detail-list-item>
           <detail-list-item term="车辆年龄">{{$tools.getAge(carInfoData.date)}}</detail-list-item>
-          <detail-list-item term="车牌颜色">{{carInfoData.color==='1' ? '黄' : '蓝' }}</detail-list-item>
+          <detail-list-item term="车牌颜色">{{getColor(carInfoData.color)}}</detail-list-item>
           <detail-list-item term="车辆品牌">{{carInfoData.carType}}</detail-list-item>
           <detail-list-item term="汽车排量">{{carInfoData.carDisplacement}}</detail-list-item>
           <detail-list-item term="车辆种类">{{carInfoData.carKind}}</detail-list-item>
@@ -21,13 +21,13 @@
           <detail-list-item term="车辆所属单位">{{carInfoData.carUnit}}</detail-list-item>
           <detail-list-item term="原始牌照">{{carInfoData.carNumOld}}</detail-list-item>
           <detail-list-item term="备注">{{carInfoData.remark}}</detail-list-item>
-          <detail-list-item term="车辆状态">{{carInfoData.status==='1' ? '行驶' : '停驶'}}</detail-list-item>
+          <detail-list-item term="车辆状态">{{getStatus(carInfoData.status)}}</detail-list-item>
         </detail-list>
       </a-card>
   </a-modal>
 </template>
 <script>
-import DetailList from '../../../components/tool/DetailList'
+import DetailList from '@/components/tool/DetailList'
 
 const DetailListItem = DetailList.Item
 export default {
@@ -46,6 +46,20 @@ export default {
     return {}
   },
   methods: {
+    getStatus (status) {
+      if (status === '1') {
+        return '行驶'
+      } else if (status === '2') {
+        return '停驶'
+      }
+    },
+    getColor (color) {
+      if (color === '1') {
+        return '黄'
+      } else if (color === '2') {
+        return '蓝'
+      }
+    },
     handleCancleClick () {
       this.$emit('close')
     // },

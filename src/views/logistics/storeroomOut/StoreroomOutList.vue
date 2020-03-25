@@ -1,6 +1,6 @@
 <template>
   <a-drawer
-    width=500
+    width=600
     placement="right"
     @close="onClose"
     :closable="false"
@@ -33,17 +33,15 @@
                :dataSource="dataSource"
                :pagination="pagination"
                :loading="loading"
+               :rowSelection="{selectedRowKeys: selectedRowKeys, onChange: onSelectChange}"
                :scroll="{ y: 765 }"
                rowKey="id"
                @change="handleTableChange">
-        <template slot="district" slot-scope="text, record">
-          <a-icon type="check-circle" theme="twoTone" twoToneColor="#9451ff" @click="determine(record)" title="确认"></a-icon>
-        </template>
       </a-table>
     </div>
     <div class="drawer-bootom-button">
       <a-button @click="onClose">取消</a-button>
-    </div>
+      <a-button @click="determine" type="primary">提交</a-button></div>
   </a-drawer>
 </template>
 <script>
@@ -60,6 +58,8 @@ export default {
       dataSource: [],
       paginationInfo: null,
       queryParams: {},
+      selectedRowKeys: [],
+      selectedRows: [],
       pagination: {
         size: 'small',
         pageSizeOptions: ['20', '40', '80', '160'],
@@ -82,19 +82,29 @@ export default {
         dataIndex: 'money',
         scopedSlots: { customRender: 'money' }
       }, {
-        title: '操作',
-        dataIndex: 'district',
-        scopedSlots: { customRender: 'district' }
+        title: '出库部门',
+        dataIndex: 'toDeptName',
+        scopedSlots: { customRender: 'toDeptName' }
       }]
     }
   },
   methods: {
-    determine (record) {
-      this.$emit('change', record.num, record.id)
+    determine () {
+      if (!this.selectedRowKeys.length) {
+        this.$message.warning('请选择需要绑定的记录')
+        return
+      }
+      this.$emit('change', this.selectedRows.map(i => i.num).join(), this.selectedRowKeys.join())
       this.onClose()
+    },
+    onSelectChange (selectedRowKeys, selectedRows) {
+      this.selectedRowKeys = selectedRowKeys
+      this.selectedRows = selectedRows
     },
     onClose () {
       this.$emit('close')
+      this.selectedRowKeys = []
+      this.selectedRows = []
       this.dataSource = []
     },
     search () {

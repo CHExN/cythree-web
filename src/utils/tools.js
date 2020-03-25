@@ -55,6 +55,20 @@ let tools = {
     return obj
   },
 
+  // 四舍五入
+  rounding (number, index) {
+    let numString = number.toString()
+    let numStringArr = numString.split('.')
+    if (numStringArr.length === 1) {
+      return Number(numString)
+    }
+    let numStringArrArr = numStringArr[1].split('')
+    if (numStringArrArr[index] && numStringArrArr[index] >= 5) {
+      numStringArrArr[index - 1] = (Number(numStringArrArr[index - 1]) + 1).toString()
+    }
+    return Number(`${numStringArr[0]}.${numStringArrArr.slice(0, index).join('')}`)
+  },
+
   // number数组之和
   sumArr (arr) {
     return arr.reduce(function (prev, cur) {

@@ -155,10 +155,10 @@ export default {
   watch: {
     supplierManageVisiable () {
       if (this.supplierManageVisiable) {
-        this.tableLoading = true
+        this.loading = true
         this.$get('supplier', {
         }).then((r) => {
-          this.tableLoading = false
+          this.loading = false
           this.dataSource = this.setTableValues(r.data.rows)
         })
       }

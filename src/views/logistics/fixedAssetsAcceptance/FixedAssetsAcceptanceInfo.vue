@@ -41,7 +41,7 @@
   </a-modal>
 </template>
 <script>
-import DetailList from '../../../components/tool/DetailList'
+import DetailList from '@/components/tool/DetailList'
 import AStepItem from '../../../components/tool/AStepItem'
 
 const DetailListItem = DetailList.Item
@@ -88,6 +88,12 @@ export default {
       }, {
         title: '收据',
         dataIndex: 'receipt'
+      }, {
+        title: '出库部门',
+        dataIndex: 'toDeptName'
+      }, {
+        title: '出库单号',
+        dataIndex: 'outNum'
       }]
     }
   },

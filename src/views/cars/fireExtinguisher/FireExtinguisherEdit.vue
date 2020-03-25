@@ -22,12 +22,20 @@
           autocomplete="off"
           v-decorator="['brandModel']"/>
       </a-form-item>
-      <a-form-item label='配发日期' v-bind="formItemLayout">
+      <a-form-item label='配发日期1' v-bind="formItemLayout">
         <a-date-picker
-          placeholder='配发日期'
+          placeholder='配发日期1'
           format='YYYY-MM-DD'
           style="width: 100%;"
-          v-decorator="['allotmentDate']"
+          v-decorator="['allotmentDate1']"
+        />
+      </a-form-item>
+      <a-form-item label='配发日期2' v-bind="formItemLayout">
+        <a-date-picker
+          placeholder='配发日期2'
+          format='YYYY-MM-DD'
+          style="width: 100%;"
+          v-decorator="['allotmentDate2']"
         />
       </a-form-item>
       <a-form-item label='责任人' v-bind="formItemLayout">
@@ -38,12 +46,20 @@
             {rules: [{ required: true, message: '责任人不能为空'}]}
           ]"/>
       </a-form-item>
-      <a-form-item label='检测日期' v-bind="formItemLayout">
+      <a-form-item label='检测日期1' v-bind="formItemLayout">
         <a-date-picker
-          placeholder='检测日期'
+          placeholder='检测日期1'
           format='YYYY-MM-DD'
           style="width: 100%;"
-          v-decorator="['testDate']"
+          v-decorator="['testDate1']"
+        />
+      </a-form-item>
+      <a-form-item label='检测日期2' v-bind="formItemLayout">
+        <a-date-picker
+          placeholder='检测日期2'
+          format='YYYY-MM-DD'
+          style="width: 100%;"
+          v-decorator="['testDate2']"
         />
       </a-form-item>
       <a-form-item label='选择公厕' v-bind="formItemLayout">
@@ -56,11 +72,18 @@
             {rules: [{ required: true, message: '请选择公厕'}]}
           ]"/>
       </a-form-item>
-      <a-form-item label='规格' v-bind="formItemLayout">
+      <a-form-item label='规格1' v-bind="formItemLayout">
         <a-input
-          placeholder='规格'
+          placeholder='规格1'
           autocomplete="off"
-          v-decorator="['specification']"
+          v-decorator="['specification1']"
+        />
+      </a-form-item>
+      <a-form-item label='规格2' v-bind="formItemLayout">
+        <a-input
+          placeholder='规格2'
+          autocomplete="off"
+          v-decorator="['specification2']"
         />
       </a-form-item>
       <a-form-item label='摆放地点' v-bind="formItemLayout">
@@ -141,7 +164,7 @@ export default {
     },
     setFormValues ({...fireExtinguisher}) {
       this.id = fireExtinguisher.id
-      let fields = ['allotmentDate', 'testDate']
+      let fields = ['allotmentDate1', 'allotmentDate2', 'testDate1', 'testDate2']
       let forbids = ['createTime', 'modifyTime']
       let obj = {}
       Object.keys(fireExtinguisher).forEach((key) => {
@@ -159,7 +182,7 @@ export default {
     handleSubmit () {
       this.form.validateFields((err, values) => {
         if (!err) {
-          let fields = ['allotmentDate', 'testDate']
+          let fields = ['allotmentDate1', 'allotmentDate2', 'testDate1', 'testDate2']
           fields.forEach((item) => {
             if (values[item]) values[item] = values[item].format('YYYY-MM-DD')
           })

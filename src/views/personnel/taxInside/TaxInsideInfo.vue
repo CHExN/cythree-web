@@ -173,31 +173,13 @@
               <span style="cursor: pointer;">{{monthlyTaxesPaid.value}}</span>
             </a-popover>
           </detail-list-item>
-          <!-- <detail-list-item term="本期收入">{{taxInsideInfoData.currentIncome}}</detail-list-item>
-          <detail-list-item term="本期免税收入">{{taxInsideInfoData.currentTaxFreeIncome}}</detail-list-item>
-          <detail-list-item term="基本养老保险费">{{taxInsideInfoData.basicPensionIp}}</detail-list-item>
-          <detail-list-item term="基本医疗保险费">{{taxInsideInfoData.basicMedicalIp}}</detail-list-item>
-          <detail-list-item term="失业保险费">{{taxInsideInfoData.unemploymentIp}}</detail-list-item>
-          <detail-list-item term="住房公积金">{{taxInsideInfoData.housingFund}}</detail-list-item>
-          <detail-list-item term="累计子女教育">{{taxInsideInfoData.cumulativeChildE}}</detail-list-item>
-          <detail-list-item term="累计继续教育">{{taxInsideInfoData.cumulativeContinuingE}}</detail-list-item>
-          <detail-list-item term="累计住房贷款利息">{{taxInsideInfoData.cumulativeHomeLoanInterest}}</detail-list-item>
-          <detail-list-item term="累计住房租金">{{taxInsideInfoData.cumulativeHousingRent}}</detail-list-item>
-          <detail-list-item term="累计赡养老人">{{taxInsideInfoData.cumulativeElderlySupport}}</detail-list-item>
-          <detail-list-item term="企业(职业)年金">{{taxInsideInfoData.corporateAnnuity}}</detail-list-item>
-          <detail-list-item term="商业健康保险">{{taxInsideInfoData.commercialHealthInsurance}}</detail-list-item>
-          <detail-list-item term="税延养老保险">{{taxInsideInfoData.taxExtensionPensionInsurance}}</detail-list-item>
-          <detail-list-item term="其他">{{taxInsideInfoData.other}}</detail-list-item>
-          <detail-list-item term="准予扣除的捐赠额">{{taxInsideInfoData.allowanceForDeduction}}</detail-list-item>
-          <detail-list-item term="减免税额">{{taxInsideInfoData.taxDeduction}}</detail-list-item>
-          <detail-list-item term="应扣税额">{{taxInsideInfoData.finalWage}}</detail-list-item> -->
           <detail-list-item term="备注">{{taxInsideInfoData.remark}}</detail-list-item>
         </detail-list>
       </a-card>
   </a-modal>
 </template>
 <script>
-import DetailList from '../../../components/tool/DetailList'
+import DetailList from '@/components/tool/DetailList'
 
 const DetailListItem = DetailList.Item
 export default {
@@ -277,10 +259,8 @@ export default {
   watch: {
     taxInsideInfoVisiable () {
       if (this.taxInsideInfoVisiable) {
-        // 扣税率
-        let deductionRate = 0
-        // 速算扣除数
-        let quickCalculationDeductions = 0
+        // 扣税率, 速算扣除数
+        let deductionRate, quickCalculationDeductions
         if (this.taxInsideInfoData.finalWageSum <= 36000) {
           deductionRate = 0.03
           quickCalculationDeductions = 0
@@ -303,8 +283,9 @@ export default {
           deductionRate = 0.45
           quickCalculationDeductions = 181920
         }
-        this.monthlyTaxesPaid.value = this.$tools.addZero(Math.round(this.$tools.accSubtract(this.$tools.accMultiply(this.taxInsideInfoData.finalWageSum, deductionRate), quickCalculationDeductions) * 100) / 100)
-        this.monthlyTaxesPaid.text = `${this.taxInsideInfoData.finalWageSum} * ${deductionRate} - ${quickCalculationDeductions} = ${this.$tools.accSubtract(this.$tools.accMultiply(this.taxInsideInfoData.finalWageSum, deductionRate), quickCalculationDeductions)}`
+        // this.monthlyTaxesPaid.value = this.$tools.addZero(Math.round(this.taxInsideInfoData.monthTaxPaid * 100) / 100)
+        this.monthlyTaxesPaid.value = this.$tools.addZero(this.taxInsideInfoData.monthTaxPaid)
+        this.monthlyTaxesPaid.text = `${this.taxInsideInfoData.finalWageSum} * ${deductionRate} - ${quickCalculationDeductions} - （以往月份的月缴税数） = ${this.taxInsideInfoData.monthTaxPaid}`
         this.$get('taxInside/oneInfo', {
           staffId: this.taxInsideInfoData.staffId,
           year: this.taxInsideInfoData.year,

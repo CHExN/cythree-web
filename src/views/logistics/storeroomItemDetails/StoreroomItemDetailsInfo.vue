@@ -41,7 +41,7 @@
   </a-modal>
 </template>
 <script>
-import DetailList from '../../../components/tool/DetailList'
+import DetailList from '@/components/tool/DetailList'
 import AStepItem from '../../../components/tool/AStepItem'
 
 const DetailListItem = DetailList.Item

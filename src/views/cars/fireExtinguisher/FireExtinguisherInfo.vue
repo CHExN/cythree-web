@@ -11,12 +11,15 @@
         <detail-list>
           <detail-list-item term="资产名称">{{fireExtinguisherInfoData.assetName}}</detail-list-item>
           <detail-list-item term="品牌型号">{{fireExtinguisherInfoData.brandModel}}</detail-list-item>
-          <detail-list-item term="配发日期">{{fireExtinguisherInfoData.allotmentDate}}</detail-list-item>
+          <detail-list-item term="配发日期1">{{fireExtinguisherInfoData.allotmentDate1}}</detail-list-item>
+          <detail-list-item term="配发日期2">{{fireExtinguisherInfoData.allotmentDate2}}</detail-list-item>
           <detail-list-item term="责任人">{{fireExtinguisherInfoData.user}}</detail-list-item>
-          <detail-list-item term="检测日期">{{fireExtinguisherInfoData.testDate}}</detail-list-item>
+          <detail-list-item term="检测日期1">{{fireExtinguisherInfoData.testDate1}}</detail-list-item>
+          <detail-list-item term="检测日期2">{{fireExtinguisherInfoData.testDate2}}</detail-list-item>
           <detail-list-item term="公厕编号">{{fireExtinguisherInfoData.wcNum}}</detail-list-item>
           <detail-list-item term="公厕名称">{{fireExtinguisherInfoData.wcName}}</detail-list-item>
-          <detail-list-item term="规格">{{fireExtinguisherInfoData.specification}}</detail-list-item>
+          <detail-list-item term="规格1">{{fireExtinguisherInfoData.specification1}}</detail-list-item>
+          <detail-list-item term="规格2">{{fireExtinguisherInfoData.specification2}}</detail-list-item>
           <detail-list-item term="摆放地点">{{fireExtinguisherInfoData.place}}</detail-list-item>
           <detail-list-item term="备注">{{fireExtinguisherInfoData.remark}}</detail-list-item>
         </detail-list>
@@ -24,7 +27,7 @@
   </a-modal>
 </template>
 <script>
-import DetailList from '../../../components/tool/DetailList'
+import DetailList from '@/components/tool/DetailList'
 
 const DetailListItem = DetailList.Item
 export default {

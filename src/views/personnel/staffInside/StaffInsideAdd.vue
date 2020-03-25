@@ -200,7 +200,7 @@
       </a-form-item>
       <a-form-item label='调入日期' v-bind="formItemLayout">
         <a-date-picker
-          placeholder='调入或报到日期'
+          placeholder='调入或报到日期，【增加人员报表】就是根据此项进行查询'
           format='YYYY-MM-DD'
           style="width: 100%;"
           v-decorator="['transferDate']"

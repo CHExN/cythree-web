@@ -142,7 +142,7 @@ export default {
       paginationInfo: null,
       dictData: {},
       pagination: {
-        pageSizeOptions: ['10', '20', '30', '40', '100'],
+        pageSizeOptions: ['10', '50', '100', '250', '500'],
         defaultCurrent: 1,
         defaultPageSize: 10,
         showQuickJumper: true,

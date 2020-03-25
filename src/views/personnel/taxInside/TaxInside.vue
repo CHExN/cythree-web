@@ -148,26 +148,27 @@
       @close="handleTaxInsideInfoClose">
     </tax-inside-info>
     <!-- 导入结果 -->
-    <tax-inside-import-result
+    <import-result
       @close="handleClose"
       :importData="importData"
       :errors="errors"
       :times="times"
-      :taxInsideImportResultVisible="taxInsideImportResultVisible">
-    </tax-inside-import-result>
+      :successColumns="successColumns"
+      :importResultVisible="importResultVisible">
+    </import-result>
   </a-card>
 </template>
 <script>
 import TaxInsideAdd from './TaxInsideAdd'
 import TaxInsideEdit from './TaxInsideEdit'
 import TaxInsideInfo from './TaxInsideInfo'
-import TaxInsideImportResult from './TaxInsideImportResult'
+import ImportResult from '@/components/view/ImportResult'
 import moment from 'moment'
 moment.locale('zh-cn')
 
 export default {
   name: 'TaxInside',
-  components: { TaxInsideAdd, TaxInsideEdit, TaxInsideInfo, TaxInsideImportResult },
+  components: { TaxInsideAdd, TaxInsideEdit, TaxInsideInfo, ImportResult },
   data () {
     return {
       nowMonth: moment(),
@@ -178,7 +179,8 @@ export default {
       importData: [],
       times: '',
       errors: [],
-      taxInsideImportResultVisible: false,
+      successColumns: [],
+      importResultVisible: false,
       advanced: false,
       taxInsideAdd: {
         visiable: false,
@@ -241,34 +243,8 @@ export default {
         title: '月缴税数',
         dataIndex: 'id',
         customRender: (text, row, index) => {
-          // 扣税率
-          let deductionRate = 0
-          // 速算扣除数
-          let quickCalculationDeductions = 0
-
-          if (row.finalWageSum <= 36000) {
-            deductionRate = 0.03
-            quickCalculationDeductions = 0
-          } else if (row.finalWageSum <= 144000) {
-            deductionRate = 0.1
-            quickCalculationDeductions = 2520
-          } else if (row.finalWageSum <= 300000) {
-            deductionRate = 0.2
-            quickCalculationDeductions = 16920
-          } else if (row.finalWageSum <= 420000) {
-            deductionRate = 0.25
-            quickCalculationDeductions = 31920
-          } else if (row.finalWageSum <= 660000) {
-            deductionRate = 0.3
-            quickCalculationDeductions = 52920
-          } else if (row.finalWageSum <= 960000) {
-            deductionRate = 0.35
-            quickCalculationDeductions = 85920
-          } else {
-            deductionRate = 0.45
-            quickCalculationDeductions = 181920
-          }
-          return this.$tools.addZero(Math.round(this.$tools.accSubtract(this.$tools.accMultiply(row.finalWageSum, deductionRate), quickCalculationDeductions) * 100) / 100)
+          // return this.$tools.addZero(Math.round(row.monthTaxPaid * 100) / 100)
+          return this.$tools.addZero(row.monthTaxPaid)
         }
       }, {
         title: '月份',
@@ -290,7 +266,7 @@ export default {
   },
   methods: {
     handleClose () {
-      this.taxInsideImportResultVisible = false
+      this.importResultVisible = false
     },
     downloadTemplate () {
       this.$download('taxInside/template', {}, '编内个税表_导入模板.xlsx')
@@ -320,7 +296,23 @@ export default {
         this.importData = data.data
         this.errors = data.error
         this.times = data.time / 1000
-        this.taxInsideImportResultVisible = true
+        this.successColumns = [{
+          title: '姓名',
+          dataIndex: 'staffName'
+        }, {
+          title: '月份',
+          dataIndex: 'year',
+          customRender: (text, row, index) => {
+            return `${text}-${row.month}`
+          }
+        }, {
+          title: '备注',
+          dataIndex: 'remark'
+        }, {
+          title: '插入日期',
+          dataIndex: 'createTime'
+        }]
+        this.importResultVisible = true
       }).catch((r) => {
         this.file = ''
         this.$message.destroy()

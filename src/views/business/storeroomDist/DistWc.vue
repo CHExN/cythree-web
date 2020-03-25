@@ -207,7 +207,8 @@ export default {
         // this.storeroom.amountDist -= this.rowIdCounts[record.wcId]
         let amountDist = this.storeroom.amountDist - this.rowIdCounts[record.wcId]
         // 四舍五入，保留小数点后两位
-        this.storeroom.amountDist = Math.round(amountDist * 100) / 100
+        // this.storeroom.amountDist = Math.round(amountDist * 100) / 100
+        this.storeroom.amountDist = this.$tools.rounding(amountDist, 2)
       } else {
         // 加的时候就不用四舍五入了
         this.storeroom.amountDist += this.rowIdCounts[record.wcId]
@@ -221,7 +222,8 @@ export default {
           // this.storeroom.amountDist -= this.rowIdCounts[record.wcId]
           let amountDist = this.storeroom.amountDist - this.rowIdCounts[record.wcId]
           // 四舍五入，保留小数点后两位
-          this.storeroom.amountDist = Math.round(amountDist * 100) / 100
+          // this.storeroom.amountDist = Math.round(amountDist * 100) / 100
+          this.storeroom.amountDist = this.$tools.rounding(amountDist, 2)
         })
       } else {
         changeRows.forEach(record => {
@@ -258,7 +260,8 @@ export default {
       }
       let amountDist = storeroomCount - count
       // 四舍五入，保留小数点后两位
-      this.storeroom.amountDist = Math.round(amountDist * 100) / 100
+      // this.storeroom.amountDist = Math.round(amountDist * 100) / 100
+      this.storeroom.amountDist = this.$tools.rounding(amountDist, 2)
     },
     handleSubmit () {
       let rowIdCountsKey = Object.keys(this.rowIdCounts)

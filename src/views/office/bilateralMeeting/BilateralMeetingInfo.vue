@@ -97,7 +97,7 @@
   </a-modal>
 </template>
 <script>
-import DetailList from '../../../components/tool/DetailList'
+import DetailList from '@/components/tool/DetailList'
 import AStepItem from '../../../components/tool/AStepItem'
 import { mapState } from 'vuex'
 

@@ -53,6 +53,14 @@
                   <a-input v-model="queryParams.remark"/>
                 </a-form-item>
               </a-col>
+              <a-col :md="12" :sm="24" >
+                <a-form-item
+                  label="配发日期"
+                  :labelCol="{span: 5}"
+                  :wrapperCol="{span: 18, offset: 1}">
+                  <range-date @change="handleAllotmentDateChange" ref="allotmentDate"></range-date>
+                </a-form-item>
+              </a-col>
             </template>
           </div>
           <span style="float: right; margin: 3px auto 1em;">
@@ -70,7 +78,18 @@
       <div class="operator">
         <a-button type="primary" ghost @click="add" v-hasPermission="'chargingCabinet:add'">新增</a-button>
         <a-button @click="batchDelete" v-hasPermission="'chargingCabinet:delete'">删除</a-button>
-        <!-- <a-button @click="exportExcel" v-hasPermission="'chargingCabinet:export'">导出Excel</a-button> -->
+        <a-dropdown v-hasAnyPermission="'chargingCabinet:add','chargingCabinet:export'">
+          <a-menu slot="overlay">
+            <a-menu-item key="download-template" @click="downloadTemplate">模板下载</a-menu-item>
+            <a-menu-item key="import-data" v-hasPermission="'chargingCabinet:add'">
+              <a-upload class="upload-area" :fileList="fileList" :beforeUpload="importExcel">导入Excel</a-upload>
+            </a-menu-item>
+            <a-menu-item v-hasPermission="'chargingCabinet:export'" key="export-data" @click="exportExcel">导出Excel</a-menu-item>
+          </a-menu>
+          <a-button>
+            更多操作 <a-icon type="down" />
+          </a-button>
+        </a-dropdown>
       </div>
       <!-- 表格区域 -->
       <a-table ref="TableInfo"
@@ -109,18 +128,35 @@
       @close="handleChargingCabinetEditClose"
       @success="handleChargingCabinetEditSuccess">
     </charging-cabinet-edit>
+    <!-- 导入结果 -->
+    <import-result
+      @close="handleClose"
+      :importData="importData"
+      :errors="errors"
+      :times="times"
+      :successColumns="successColumns"
+      :importResultVisible="importResultVisible">
+    </import-result>
   </a-card>
 </template>
 <script>
+import RangeDate from '@/components/datetime/RangeDate'
 import ChargingCabinetInfo from './ChargingCabinetInfo'
 import ChargingCabinetAdd from './ChargingCabinetAdd'
 import ChargingCabinetEdit from './ChargingCabinetEdit'
+import ImportResult from '@/components/view/ImportResult'
 
 export default {
   name: 'ChargingCabinet',
-  components: {ChargingCabinetInfo, ChargingCabinetAdd, ChargingCabinetEdit},
+  components: { RangeDate, ChargingCabinetInfo, ChargingCabinetAdd, ChargingCabinetEdit, ImportResult },
   data () {
     return {
+      fileList: [],
+      importData: [],
+      times: '',
+      errors: [],
+      successColumns: [],
+      importResultVisible: false,
       advanced: false,
       chargingCabinetInfo: {
         visiable: false,
@@ -134,8 +170,6 @@ export default {
         visiable: false,
         data: {}
       },
-      // carKindData: [],
-      // carUseData: [],
       queryParams: {
         carKind: [],
         carUse: []
@@ -157,12 +191,6 @@ export default {
     }
   },
   computed: {
-    // filteredKindOptions () {
-    //   return this.carKindData.filter(o => !this.queryParams.carKind.includes(o))
-    // },
-    // filteredUseOptions () {
-    //   return this.carUseData.filter(o => !this.queryParams.carUse.includes(o))
-    // },
     columns () {
       // 受控属性
       let { filteredInfo } = this
@@ -176,6 +204,26 @@ export default {
       }, {
         title: '配发日期',
         dataIndex: 'allotmentDate'
+      }, {
+        title: '在职否',
+        dataIndex: 'isLeave',
+        customRender: (text, row, index) => {
+          switch (text) {
+            case '0':
+              return <a-tag color="cyan">在职</a-tag>
+            case '1':
+              return <a-tag color="red">非在职</a-tag>
+            default:
+              return text
+          }
+        },
+        filters: [
+          { text: '在职', value: '0' },
+          { text: '非在职', value: '1' }
+        ],
+        filterMultiple: false,
+        filteredValue: filteredInfo.isLeave || null,
+        onFilter: (value, record) => record.isLeave.includes(value)
       }, {
         title: '责任人',
         dataIndex: 'user'
@@ -215,10 +263,45 @@ export default {
     }
   },
   mounted () {
-    // this.loadSelect()
     this.fetch()
   },
   methods: {
+    handleClose () {
+      this.importResultVisible = false
+    },
+    downloadTemplate () {
+      this.$download('chargingCabinet/template', {}, '充电柜表_导入模板.xlsx')
+    },
+    importExcel (file) {
+      const formData = new FormData()
+      formData.append('file', file)
+      this.$message.loading('处理中', 0)
+      this.$upload('chargingCabinet/import', formData).then((r) => {
+        let data = r.data.data
+        if (data.data.length) {
+          this.fetch()
+        }
+        this.$message.destroy()
+        this.importData = data.data
+        this.errors = data.error
+        this.times = data.time / 1000
+        this.successColumns = [{
+          title: '品牌型号',
+          dataIndex: 'brandModel'
+        }, {
+          title: '配发日期',
+          dataIndex: 'allotmentDate'
+        }, {
+          title: '备注',
+          dataIndex: 'remark'
+        }]
+        this.importResultVisible = true
+      }).catch((r) => {
+        this.$message.destroy()
+        console.error(r)
+      })
+      return false
+    },
     onSelectChange (selectedRowKeys) {
       this.selectedRowKeys = selectedRowKeys
     },
@@ -230,6 +313,8 @@ export default {
         this.queryParams.brandModel = ''
         this.queryParams.place = ''
         this.queryParams.remark = ''
+        this.queryParams.allotmentDateFrom = ''
+        this.queryParams.allotmentDateTo = ''
       }
     },
     view (record) {
@@ -262,12 +347,12 @@ export default {
     handleChargingCabinetInfoClose () {
       this.chargingCabinetInfo.visiable = false
     },
-    // handleKindChange (value) {
-    //   this.queryParams.carKind = value || ''
-    // },
-    // handleUseChange (value) {
-    //   this.queryParams.carUse = value || ''
-    // },
+    handleAllotmentDateChange (value) {
+      if (value) {
+        this.queryParams.allotmentDateFrom = value[0]
+        this.queryParams.allotmentDateTo = value[1]
+      }
+    },
     batchDelete () {
       if (!this.selectedRowKeys.length) {
         this.$message.warning('请选择需要删除的记录')
@@ -290,28 +375,28 @@ export default {
         }
       })
     },
-    // exportExcel () {
-    //   let {sortedInfo, filteredInfo} = this
-    //   let sortField, sortOrder, pageSize
-    //   // 设置导出的数据为总数据条数
-    //   if (this.pagination) {
-    //     pageSize = this.pagination.total
-    //   }
-    //   // 获取当前列的排序和列的过滤规则
-    //   if (sortedInfo) {
-    //     // 列名
-    //     sortField = sortedInfo.field
-    //     // 排序方式 ascend正序 descend倒序
-    //     sortOrder = sortedInfo.order
-    //   }
-    //   this.$export('chargingCabinet/excel', {
-    //     sortField: sortField,
-    //     sortOrder: sortOrder,
-    //     pageSize: pageSize,
-    //     ...this.queryParams,
-    //     ...filteredInfo
-    //   })
-    // },
+    exportExcel () {
+      let {sortedInfo, filteredInfo} = this
+      let sortField, sortOrder, pageSize
+      // 设置导出的数据为总数据条数
+      if (this.pagination) {
+        pageSize = this.pagination.total
+      }
+      // 获取当前列的排序和列的过滤规则
+      if (sortedInfo) {
+        // 列名
+        sortField = sortedInfo.field
+        // 排序方式 ascend正序 descend倒序
+        sortOrder = sortedInfo.order
+      }
+      this.$export('chargingCabinet/excel', {
+        sortField: sortField,
+        sortOrder: sortOrder,
+        pageSize: pageSize,
+        ...this.queryParams,
+        ...filteredInfo
+      })
+    },
     search () {
       let {sortedInfo, filteredInfo} = this
       let sortField, sortOrder
@@ -342,6 +427,10 @@ export default {
       this.sortedInfo = null
       // 重置查询参数
       this.queryParams = {}
+      if (this.advanced) {
+        // 清空时间选择
+        this.$refs.allotmentDate.reset()
+      }
       this.fetch()
     },
     handleTableChange (pagination, filters, sorter) {
@@ -358,16 +447,6 @@ export default {
         ...filters
       })
     },
-    // loadSelect () {
-    //   this.$get('chargingCabinet/carKind', {
-    //   }).then((r) => {
-    //     this.carKindData = r.data.filter(d => d)
-    //   })
-    //   this.$get('chargingCabinet/carUse', {
-    //   }).then((r) => {
-    //     this.carUseData = r.data.filter(d => d)
-    //   })
-    // },
     fetch (params = {}) {
       // 显示loading
       this.loading = true

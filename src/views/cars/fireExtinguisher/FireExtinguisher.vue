@@ -61,6 +61,38 @@
                   <a-input v-model="queryParams.remark"/>
                 </a-form-item>
               </a-col>
+              <a-col :md="12" :sm="24" >
+                <a-form-item
+                  label="配发日期1"
+                  :labelCol="{span: 5}"
+                  :wrapperCol="{span: 18, offset: 1}">
+                  <range-date @change="handleAllotmentDate1Change" ref="allotmentDate1"></range-date>
+                </a-form-item>
+              </a-col>
+              <a-col :md="12" :sm="24" >
+                <a-form-item
+                  label="配发日期2"
+                  :labelCol="{span: 5}"
+                  :wrapperCol="{span: 18, offset: 1}">
+                  <range-date @change="handleAllotmentDate2Change" ref="allotmentDate2"></range-date>
+                </a-form-item>
+              </a-col>
+              <a-col :md="12" :sm="24" >
+                <a-form-item
+                  label="检测日期1"
+                  :labelCol="{span: 5}"
+                  :wrapperCol="{span: 18, offset: 1}">
+                  <range-date @change="handleTestDate1Change" ref="testDate1"></range-date>
+                </a-form-item>
+              </a-col>
+              <a-col :md="12" :sm="24" >
+                <a-form-item
+                  label="检测日期2"
+                  :labelCol="{span: 5}"
+                  :wrapperCol="{span: 18, offset: 1}">
+                  <range-date @change="handleTestDate2Change" ref="testDate2"></range-date>
+                </a-form-item>
+              </a-col>
             </template>
           </div>
           <span style="float: right; margin: 3px auto 1em;">
@@ -78,7 +110,18 @@
       <div class="operator">
         <a-button type="primary" ghost @click="add" v-hasPermission="'fireExtinguisher:add'">新增</a-button>
         <a-button @click="batchDelete" v-hasPermission="'fireExtinguisher:delete'">删除</a-button>
-        <!-- <a-button @click="exportExcel" v-hasPermission="'fireExtinguisher:export'">导出Excel</a-button> -->
+        <a-dropdown v-hasAnyPermission="'fireExtinguisher:add','fireExtinguisher:export'">
+          <a-menu slot="overlay">
+            <a-menu-item key="download-template" @click="downloadTemplate">模板下载</a-menu-item>
+            <a-menu-item key="import-data" v-hasPermission="'fireExtinguisher:add'">
+              <a-upload class="upload-area" :fileList="fileList" :beforeUpload="importExcel">导入Excel</a-upload>
+            </a-menu-item>
+            <a-menu-item v-hasPermission="'fireExtinguisher:export'" key="export-data" @click="exportExcel">导出Excel</a-menu-item>
+          </a-menu>
+          <a-button>
+            更多操作 <a-icon type="down" />
+          </a-button>
+        </a-dropdown>
       </div>
       <!-- 表格区域 -->
       <a-table ref="TableInfo"
@@ -125,18 +168,35 @@
       @close="handleFireExtinguisherEditClose"
       @success="handleFireExtinguisherEditSuccess">
     </fire-extinguisher-edit>
+    <!-- 导入结果 -->
+    <import-result
+      @close="handleClose"
+      :importData="importData"
+      :errors="errors"
+      :times="times"
+      :successColumns="successColumns"
+      :importResultVisible="importResultVisible">
+    </import-result>
   </a-card>
 </template>
 <script>
+import RangeDate from '@/components/datetime/RangeDate'
 import FireExtinguisherInfo from './FireExtinguisherInfo'
 import FireExtinguisherAdd from './FireExtinguisherAdd'
 import FireExtinguisherEdit from './FireExtinguisherEdit'
+import ImportResult from '@/components/view/ImportResult'
 
 export default {
   name: 'FireExtinguisher',
-  components: {FireExtinguisherInfo, FireExtinguisherAdd, FireExtinguisherEdit},
+  components: { RangeDate, FireExtinguisherInfo, FireExtinguisherAdd, FireExtinguisherEdit, ImportResult },
   data () {
     return {
+      fileList: [],
+      importData: [],
+      times: '',
+      errors: [],
+      successColumns: [],
+      importResultVisible: false,
       advanced: false,
       fireExtinguisherInfo: {
         visiable: false,
@@ -150,8 +210,6 @@ export default {
         visiable: false,
         data: {}
       },
-      // carKindData: [],
-      // carUseData: [],
       queryParams: {
         carKind: [],
         carUse: []
@@ -173,12 +231,6 @@ export default {
     }
   },
   computed: {
-    // filteredKindOptions () {
-    //   return this.carKindData.filter(o => !this.queryParams.carKind.includes(o))
-    // },
-    // filteredUseOptions () {
-    //   return this.carUseData.filter(o => !this.queryParams.carUse.includes(o))
-    // },
     columns () {
       // 受控属性
       return [{
@@ -188,14 +240,20 @@ export default {
         title: '品牌型号',
         dataIndex: 'brandModel'
       }, {
-        title: '配发日期',
-        dataIndex: 'allotmentDate'
+        title: '配发日期1',
+        dataIndex: 'allotmentDate1'
+      }, {
+        title: '配发日期2',
+        dataIndex: 'allotmentDate2'
       }, {
         title: '责任人',
         dataIndex: 'user'
       }, {
-        title: '检测日期',
-        dataIndex: 'testDate'
+        title: '检测日期1',
+        dataIndex: 'testDate1'
+      }, {
+        title: '检测日期2',
+        dataIndex: 'testDate2'
       }, {
         title: '公厕名称',
         dataIndex: 'wcName',
@@ -210,10 +268,45 @@ export default {
     }
   },
   mounted () {
-    // this.loadSelect()
     this.fetch()
   },
   methods: {
+    handleClose () {
+      this.importResultVisible = false
+    },
+    downloadTemplate () {
+      this.$download('fireExtinguisher/template', {}, '灭火器表_导入模板.xlsx')
+    },
+    importExcel (file) {
+      const formData = new FormData()
+      formData.append('file', file)
+      this.$message.loading('处理中', 0)
+      this.$upload('fireExtinguisher/import', formData).then((r) => {
+        let data = r.data.data
+        if (data.data.length) {
+          this.fetch()
+        }
+        this.$message.destroy()
+        this.importData = data.data
+        this.errors = data.error
+        this.times = data.time / 1000
+        this.successColumns = [{
+          title: '品牌型号',
+          dataIndex: 'brandModel'
+        }, {
+          title: '责任人',
+          dataIndex: 'user'
+        }, {
+          title: '公厕编号',
+          dataIndex: 'wcName'
+        }]
+        this.importResultVisible = true
+      }).catch((r) => {
+        this.$message.destroy()
+        console.error(r)
+      })
+      return false
+    },
     onSelectChange (selectedRowKeys) {
       this.selectedRowKeys = selectedRowKeys
     },
@@ -226,6 +319,14 @@ export default {
         this.queryParams.specification = ''
         this.queryParams.place = ''
         this.queryParams.remark = ''
+        this.queryParams.allotmentDate1From = ''
+        this.queryParams.allotmentDate1To = ''
+        this.queryParams.allotmentDate2From = ''
+        this.queryParams.allotmentDate2To = ''
+        this.queryParams.testDate1From = ''
+        this.queryParams.testDate1To = ''
+        this.queryParams.testDate2From = ''
+        this.queryParams.testDate2To = ''
       }
     },
     view (record) {
@@ -258,12 +359,30 @@ export default {
     handleFireExtinguisherInfoClose () {
       this.fireExtinguisherInfo.visiable = false
     },
-    // handleKindChange (value) {
-    //   this.queryParams.carKind = value || ''
-    // },
-    // handleUseChange (value) {
-    //   this.queryParams.carUse = value || ''
-    // },
+    handleAllotmentDate1Change (value) {
+      if (value) {
+        this.queryParams.allotmentDate1From = value[0]
+        this.queryParams.allotmentDate1To = value[1]
+      }
+    },
+    handleAllotmentDate2Change (value) {
+      if (value) {
+        this.queryParams.allotmentDate2From = value[0]
+        this.queryParams.allotmentDate2To = value[1]
+      }
+    },
+    handleTestDate1Change (value) {
+      if (value) {
+        this.queryParams.testDate1From = value[0]
+        this.queryParams.testDate1To = value[1]
+      }
+    },
+    handleTestDate2Change (value) {
+      if (value) {
+        this.queryParams.testDate2From = value[0]
+        this.queryParams.testDate2To = value[1]
+      }
+    },
     batchDelete () {
       if (!this.selectedRowKeys.length) {
         this.$message.warning('请选择需要删除的记录')
@@ -286,28 +405,28 @@ export default {
         }
       })
     },
-    // exportExcel () {
-    //   let {sortedInfo, filteredInfo} = this
-    //   let sortField, sortOrder, pageSize
-    //   // 设置导出的数据为总数据条数
-    //   if (this.pagination) {
-    //     pageSize = this.pagination.total
-    //   }
-    //   // 获取当前列的排序和列的过滤规则
-    //   if (sortedInfo) {
-    //     // 列名
-    //     sortField = sortedInfo.field
-    //     // 排序方式 ascend正序 descend倒序
-    //     sortOrder = sortedInfo.order
-    //   }
-    //   this.$export('fireExtinguisher/excel', {
-    //     sortField: sortField,
-    //     sortOrder: sortOrder,
-    //     pageSize: pageSize,
-    //     ...this.queryParams,
-    //     ...filteredInfo
-    //   })
-    // },
+    exportExcel () {
+      let {sortedInfo, filteredInfo} = this
+      let sortField, sortOrder, pageSize
+      // 设置导出的数据为总数据条数
+      if (this.pagination) {
+        pageSize = this.pagination.total
+      }
+      // 获取当前列的排序和列的过滤规则
+      if (sortedInfo) {
+        // 列名
+        sortField = sortedInfo.field
+        // 排序方式 ascend正序 descend倒序
+        sortOrder = sortedInfo.order
+      }
+      this.$export('fireExtinguisher/excel', {
+        sortField: sortField,
+        sortOrder: sortOrder,
+        pageSize: pageSize,
+        ...this.queryParams,
+        ...filteredInfo
+      })
+    },
     search () {
       let {sortedInfo, filteredInfo} = this
       let sortField, sortOrder
@@ -338,6 +457,13 @@ export default {
       this.sortedInfo = null
       // 重置查询参数
       this.queryParams = {}
+      if (this.advanced) {
+        // 清空时间选择
+        this.$refs.allotmentDate1.reset()
+        this.$refs.allotmentDate2.reset()
+        this.$refs.testDate1.reset()
+        this.$refs.testDate2.reset()
+      }
       this.fetch()
     },
     handleTableChange (pagination, filters, sorter) {

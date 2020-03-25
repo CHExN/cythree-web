@@ -170,6 +170,7 @@ export default {
   },
   methods: {
     selectIdNum (value) {
+      if (!value) return this.$message.warning('请填写身份证号码')
       this.$message.loading('查询此身份证号中...', 0)
       this.$get('staffOutside/getStaffOutsideByIdNum', {
         idNum: value

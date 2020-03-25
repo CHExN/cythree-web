@@ -187,48 +187,14 @@
               <span style="cursor: pointer;">{{wageInfoData.taxDeductionSum}}</span>
             </a-popover>
           </detail-list-item>
-
-          <detail-list-item term="空列01">
+          <detail-list-item :key="index" :term="item === '' ? `空列0${index + 1}` : item" v-for="(item, index) in emptyColumn">
             <a-popover trigger="hover">
               <template slot="content">
-                <p>{{monthlyInformation.emptyColumn01.join('；')}}</p>
+                <p>{{monthlyInformation[`emptyColumn0${index + 1}`].join('；')}}</p>
               </template>
-              <span style="cursor: pointer;">{{wageInfoData.emptyColumn01Sum}}</span>
+              <span style="cursor: pointer;">{{wageInfoData[`emptyColumn0${index + 1}Sum`]}}</span>
             </a-popover>
           </detail-list-item>
-          <detail-list-item term="空列02">
-            <a-popover trigger="hover">
-              <template slot="content">
-                <p>{{monthlyInformation.emptyColumn02.join('；')}}</p>
-              </template>
-              <span style="cursor: pointer;">{{wageInfoData.emptyColumn02Sum}}</span>
-            </a-popover>
-          </detail-list-item>
-          <detail-list-item term="空列03">
-            <a-popover trigger="hover">
-              <template slot="content">
-                <p>{{monthlyInformation.emptyColumn03.join('；')}}</p>
-              </template>
-              <span style="cursor: pointer;">{{wageInfoData.emptyColumn03Sum}}</span>
-            </a-popover>
-          </detail-list-item>
-          <detail-list-item term="空列04">
-            <a-popover trigger="hover">
-              <template slot="content">
-                <p>{{monthlyInformation.emptyColumn04.join('；')}}</p>
-              </template>
-              <span style="cursor: pointer;">{{wageInfoData.emptyColumn04Sum}}</span>
-            </a-popover>
-          </detail-list-item>
-          <detail-list-item term="空列05">
-            <a-popover trigger="hover">
-              <template slot="content">
-                <p>{{monthlyInformation.emptyColumn05.join('；')}}</p>
-              </template>
-              <span style="cursor: pointer;">{{wageInfoData.emptyColumn05Sum}}</span>
-            </a-popover>
-          </detail-list-item>
-
           <detail-list-item term="实发工资">
             <a-popover trigger="hover">
               <template slot="content">
@@ -281,7 +247,7 @@
   </a-modal>
 </template>
 <script>
-import DetailList from '../../../components/tool/DetailList'
+import DetailList from '@/components/tool/DetailList'
 
 const DetailListItem = DetailList.Item
 export default {
@@ -300,6 +266,13 @@ export default {
     return {
       staffInsideData: {},
       loading: false,
+      emptyColumn: [
+        '空列01',
+        '空列02',
+        '空列03',
+        '空列04',
+        '空列05'
+      ],
       monthlyInformation: {
         currentIncome: [],
         reissueSalaryScale: [],
@@ -444,6 +417,13 @@ export default {
           monthArr: this.wageInfoData.monthArr
         }).then((r) => {
           this.wageInfoDataProcessing(r.data)
+        })
+        this.$get('wageRemark/getOne', {
+          insideOrOutside: this.wageInfoData.insideOrOutside,
+          year: this.wageInfoData.year,
+          month: this.wageInfoData.month
+        }).then((r) => {
+          if (r.data) this.emptyColumn = r.data.remark.split(',')
         })
       }
     }

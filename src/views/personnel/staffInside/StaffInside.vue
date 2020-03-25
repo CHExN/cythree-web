@@ -255,10 +255,10 @@
           style="left: -12%;top: 25%"
           @ok="staffChange"
           okText="提交">
-          <a-month-picker
-            style="width: 100%;"
-            @change="handleYearMonthChange"
-          />
+          <range-date
+            @change="handleDateChange"
+            ref="createTime">
+          </range-date>
         </a-modal>
       </div>
       <!-- 表格区域 -->
@@ -308,6 +308,7 @@
   </a-card>
 </template>
 <script>
+import RangeDate from '@/components/datetime/RangeDate'
 import DeptInputTree from '../../system/dept/DeptInputTree'
 import StaffInsideInfo from './StaffInsideInfo'
 import StaffInsideAdd from './StaffInsideAdd'
@@ -316,11 +317,11 @@ import { newSpread, floatForm, floatReset, saveExcel } from '@/utils/spreadJS'
 
 export default {
   name: 'StaffInside',
-  components: { DeptInputTree, StaffInsideInfo, StaffInsideAdd, StaffInsideEdit },
+  components: { RangeDate, DeptInputTree, StaffInsideInfo, StaffInsideAdd, StaffInsideEdit },
   data () {
     return {
       changeType: '',
-      changeDate: '',
+      changeDate: [],
       modalVisible: false,
       isLeave: '0',
       advanced: false,
@@ -518,13 +519,15 @@ export default {
   },
   methods: {
     staffChange () {
-      if (!this.changeDate) {
+      if (this.changeDate.length === 0) {
         this.$message.warning('请选择日期')
         return
       }
+      this.$message.loading('正在生成', 0)
       this.modalVisible = false
       this.$get('staffInside/getIncreaseOrDecreaseStaffInside', {
-        birthDate: this.changeDate,
+        createTimeFrom: this.changeDate[0],
+        createTimeTo: this.changeDate[1],
         isLeave: this.changeType
       }).then((r) => {
         let newData = []
@@ -533,24 +536,24 @@ export default {
             item.type,
             item.name,
             item.idNum,
-            item.gender === '1' ? '男' : '女'
+            item.gender === '1' ? '男' : '女',
+            item.technicalType,
+            item.leaveDate
           ])
         })
-        this.$message.loading('正在生成', 3, () => { // 3s后关闭执行关闭回调函数
-          let spread = newSpread('Staff')
-          spread = floatForm(spread, 'Staff', newData)
-          let fileName = `${this.changeType === 0 ? '增加' : '减少'}人员报表_${this.changeDate}.xlsx`
-          saveExcel(spread, fileName)
-          floatReset(spread, 'Staff', newData.length)
-        })
+        this.$message.destroy() // 把message全局销毁
+        let spread = newSpread('Staff')
+        spread = floatForm(spread, 'Staff', newData)
+        let fileName = `${this.changeType === 0 ? '增加' : '减少'}人员报表_${this.changeDate[0]}至${this.changeDate[1]}.xlsx`
+        saveExcel(spread, fileName)
+        floatReset(spread, 'Staff', newData.length)
+        // 清空时间选择
+        this.$refs.createTime.reset()
+        this.changeDate = []
       })
     },
-    handleYearMonthChange (value) {
-      if (!value) {
-        this.changeDate = ''
-        return
-      }
-      this.changeDate = value.format('YYYY-MM')
+    handleDateChange (value) {
+      if (value) this.changeDate = value
     },
     showModal (value) {
       this.changeType = value

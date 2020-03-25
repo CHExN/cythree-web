@@ -175,7 +175,7 @@
               </a-col>
               <a-col :md="12" :sm="24" >
                 <a-form-item
-                  label="非在职日期"
+                  label="减少日期"
                   :labelCol="{span: 5}"
                   :wrapperCol="{span: 18, offset: 1}">
                   <range-date @change="handleDateChange" ref="createTime"></range-date>
