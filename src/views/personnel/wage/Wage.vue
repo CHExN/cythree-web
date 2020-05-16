@@ -134,20 +134,20 @@
         </template>
       </a-table>
     </div>
-    <!-- 新增工资信息 -->
+    <!-- 新增编内工资信息 -->
     <wage-add
       :wageAddVisiable="wageAdd.visiable"
       @close="handleWageAddClose"
       @success="handleWageAddSuccess">
     </wage-add>
-    <!-- 修改工资信息 -->
+    <!-- 修改编内工资信息 -->
     <wage-edit
       ref="wageEdit"
       :wageEditVisiable="wageEdit.visiable"
       @close="handleWageEditClose"
       @success="handleWageEditSuccess">
     </wage-edit>
-    <!-- 工资详细信息 -->
+    <!-- 编内工资详细信息 -->
     <wage-info
       :wageInfoData="wageInfo.data"
       :wageInfoVisiable="wageInfo.visiable"
@@ -162,9 +162,10 @@
       :successColumns="successColumns"
       :importResultVisible="importResultVisible">
     </import-result>
-    <!-- 工资备注管理 -->
+    <!-- 编内工资备注管理 -->
     <wage-remark
       :wageRemarkVisiable="wageRemark.visiable"
+      :insideOrOutside="'0'"
       @close="handleWageRemarkClose">
     </wage-remark>
   </a-card>
@@ -243,19 +244,6 @@ export default {
         title: '序号',
         dataIndex: 'sortNum'
       }, {
-        title: '编制类别',
-        dataIndex: 'insideOrOutside',
-        customRender: (text, row, index) => {
-          switch (text) {
-            case '0':
-              return '编内'
-            case '1':
-              return '编外'
-            default:
-              return text
-          }
-        }
-      }, {
         title: '姓名',
         dataIndex: 'staffName'
       }, {
@@ -294,7 +282,7 @@ export default {
       this.importResultVisible = false
     },
     downloadTemplate () {
-      this.$download('wage/template', {}, '工资表_导入模板.xlsx')
+      this.$download('wage/template', {}, '编内工资表_导入模板.xlsx')
     },
     beforeUpload (file) {
       this.modalVisible = true
@@ -371,7 +359,7 @@ export default {
     },
     handleWageAddSuccess () {
       this.wageAdd.visiable = false
-      this.$message.success('新增工资信息成功')
+      this.$message.success('新增编内工资信息成功')
       this.search()
     },
     edit (record) {
@@ -383,7 +371,7 @@ export default {
     },
     handleWageEditSuccess () {
       this.wageEdit.visiable = false
-      this.$message.success('修改工资信息成功')
+      this.$message.success('修改编内工资信息成功')
       this.search()
     },
     view (record) {

@@ -16,32 +16,10 @@
           autoFocus
           placeholder='姓名'
           autocomplete="off"
-          v-decorator="['name']"/>
+          v-decorator="['name',
+            {rules: [{ required: true, message: '请选择人员'}]}
+          ]"/>
       </a-form-item>
-      <!-- <a-form-item label='人员id' v-bind="formItemLayout">
-        <a-input
-          placeholder='人员id'
-          autocomplete="off"
-          autoFocus
-          v-decorator="['staffId']"/>
-      </a-form-item> -->
-      <a-form-item label='档案编号' v-bind="formItemLayout">
-        <a-auto-complete
-          placeholder='档案编号'
-          :dataSource="fileNumData"
-          :allowClear='true'
-          :filterOption="filterOption"
-          v-decorator="['fileNum']"
-        />
-      </a-form-item>
-      <a-form-item label='胸牌号码' v-bind="formItemLayout">
-        <a-input
-          placeholder='胸牌号码'
-          autocomplete="off"
-          v-decorator="['badNum']"
-        />
-      </a-form-item>
-
       <a-form-item
         v-for="(k, index) in form.getFieldValue('contractPeriodKeys')"
         :key="k"
@@ -178,8 +156,7 @@ export default {
       staffInsideList: {
         visiable: false
       },
-      idNum: '',
-      fileNumData: ['编内合同制', '编内固定工']
+      idNum: ''
     }
   },
   created () {
@@ -285,9 +262,9 @@ export default {
           this.$message.warning('格式出错，请检查表单')
         }
       })
-    },
-    filterOption (input, option) {
-      return option.componentOptions.children[0].text.toUpperCase().indexOf(input.toUpperCase()) >= 0
+    // },
+    // filterOption (input, option) {
+    //   return option.componentOptions.children[0].text.toUpperCase().indexOf(input.toUpperCase()) >= 0
     }
   }
 }

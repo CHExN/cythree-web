@@ -255,30 +255,28 @@ export default {
               data.push(item)
             }
           })
-          if (data.length > 0) {
-            if (isType) {
-              let canteenList = JSON.stringify(data, function (key, value) {
-                return key === 'key' || key === 'editable' || key === 'isNew' ? undefined : value
-              })
-              const date = values['date']
-              this.putLoading = true
-              this.$post('storeroomPut', {
-                ...values,
-                typeApplication: 8, // 食堂用品
-                storeroomList: canteenList,
-                date: date.format('YYYY-MM-DD')
-              }).then((r) => {
-                this.reset()
-                this.$emit('success')
-              }).catch(() => {
-                this.putLoading = false
-              })
-            } else {
-              this.$message.warning('请检查类别列是否有空的')
-            }
-          } else {
-            this.$message.warning('入库名单至少要有一条数据')
+          if (data.length === 0) {
+            return this.$message.warning('入库名单至少要有一条数据')
           }
+          if (!isType) {
+            return this.$message.warning('请检查类别列是否有空的')
+          }
+          let canteenList = JSON.stringify(data, function (key, value) {
+            return key === 'key' || key === 'editable' || key === 'isNew' ? undefined : value
+          })
+          const date = values['date']
+          this.putLoading = true
+          this.$post('storeroomPut', {
+            ...values,
+            typeApplication: 8, // 食堂用品
+            storeroomList: canteenList,
+            date: date.format('YYYY-MM-DD')
+          }).then((r) => {
+            this.reset()
+            this.$emit('success')
+          }).catch(() => {
+            this.putLoading = false
+          })
         }
       })
     },
@@ -333,8 +331,7 @@ export default {
     },
     handleSearch (name, key) {
       if (name) {
-        this.$get('price/' + name, {
-        }).then((r) => {
+        this.$get('price/name', {name}).then((r) => {
           if (r.data.length) {
             // 触发autoComplete展示下拉框
             // 这里会报[Vue warn]: Avoid mutating a prop directly since the value will be overwritten whenever the parent component re-renders. Instead, use a data or computed property based on the prop's value.
@@ -367,33 +364,37 @@ export default {
       this.form.validateFields((err, values) => {
         if (!err) {
           let data = []
+          let isType = true
           this.dataSource.forEach(item => {
             if (item.isNew === false && item.editable === false) {
+              if (!item.type) isType = false
               data.push(item)
             }
           })
-          if (data.length > 0) {
-            this.modalVisible = false
-            let canteenList = JSON.stringify(data, function (key, value) {
-              return key === 'key' || key === 'editable' || key === 'isNew' ? undefined : value
-            })
-            this.putOutLoading = true
-            const date = values['date']
-            this.$post('storeroomPut/inOut', {
-              ...values,
-              typeApplication: 8, // 食堂用品
-              toDeptId: 32, // 默认出库到食堂
-              date: date.format('YYYY-MM-DD'),
-              storeroomList: canteenList
-            }).then((r) => {
-              this.reset()
-              this.$emit('success')
-            }).catch(() => {
-              this.putOutLoading = false
-            })
-          } else {
-            this.$message.warning('入库名单至少要有一条数据')
+          if (data.length === 0) {
+            return this.$message.warning('入库名单至少要有一条数据')
           }
+          if (!isType) {
+            return this.$message.warning('请检查类别列是否有空的')
+          }
+          this.modalVisible = false
+          let canteenList = JSON.stringify(data, function (key, value) {
+            return key === 'key' || key === 'editable' || key === 'isNew' ? undefined : value
+          })
+          this.putOutLoading = true
+          const date = values['date']
+          this.$post('storeroomPut/inOut', {
+            ...values,
+            typeApplication: 8, // 食堂用品
+            toDeptId: 32, // 默认出库到食堂
+            date: date.format('YYYY-MM-DD'),
+            storeroomList: canteenList
+          }).then((r) => {
+            this.reset()
+            this.$emit('success')
+          }).catch(() => {
+            this.putOutLoading = false
+          })
         }
       })
     }

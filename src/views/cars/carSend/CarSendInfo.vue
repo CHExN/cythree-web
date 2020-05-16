@@ -55,7 +55,7 @@ export default {
       }
     },
     getCreateTime (createTime) {
-      if (createTime) return createTime.replace(/T/, ' ')
+      if (createTime) return this.$tools.getDateTime(createTime)
     },
     handleCancleClick () {
       this.$emit('close')

@@ -107,21 +107,6 @@
           v-decorator="['birthDate']"
         />
       </a-form-item>
-      <!-- <a-form-item label='年龄' v-bind="formItemLayout">
-        <a-input-number
-          :min="0"
-          :max="200"
-          autocomplete="off"
-          placeholder='年龄'
-          style="width: 100%;"
-          v-decorator="['age']"/>
-      </a-form-item> -->
-      <!-- <a-form-item label='退休年份' v-bind="formItemLayout">
-        <a-input
-          placeholder='退休年份'
-          autocomplete="off"
-          v-decorator="['retirementYear']"/>
-      </a-form-item> -->
       <a-form-item label='家庭住址' v-bind="formItemLayout">
         <a-textarea
           placeholder='家庭住址'
@@ -201,6 +186,22 @@
           autocomplete="off"
           v-decorator="['disabilityIdentificationLevel']"/>
       </a-form-item>
+       <a-form-item label='增加日期' v-bind="formItemLayout">
+        <a-date-picker
+          placeholder='增加日期，【增加人员报表】就是根据此项进行查询'
+          format='YYYY-MM-DD'
+          style="width: 100%;"
+          v-decorator="['addDate']"
+        />
+      </a-form-item>
+      <a-form-item label='调入日期' v-bind="formItemLayout">
+        <a-date-picker
+          placeholder='调入或报到日期'
+          format='YYYY-MM-DD'
+          style="width: 100%;"
+          v-decorator="['transferDate']"
+        />
+      </a-form-item>
       <a-form-item label='参加工作日期' v-bind="formItemLayout">
         <a-date-picker
           placeholder='参加工作日期'
@@ -217,17 +218,11 @@
           v-decorator="['farmerWorkDate']"
         />
       </a-form-item>
-      <a-form-item label='调入日期' v-bind="formItemLayout">
-        <a-date-picker
-          placeholder='调入或报到日期，【增加人员报表】就是根据此项进行查询'
-          format='YYYY-MM-DD'
-          style="width: 100%;"
-          v-decorator="['transferDate']"
-        />
-      </a-form-item>
       <a-form-item label='岗位' v-bind="formItemLayout">
         <a-radio-group
-          v-decorator="['post']">
+          v-decorator="['post',
+            {rules: [{ required: true, message: '请选择岗位'}]}
+          ]">
           <a-radio-button value="0">管理岗</a-radio-button>
           <a-radio-button value="1">技工</a-radio-button>
           <a-radio-button value="2">工勤岗</a-radio-button>
@@ -295,9 +290,17 @@
           v-decorator="['entryStatus']"
         />
       </a-form-item>
-      <a-form-item label='排序编号' v-bind="formItemLayout">
+      <!-- <a-form-item label='排序编号' v-bind="formItemLayout">
         <a-input-number
           placeholder='排序编号'
+          autocomplete="off"
+          style="width: 100%;"
+          v-decorator="['sortNum']"
+        />
+      </a-form-item> -->
+      <a-form-item label='排序编号' v-bind="formItemLayout">
+        <a-input-number
+          :placeholder="'填写序号会插入到相应的位置上，不填写不变，当前序号：' + sortNum"
           autocomplete="off"
           style="width: 100%;"
           v-decorator="['sortNum']"
@@ -343,6 +346,7 @@ export default {
   data () {
     return {
       staffId: '',
+      sortNum: '',
       deptId: '',
       loading: false,
       formItemLayout,
@@ -361,22 +365,16 @@ export default {
     onIdNumChange () {
       const idNum = this.form.getFieldValue('idNum')
       const birthDate = moment(this.$tools.getBirthday(idNum))
-      // const age = this.$tools.getAge(birthDate)
       const birthplace = this.$tools.getBirthplace(idNum)
       const gender = this.$tools.getGender(idNum)
-      // const retirementYear = this.$tools.getRetirement(birthDate, gender) // 退休年份
 
       this.form.getFieldDecorator('birthDate')
-      // this.form.getFieldDecorator('age')
       this.form.getFieldDecorator('birthplace')
       this.form.getFieldDecorator('gender')
-      // this.form.getFieldDecorator('retirementYear')
 
       this.form.setFieldsValue({ birthDate })
-      // this.form.setFieldsValue({ age })
       this.form.setFieldsValue({ birthplace })
       this.form.setFieldsValue({ gender: gender + '' })
-      // this.form.setFieldsValue({ retirementYear })
     },
     onClose () {
       this.reset()
@@ -386,9 +384,12 @@ export default {
       // staffInside.deptId = `${staffInside.deptId}` || ''
       staffInside.deptId = [staffInside.deptId] || []
       this.staffId = staffInside.staffId
-      const fields = ['leaveDate', 'birthDate', 'graduationDate', 'workDate', 'farmerWorkDate', 'transferDate', 'technicalLevelDate', 'appointmentDate']
+      this.sortNum = staffInside.sortNum
+      const fields = ['leaveDate', 'birthDate', 'graduationDate', 'workDate', 'farmerWorkDate', 'addDate', 'transferDate', 'technicalLevelDate', 'appointmentDate']
+      const excludes = ['sortNum']
       let obj = {}
       Object.keys(staffInside).forEach((key) => {
+        if (excludes.includes(key)) return
         this.form.getFieldDecorator(key)
         obj[key] = staffInside[key]
       })
@@ -401,7 +402,7 @@ export default {
     handleSubmit () {
       this.form.validateFields((err, values) => {
         if (!err) {
-          const {leaveDate, birthDate, graduationDate, workDate, farmerWorkDate, transferDate, technicalLevelDate, appointmentDate} = values
+          const {leaveDate, birthDate, graduationDate, workDate, farmerWorkDate, addDate, transferDate, technicalLevelDate, appointmentDate} = values
           const staffInsideData = {
             staffId: this.staffId,
             ...values,
@@ -410,6 +411,7 @@ export default {
             graduationDate: graduationDate ? graduationDate.format('YYYY-MM-DD') : graduationDate,
             workDate: workDate ? workDate.format('YYYY-MM-DD') : workDate,
             farmerWorkDate: farmerWorkDate ? farmerWorkDate.format('YYYY-MM-DD') : farmerWorkDate,
+            addDate: addDate ? addDate.format('YYYY-MM-DD') : addDate,
             transferDate: transferDate ? transferDate.format('YYYY-MM-DD') : transferDate,
             technicalLevelDate: technicalLevelDate ? technicalLevelDate.format('YYYY-MM-DD') : technicalLevelDate,
             appointmentDate: appointmentDate ? appointmentDate.format('YYYY-MM-DD') : appointmentDate

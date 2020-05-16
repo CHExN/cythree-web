@@ -23,31 +23,41 @@
         <a-input
           placeholder='空列1'
           autocomplete="off"
-          v-decorator="['emptyColumn01']"/>
+          v-decorator="['emptyColumn01',
+            {rules: [{pattern: '^[^,]+$', message: '不能包含 , 符号'}]}
+          ]"/>
       </a-form-item>
       <a-form-item label='空列2' v-bind="formItemLayout">
         <a-input
           placeholder='空列2'
           autocomplete="off"
-          v-decorator="['emptyColumn02']"/>
+          v-decorator="['emptyColumn02',
+            {rules: [{pattern: '^[^,]+$', message: '不能包含 , 符号'}]}
+          ]"/>
       </a-form-item>
       <a-form-item label='空列3' v-bind="formItemLayout">
         <a-input
           placeholder='空列3'
           autocomplete="off"
-          v-decorator="['emptyColumn03']"/>
+          v-decorator="['emptyColumn03',
+            {rules: [{pattern: '^[^,]+$', message: '不能包含 , 符号'}]}
+          ]"/>
       </a-form-item>
       <a-form-item label='空列4' v-bind="formItemLayout">
         <a-input
           placeholder='空列4'
           autocomplete="off"
-          v-decorator="['emptyColumn04']"/>
+          v-decorator="['emptyColumn04',
+            {rules: [{pattern: '^[^,]+$', message: '不能包含 , 符号'}]}
+          ]"/>
       </a-form-item>
       <a-form-item label='空列5' v-bind="formItemLayout">
         <a-input
           placeholder='空列5'
           autocomplete="off"
-          v-decorator="['emptyColumn05']"/>
+          v-decorator="['emptyColumn05',
+            {rules: [{pattern: '^[^,]+$', message: '不能包含 , 符号'}]}
+          ]"/>
       </a-form-item>
     </a-form>
     <div class="drawer-bootom-button">

@@ -13,14 +13,19 @@
         <a-input
           disabled
           autocomplete="off"
-          v-decorator="['name']"/>
+          v-decorator="['name',
+            {rules: [{ required: true, message: '请填写正确的身份证号，已此验证人员'}]}
+          ]"/>
       </a-form-item>
       <a-form-item label='身份证号' v-bind="formItemLayout">
-        <a-input
+        <a-input-search
           @search="selectIdNum"
+          @change="handleIdNumChange"
           placeholder='身份证号'
           autocomplete="off"
-          v-decorator="['idNum']"
+          v-decorator="['idNum',
+            {rules: [{ required: true, message: '请填写身份证号'}]}
+          ]"
         />
       </a-form-item>
 
@@ -180,11 +185,7 @@ export default {
       loading: false,
       formItemLayout,
       formItemLayoutWithOutLabel,
-      form: this.$form.createForm(this),
-      // staffOutsideList: {
-      //   visiable: false
-      // },
-      fileNumData: ['编外合同制', '编外固定工']
+      form: this.$form.createForm(this)
     }
   },
   created () {
@@ -255,6 +256,10 @@ export default {
     onClose () {
       this.reset()
       this.$emit('close')
+    },
+    handleIdNumChange () {
+      this.form.getFieldDecorator('name')
+      this.form.setFieldsValue({ name: '' })
     },
     // untied () {
     //   this.loading = true

@@ -1,8 +1,7 @@
 <template>
   <a-drawer
     :title="dateTitle+' 记录'"
-    :maskClosable="false"
-    width=1000
+    width=1200
     placement="right"
     @close="onClose"
     :visible="storeroomDistWcVisiable"
@@ -49,11 +48,19 @@
                   <a-input v-model="queryParams.name"/>
                 </a-form-item>
               </a-col>
+              <a-col :md="12" :sm="24" >
+                <a-form-item
+                  label="操作账号"
+                  :labelCol="{span: 5}"
+                  :wrapperCol="{span: 18, offset: 1}">
+                  <a-input v-model="queryParams.username"/>
+                </a-form-item>
+              </a-col>
             </template>
           </div>
           <span style="float: right; margin: 3px auto 1em;">
             <a-button type="primary" @click="search">查询</a-button>
-            <a-button style="margin-left: 8px" @click="reset">重置</a-button>
+            <a-button style="margin-left: 8px" @click="reboot">重置</a-button>
             <a @click="toggleAdvanced" style="margin-left: 8px">
               {{advanced ? '收起' : '展开'}}
               <a-icon :type="advanced ? 'up' : 'down'" />
@@ -121,6 +128,9 @@ export default {
         title: '公厕编号',
         dataIndex: 'wcNum'
       }, {
+        title: '所属分队',
+        dataIndex: 'wcOwn'
+      }, {
         title: '物品名称',
         dataIndex: 'name'
       }, {
@@ -132,12 +142,14 @@ export default {
       }, {
         title: '分配数量',
         dataIndex: 'amount',
-        scopedSlots: { customRender: 'amount' },
-        width: 100
+        scopedSlots: { customRender: 'amount' }
       }, {
-        title: '操作日期',
+        title: '分配日期',
         dataIndex: 'date',
         scopedSlots: { customRender: 'date' }
+      }, {
+        title: '操作账号',
+        dataIndex: 'username'
       }]
     }
   },
@@ -146,6 +158,7 @@ export default {
   methods: {
     onClose () {
       this.$emit('close')
+      this.reboot()
       this.dataSource = []
     },
     toggleAdvanced () {
@@ -153,6 +166,7 @@ export default {
       if (!this.advanced) {
         this.queryParams.name = ''
         this.queryParams.wcName = ''
+        this.queryParams.username = ''
       }
     },
     handleTypeApplicationChange (value) {
@@ -188,6 +202,9 @@ export default {
       this.paginationInfo = null
       // 重置查询参数
       this.queryParams = {}
+    },
+    reboot () {
+      this.reset()
       this.fetch()
     },
     handleTableChange (pagination, filters, sorter) {

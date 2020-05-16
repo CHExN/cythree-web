@@ -106,9 +106,7 @@
           style="left: -12%;top: 25%"
           @ok="exportExcel"
           okText="提交">
-          <a-month-picker
-            style="width: 100%;"
-          />
+          <a-month-picker style="width: 100%;"/>
         </a-modal>
       </div>
       <!-- 表格区域 -->

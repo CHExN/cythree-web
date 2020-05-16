@@ -67,6 +67,7 @@
     <!-- 新增工资备注 -->
     <wage-remark-add
       :wageRemarkAddVisiable="wageRemarkAdd.visiable"
+      :insideOrOutside="insideOrOutside"
       @close="handleWageRemarkAddClose"
       @success="handleWageRemarkAddSuccess">
     </wage-remark-add>
@@ -91,6 +92,9 @@ export default {
   props: {
     wageRemarkVisiable: {
       default: false
+    },
+    insideOrOutside: {
+      require: true
     }
   },
   data () {
@@ -222,7 +226,7 @@ export default {
       }
       this.$get('wageRemark', {
         ...params,
-        insideOrOutside: '0'
+        insideOrOutside: this.insideOrOutside
       }).then((r) => {
         let data = r.data
         this.dataSource = []

@@ -25,8 +25,8 @@
           <!-- <detail-list-item term="修改时间">{{insuranceInsideInfoData.modifyTime}}</detail-list-item> -->
         </detail-list>
       </a-card>
-      <a-divider style="margin-bottom: 32px"/>
-      <a-card :loading='loading' :bordered="false">
+      <a-divider v-hasPermission="'staffInside:view'" style="margin-bottom: 32px"/>
+      <a-card v-hasPermission="'staffInside:view'" :loading='loading' :bordered="false">
         <detail-list title="人员信息">
           <detail-list-item term="姓名">{{staffInsideData.name}}</detail-list-item>
           <detail-list-item term="部门">{{staffInsideData.deptName}}</detail-list-item>
@@ -49,11 +49,13 @@
           <detail-list-item term="座机联系电话">{{staffInsideData.phoneLandLine}}</detail-list-item>
           <detail-list-item term="手机联系电话">{{staffInsideData.phoneCell}}</detail-list-item>
           <detail-list-item term="出生年月">{{staffInsideData.birthDate}}</detail-list-item>
-          <detail-list-item term="年龄">{{this.$tools.getAge(staffInsideData.birthDate)}}</detail-list-item>
-          <!-- <detail-list-item term="退休年份">{{staffInsideData.retirementYear}}</detail-list-item> -->
+          <!-- <detail-list-item term="年龄">{{this.$tools.getAge(staffInsideData.birthDate)}}</detail-list-item> -->
+          <detail-list-item term="年龄">{{staffInsideData.age}}</detail-list-item>
+          <detail-list-item term="退休年龄">{{staffInsideData.retirementAge}}</detail-list-item>
+          <detail-list-item term="退休日期">{{staffInsideData.retirementDate}}</detail-list-item>
+          <detail-list-item term="调入日期">{{staffInsideData.transferDate}}</detail-list-item>
           <detail-list-item term="参加工作日期">{{staffInsideData.workDate}}</detail-list-item>
           <detail-list-item term="农转工转工日期">{{staffInsideData.farmerWorkDate}}</detail-list-item>
-          <detail-list-item term="调入环卫或报到日期">{{staffInsideData.transferDate}}</detail-list-item>
           <detail-list-item term="现任职务">{{staffInsideData.technicalType}}</detail-list-item>
           <detail-list-item term="岗位">{{getPost(staffInsideData.post)}}</detail-list-item>
           <detail-list-item term="岗位级别">{{staffInsideData.postLevel}}</detail-list-item>
@@ -70,6 +72,7 @@
 <script>
 import DetailList from '@/components/tool/DetailList'
 import AStepItem from '../../../components/tool/AStepItem'
+import { mapState } from 'vuex'
 
 const DetailListItem = DetailList.Item
 const AStepItemGroup = AStepItem.Group
@@ -91,9 +94,13 @@ export default {
       loading: false
     }
   },
+  computed: {
+    ...mapState({
+      permissions: state => state.account.permissions
+    })
+  },
   methods: {
     handleCancleClick () {
-      this.staffInsideData = {}
       this.$emit('close')
     },
     getNewTransfer (newTransfer) {
@@ -155,7 +162,8 @@ export default {
   },
   watch: {
     insuranceInsideInfoVisiable () {
-      if (this.insuranceInsideInfoVisiable) {
+      if (this.insuranceInsideInfoVisiable && this.permissions.includes('staffInside:view')) {
+        this.staffInsideData = {}
         this.loading = true
         this.$get('staffInside/getStaffInsideByStaffId', {
           staffId: this.insuranceInsideInfoData.staffId

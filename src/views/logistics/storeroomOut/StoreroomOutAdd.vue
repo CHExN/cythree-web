@@ -157,8 +157,14 @@ export default {
             key === 'createTimeFrom' ||
             key === 'createTimeTo' ||
             key === 'status' ||
+            key === 'unitOriginal' ||
+            key === 'amountOriginal' ||
+            key === 'moneyOriginal' ||
+            key === 'typeApplicationToDict' ||
+            key === 'typeApplicationAuthority' ||
             key === 'amountDist' ? undefined : value
           })
+          console.log(storeroomList)
           const date = values['date']
           this.loading = true
           this.$post('storeroomOut', {

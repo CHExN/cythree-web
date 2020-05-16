@@ -99,7 +99,6 @@ export default {
   },
   methods: {
     handleCancleClick () {
-      this.dataSource = []
       this.loading = false
       this.$emit('close')
     },
@@ -116,6 +115,7 @@ export default {
     fixedAssetsAcceptanceInfoVisiable () {
       if (this.fixedAssetsAcceptanceInfoVisiable) {
         if (this.fixedAssetsAcceptanceInfoData.storeroomOutId) {
+          this.dataSource = []
           this.loading = true
           this.$get('storeroomOut/storeroomByOutId', {
             outId: this.fixedAssetsAcceptanceInfoData.storeroomOutId

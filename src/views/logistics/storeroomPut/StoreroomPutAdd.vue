@@ -191,9 +191,11 @@ export default {
       autoData: {},
       open: false,
       tableIndex: 0,
+      storeroomCount: 0,
       modalVisible: false,
       dictData: {},
       // showSearch: false,
+      applicationId: null,
       deptId: '',
       formItemLayout,
       form: this.$form.createForm(this)
@@ -247,22 +249,27 @@ export default {
     reset () {
       this.putLoading = false
       this.putOutLoading = false
-      this.form.resetFields()
+      this.applicationId = null
       this.dataSource = []
       this.autoData = {}
       this.tableIndex = 0
+      this.storeroomCount = 0
+      this.form.resetFields()
     },
     onClose () {
       this.reset()
       this.$emit('close')
     },
-    setTableValues (typeApplication, storeroom) {
+    setTableValues (typeApplication, applicationId, storeroom) {
+      this.applicationId = applicationId
+      this.storeroomCount = storeroom.length
       this.form.getFieldDecorator('typeApplication')
       this.form.setFieldsValue({ typeApplication: typeApplication })
       for (const item in storeroom) {
         this.tableIndex++
         this.dataSource.push({
           key: this.tableIndex,
+          id: storeroom[item].id,
           name: storeroom[item].name,
           type: storeroom[item].type,
           unit: storeroom[item].unit,
@@ -286,18 +293,23 @@ export default {
             }
           })
           if (data.length > 0) {
+            let planCount = 0
             let storeroomList = JSON.stringify(data, function (key, value) {
+              if (key === 'id') planCount++
               return key === 'key' || key === 'editable' || key === 'isNew' ? undefined : value
             })
             const date = values['date']
             this.putLoading = true
             this.$post('storeroomPut', {
               ...values,
+              applicationId: this.applicationId,
               date: date.format('YYYY-MM-DD'),
               storeroomList: storeroomList
             }).then((r) => {
+              console.log(`planCount: ${planCount}`)
+              console.log(`storeroomCount: ${this.storeroomCount}`)
+              this.$emit('success', planCount === this.storeroomCount)
               this.reset()
-              this.$emit('success')
             }).catch(() => {
               this.putLoading = false
             })
@@ -358,8 +370,7 @@ export default {
     },
     handleSearch (name, key) {
       if (name) {
-        this.$get('price/' + name, {
-        }).then((r) => {
+        this.$get('price/name', {name}).then((r) => {
           if (r.data.length) {
             // 触发autoComplete展示下拉框
             // this.showSearch = true
@@ -398,21 +409,26 @@ export default {
             })
             if (data.length > 0) {
               this.modalVisible = false
+              let planCount = 0
               let storeroomList = JSON.stringify(data, function (key, value) {
+                if (key === 'id') planCount++
                 return key === 'key' || key === 'editable' || key === 'isNew' ? undefined : value
               })
-              this.putOutLoading = true
               const date = values['date']
+              this.putOutLoading = true
               this.$post('storeroomPut/inOut', {
                 ...values,
-                toDeptId: this.deptId,
+                applicationId: this.applicationId,
                 date: date.format('YYYY-MM-DD'),
-                storeroomList: storeroomList
+                storeroomList: storeroomList,
+                toDeptId: this.deptId
               }).then((r) => {
                 // 清空部门树选择
                 this.$refs.deptTree.reset()
                 this.reset()
-                this.$emit('success')
+                console.log(`planCount: ${planCount}`)
+                console.log(`storeroomCount: ${this.storeroomCount}`)
+                this.$emit('success', planCount === this.storeroomCount)
               }).catch(() => {
                 this.putOutLoading = false
               })

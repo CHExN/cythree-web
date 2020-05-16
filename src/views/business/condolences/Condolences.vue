@@ -406,14 +406,12 @@ export default {
         this.$message.warning('请选择需要导出的记录')
         return
       }
-      this.$message.loading('正在生成', 1, () => { // 3s后关闭执行关闭回调函数
-        this.selectedRows.forEach(item => {
-          item.sexx = item.sexx === '1' ? '男' : '女'
-          let spread = newSpread('Condolences')
-          spread = fixedForm(spread, 'Condolences', item)
-          let fileName = `职工慰问管理单_${item.name}.xlsx`
-          saveExcel(spread, fileName)
-        })
+      this.selectedRows.forEach(item => {
+        item.sexx = item.sexx === '1' ? '男' : '女'
+        let spread = newSpread('Condolences')
+        spread = fixedForm(spread, 'Condolences', item)
+        let fileName = `职工慰问管理单_${item.name}.xlsx`
+        saveExcel(spread, fileName)
       })
     },
     search () {

@@ -278,13 +278,13 @@ export default {
                 item.g
               ])
               if (newData.length === r.data.length) {
-                this.$message.destroy() // 等全部执行完后，再把message全局销毁
                 let spread = newSpread('WcCostAccount')
                 spread = fixedForm(spread, 'WcCostAccount', { title: `朝环三队${this.dateTitle}公厕成本核算台帐` })
                 spread = floatForm(spread, 'WcCostAccount', newData)
                 let fileName = `朝环三队${this.dateTitle}公厕成本核算台帐.xlsx`
                 saveExcel(spread, fileName)
                 floatReset(spread, 'WcCostAccount', newData.length)
+                this.$message.destroy() // 等全部执行完后，再把message全局销毁
               }
             })
           })
@@ -326,7 +326,6 @@ export default {
             ])
           })
           if (newData.length === r.data.length) {
-            this.$message.destroy() // 等全部执行完后，再把message全局销毁
             let tableName = this.yearIs === 0 ? 'WcCostAccountFirstHalf' : 'WcCostAccountSecondHalf'
             let spread = newSpread(tableName)
             spread = fixedForm(spread, tableName, { title: `朝环三队${this.yearValue}年${this.yearIs === 0 ? '01~06月' : '07~12月'}公厕成本核算台帐` })
@@ -334,6 +333,7 @@ export default {
             let fileName = `朝环三队${this.yearValue}年${this.yearIs === 0 ? '01~06月' : '07~12月'}公厕成本核算台帐.xlsx`
             saveExcel(spread, fileName)
             floatReset(spread, tableName, newData.length) // sheet.addRows有bug，用这个解决
+            this.$message.destroy() // 等全部执行完后，再把message全局销毁
           }
         })
       }

@@ -110,7 +110,7 @@
               :precision="2"
               :formatter="value => value"
               :parser="value => parseFloat(value) || 0"
-              @change="onInputNumberChange(rowIdCounts[record.wcId], record.wcId)"
+              @change="onInputNumberChange(rowIdCounts[record.wcId], record.wcId, record.wcOwn)"
             />
           </template>
           <span v-else></span>
@@ -140,6 +140,7 @@ export default {
       selectedRowKeys: [],
       selectedRows: [],
       rowIdCounts: {},
+      rowIdWcOwns: {},
       paginationInfo: null,
       queryParams: {
         wcOwn: []
@@ -204,6 +205,7 @@ export default {
     onSelect (record, selected) {
       if (selected) {
         this.$set(this.rowIdCounts, record.wcId, this.storeroom.amountDist >= 1 ? 1 : this.storeroom.amountDist)
+        this.rowIdWcOwns[record.wcId] = record.wcOwn
         // this.storeroom.amountDist -= this.rowIdCounts[record.wcId]
         let amountDist = this.storeroom.amountDist - this.rowIdCounts[record.wcId]
         // 四舍五入，保留小数点后两位
@@ -213,12 +215,14 @@ export default {
         // 加的时候就不用四舍五入了
         this.storeroom.amountDist += this.rowIdCounts[record.wcId]
         delete this.rowIdCounts[record.wcId]
+        delete this.rowIdWcOwns[record.wcId]
       }
     },
     onSelectAll (selected, selectedRows, changeRows) {
       if (selected) {
         changeRows.forEach(record => {
           this.$set(this.rowIdCounts, record.wcId, this.storeroom.amountDist >= 1 ? 1 : this.storeroom.amountDist)
+          this.rowIdWcOwns[record.wcId] = record.wcOwn
           // this.storeroom.amountDist -= this.rowIdCounts[record.wcId]
           let amountDist = this.storeroom.amountDist - this.rowIdCounts[record.wcId]
           // 四舍五入，保留小数点后两位
@@ -230,6 +234,7 @@ export default {
           // 加的时候就不用四舍五入了
           this.storeroom.amountDist += this.rowIdCounts[record.wcId]
           delete this.rowIdCounts[record.wcId]
+          delete this.rowIdWcOwns[record.wcId]
         })
       }
     },
@@ -240,12 +245,15 @@ export default {
       this.selectedRowKeys = []
       // 重置选中的id count集
       this.rowIdCounts = {}
+      this.rowIdWcOwns = {}
+      this.loading = false
+      this.butLoading = false
     },
     onClose () {
       this.onEmpty()
       this.$emit('close')
     },
-    onInputNumberChange (value, wcId) {
+    onInputNumberChange (value, wcId, wcOwn) {
       // 已选的分配总数
       let count = this.$tools.sumArr(Object.values(this.rowIdCounts))
       // 最大库存
@@ -254,6 +262,7 @@ export default {
       if (count > storeroomCount) {
         // 则把已选的分配总数减去错误的数，得到处理此项，其他所有项的分配总数，之后用最大库存减它，得到剩余库存，把这些都给当前项
         this.rowIdCounts[wcId] = storeroomCount - (count - value)
+        this.rowIdWcOwns[wcId] = wcOwn
         // 剩余库存归零
         this.storeroom.amountDist = 0
         return
@@ -276,11 +285,12 @@ export default {
           dataList.push({
             wcId: parseInt(key),
             storeroomId: this.storeroom.id,
-            amount: amount
+            amount,
+            wcOwn: this.rowIdWcOwns[key]
           })
         }
       })
-      // console.log(JSON.stringify(dataList))
+      // console.log(dataList)
       this.butLoading = true
       this.$post('wc/addWcStoreroom', {
         wcStoreroomStr: JSON.stringify(dataList),
@@ -289,9 +299,8 @@ export default {
         this.butLoading = false
         this.reset()
         this.$emit('success')
-        // 这里为什么不能成功执行catch呢
-      // }).catch(() => {
-        // this.butLoading = false
+      }).catch(() => {
+        this.butLoading = false
       })
     },
     search () {

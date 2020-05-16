@@ -205,8 +205,8 @@
           </detail-list-item>
         </detail-list>
       </a-card>
-      <a-divider style="margin-bottom: 32px"/>
-      <a-card :loading='loading' :bordered="false">
+      <a-divider v-hasPermission="'staffInside:view'" style="margin-bottom: 32px"/>
+      <a-card v-hasPermission="'staffInside:view'" :loading='loading' :bordered="false">
         <detail-list title="人员信息">
           <detail-list-item term="姓名">{{staffInsideData.name}}</detail-list-item>
           <detail-list-item term="部门">{{staffInsideData.deptName}}</detail-list-item>
@@ -229,10 +229,13 @@
           <detail-list-item term="座机联系电话">{{staffInsideData.phoneLandLine}}</detail-list-item>
           <detail-list-item term="手机联系电话">{{staffInsideData.phoneCell}}</detail-list-item>
           <detail-list-item term="出生年月">{{staffInsideData.birthDate}}</detail-list-item>
-          <detail-list-item term="年龄">{{this.$tools.getAge(staffInsideData.birthDate)}}</detail-list-item>
+          <!-- <detail-list-item term="年龄">{{this.$tools.getAge(staffInsideData.birthDate)}}</detail-list-item> -->
+          <detail-list-item term="年龄">{{staffInsideData.age}}</detail-list-item>
+          <detail-list-item term="退休年龄">{{staffInsideData.retirementAge}}</detail-list-item>
+          <detail-list-item term="退休日期">{{staffInsideData.retirementDate}}</detail-list-item>
+          <detail-list-item term="调入日期">{{staffInsideData.transferDate}}</detail-list-item>
           <detail-list-item term="参加工作日期">{{staffInsideData.workDate}}</detail-list-item>
           <detail-list-item term="农转工转工日期">{{staffInsideData.farmerWorkDate}}</detail-list-item>
-          <detail-list-item term="调入环卫或报到日期">{{staffInsideData.transferDate}}</detail-list-item>
           <detail-list-item term="现任职务">{{staffInsideData.technicalType}}</detail-list-item>
           <detail-list-item term="岗位">{{getPost(staffInsideData.post)}}</detail-list-item>
           <detail-list-item term="岗位级别">{{staffInsideData.postLevel}}</detail-list-item>
@@ -248,6 +251,7 @@
 </template>
 <script>
 import DetailList from '@/components/tool/DetailList'
+import { mapState } from 'vuex'
 
 const DetailListItem = DetailList.Item
 export default {
@@ -304,6 +308,11 @@ export default {
         realWage: []
       }
     }
+  },
+  computed: {
+    ...mapState({
+      permissions: state => state.account.permissions
+    })
   },
   methods: {
     handleCancleClick () {
@@ -401,15 +410,15 @@ export default {
   watch: {
     wageInfoVisiable () {
       if (this.wageInfoVisiable) {
+        this.staffInsideData = {}
         this.loading = true
-        this.$get('staffInside/getStaffInsideByStaffId', {
-          staffId: this.wageInfoData.staffId
-        }).then((r) => {
-          this.loading = false
-          if (r.data) {
-            this.staffInsideData = r.data
-          }
-        })
+        if (this.permissions.includes('staffInside:view')) {
+          this.$get('staffInside/getStaffInsideByStaffId', {
+            staffId: this.wageInfoData.staffId
+          }).then((r) => {
+            if (r.data) this.staffInsideData = r.data
+          })
+        }
         this.$get('wage/oneInfo', {
           insideOrOutside: this.wageInfoData.insideOrOutside,
           staffId: this.wageInfoData.staffId,
@@ -423,6 +432,7 @@ export default {
           year: this.wageInfoData.year,
           month: this.wageInfoData.month
         }).then((r) => {
+          this.loading = false
           if (r.data) this.emptyColumn = r.data.remark.split(',')
         })
       }

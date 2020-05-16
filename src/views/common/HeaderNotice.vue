@@ -220,17 +220,17 @@ export default {
       if (timestampDiff < 60) { // 一分钟以内
         return '刚刚'
       } else if (timestampDiff < 3600) { // 一小时前之内
-        return Math.floor(timestampDiff / 60) + '分钟前'
+        return `${Math.floor(timestampDiff / 60)}分钟前`
       } else if (curDate.getFullYear() === Y && curDate.getMonth() + 1 === m && curDate.getDate() === d) {
-        return '今天 ' + zeroize(H) + ':' + zeroize(i)
+        return `今天 ${zeroize(H)}:${zeroize(i)}`
       } else {
-        var newDate = new Date((curTimestamp - 86400) * 1000) // 参数中的时间戳加一天转换成的日期对象
+        const newDate = new Date((curTimestamp - 86400) * 1000) // 参数中的时间戳加一天转换成的日期对象
         if (newDate.getFullYear() === Y && newDate.getMonth() + 1 === m && newDate.getDate() === d) {
-          return '昨天 ' + zeroize(H) + ':' + zeroize(i)
+          return `昨天 ${zeroize(H)}:${zeroize(i)}`
         } else if (curDate.getFullYear() === Y) {
-          return zeroize(m) + '月' + zeroize(d) + '日 ' + zeroize(H) + ':' + zeroize(i)
+          return `${zeroize(m)}月${zeroize(d)}日 ${zeroize(H)}:${zeroize(i)}`
         } else {
-          return Y + '年' + zeroize(m) + '月' + zeroize(d) + '日 ' + zeroize(H) + ':' + zeroize(i)
+          return `${Y}年${zeroize(m)}月${zeroize(d)}日 ${zeroize(H)}:${zeroize(i)}`
         }
       }
     },

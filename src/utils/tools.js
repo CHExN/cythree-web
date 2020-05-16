@@ -62,11 +62,34 @@ let tools = {
     if (numStringArr.length === 1) {
       return Number(numString)
     }
-    let numStringArrArr = numStringArr[1].split('')
-    if (numStringArrArr[index] && numStringArrArr[index] >= 5) {
-      numStringArrArr[index - 1] = (Number(numStringArrArr[index - 1]) + 1).toString()
+    let numAfterArr = numStringArr[1].split('')
+    let amountArr = [...numStringArr[0].split(''), ...(numAfterArr.slice(0, index))].reverse()
+    // console.log(amountArr)
+    if (numAfterArr[index] && numAfterArr[index] >= 5) {
+      // 判断要进一位的那个数是不是9
+      if (numAfterArr[index - 1] === '9') {
+        let n = 1
+        let amountArrLength = amountArr.length
+        for (let i = 0; i < amountArrLength; i++) {
+          if (n === 0) continue
+          if (amountArr[i] === '9') {
+            amountArr[i] = '0'
+            if (i + 1 === amountArrLength) {
+              amountArr[i + 1] = '1'
+            }
+          } else {
+            amountArr[i] = (Number(amountArr[i]) + n).toString()
+            n = 0
+          }
+        }
+        amountArr.splice(index, 0, '.')
+        // console.log(amountArr.reverse().join(''))
+        return Number(amountArr.reverse().join(''))
+      } else {
+        numAfterArr[index - 1] = (Number(numAfterArr[index - 1]) + 1).toString()
+      }
     }
-    return Number(`${numStringArr[0]}.${numStringArrArr.slice(0, index).join('')}`)
+    return Number(`${numStringArr[0]}.${numAfterArr.slice(0, index).join('')}`)
   },
 
   // number数组之和
@@ -75,30 +98,6 @@ let tools = {
       return prev + cur
     }, 0)
   },
-
-  // 两浮点数之乘
-  // accMultiply (arg1, arg2) {
-  //   let m = 0
-  //   let s1 = arg1.toString()
-  //   let s2 = arg2.toString()
-  //   try { m += s1.split('.')[1].length } catch (e) {}
-  //   try { m += s2.split('.')[1].length } catch (e) {}
-  //   return Number(s1.replace('.', '')) * Number(s2.replace('.', '')) / Math.pow(10, m)
-  // },
-
-  // 两浮点数之和
-  // accAdd (arg1, arg2) {
-  //   let r1, r2, m
-  //   try { r1 = arg1.toString().split('.')[1].length } catch (e) { r1 = 0 }
-  //   try { r2 = arg2.toString().split('.')[1].length } catch (e) { r2 = 0 }
-  //   m = Math.pow(10, Math.max(r1, r2))
-  //   console.log(`(${arg1} * ${m} + ${arg2} * ${m}) / ${m}`)
-  //   console.log(`(${arg1 * m} + ${arg2 * m}) / ${m}`)
-  //   console.log(`${arg1 * m + arg2 * m} / ${m}`)
-  //   console.log(`${arg1 * m + arg2 * m / m}`)
-  //   console.log('==========')
-  //   return (arg1 * m + arg2 * m) / m
-  // },
 
   /*
    * 判断obj是否为一个整数
@@ -236,6 +235,12 @@ let tools = {
   // 根据身份证号获取性别
   getGender (idNum) {
     return idNum.slice(14, 17) % 2 ? 1 : 0 // 1代表男性，0代表女性
+  },
+
+  // 去除datetime里的T
+  getDateTime (dateTime) {
+    if (!dateTime) return dateTime
+    return dateTime.replace(/T/, ' ')
   },
 
   verification (entity, callback) {

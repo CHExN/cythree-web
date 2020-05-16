@@ -340,27 +340,29 @@ export default {
       this.$get('application/applicationPlan', {
         applicationId: this.putingData.id
       }).then((r) => {
-        this.$refs.putAdd.setTableValues(record.typeApplication, r.data)
+        this.$refs.putAdd.setTableValues(record.typeApplication, record.id, r.data)
       })
       this.putAdd.visiable = true
     },
     handlePutAddClose () {
       this.putAdd.visiable = false
     },
-    handlePutAddSuccess () {
+    handlePutAddSuccess (isProcess) {
       this.putAdd.visiable = false
       this.$message.success('新增入库成功')
-      this.loading = true
-      this.$put('application', {
-        num: this.putingData.num,
-        id: this.putingData.id,
-        typeApplication: this.putingData.typeApplication,
-        username: this.putingData.username,
-        process: 2
-      }).then((r) => {
-        this.search()
-        this.putingData = {}
-      })
+      if (isProcess) {
+        this.loading = true
+        this.$put('application', {
+          num: this.putingData.num,
+          id: this.putingData.id,
+          typeApplication: this.putingData.typeApplication,
+          username: this.putingData.username,
+          process: 2
+        }).then((r) => {
+          this.search()
+          this.putingData = {}
+        })
+      }
     },
     handleApplicationInfoClose () {
       this.applicationInfo.visiable = false

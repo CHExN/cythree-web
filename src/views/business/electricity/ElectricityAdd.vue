@@ -57,9 +57,9 @@
       <a-form-item label='购电方式' v-bind="formItemLayout">
         <a-auto-complete
           :dataSource="dataSource"
-          placeholder="购电方式"
           :filterOption="filterOption"
           :allowClear="true"
+          placeholder="购电方式"
           v-decorator="['type',
             {rules: [{ required: true, message: '购电方式不能为空'}]}
           ]"

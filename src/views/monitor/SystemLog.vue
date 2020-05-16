@@ -5,10 +5,10 @@
           <a-row>
             <a-col :md="12" :sm="24" >
               <a-form-item
-                label="操作人"
+                label="方法参数"
                 :labelCol="{span: 5}"
                 :wrapperCol="{span: 18, offset: 1}">
-                <a-input v-model="queryParams.username"/>
+                <a-input v-model="queryParams.params"/>
               </a-form-item>
             </a-col>
             <a-col :md="12" :sm="24" >
@@ -21,6 +21,14 @@
             </a-col>
          </a-row>
           <a-row v-if="advanced">
+            <a-col :md="12" :sm="24" >
+              <a-form-item
+                label="操作人"
+                :labelCol="{span: 5}"
+                :wrapperCol="{span: 18, offset: 1}">
+                <a-input v-model="queryParams.username"/>
+              </a-form-item>
+            </a-col>
             <a-col :md="12" :sm="24" >
               <a-form-item
                 label="操作地点"
@@ -173,6 +181,7 @@ export default {
     toggleAdvanced () {
       this.advanced = !this.advanced
       if (!this.advanced) {
+        this.queryParams.username = ''
         this.queryParams.createTimeFrom = ''
         this.queryParams.createTimeTo = ''
         this.queryParams.location = ''

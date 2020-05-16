@@ -281,13 +281,13 @@ export default {
           })
           newDataList.push(newData)
           if (this.selectedRows.length === newDataList.length) {
-            this.$message.destroy() // 等全部执行完后，再把message全局销毁
             newDataList.forEach(item => {
               let spread = newSpread('FixedAssetsAcceptance')
               spread = fixedForm(spread, 'FixedAssetsAcceptance', item)
               let fileName = `固定资产验收单_${item.name}_${item.num}.xlsx`
               saveExcel(spread, fileName)
             })
+            this.$message.destroy() // 等全部执行完后，再把message全局销毁
           }
         })
       })

@@ -403,7 +403,6 @@ export default {
         return
       }
       this.$message.loading('正在生成', 0)
-      // let newData = []
       this.selectedRows.forEach(item => {
         let dateArr = `${item.date}`.split('-')
         let exportData = {
@@ -426,7 +425,7 @@ export default {
             let storeroomMoney = this.$tools.rounding(this.$tools.accMultiply(storeroom.money, storeroom.amount), 2)
             let storeroomMoneyArr = `${this.$tools.addZero(storeroomMoney)}`.replace(/[.]/g, '').split('').reverse()
             let storeroomExportItem = [
-              '', // 货号
+              '', // 货号 (index + 1)
               storeroom.name,
               storeroom.unit,
               storeroom.amount,
@@ -452,22 +451,24 @@ export default {
               everyEightBatchesTotalAmount[divideEight] = this.$tools.accAdd(everyEightBatchesTotalAmount[divideEight], storeroomMoney)
             }
           })
+
+          // 测试
+          let money = Object.values(everyEightBatchesTotalAmount).reduce((prev, current, index, arr) => {
+            return this.$tools.accAdd(prev, current)
+          })
+          if (item.money === money) {
+            console.log('true')
+          } else {
+            console.log('========')
+            console.log(item.money)
+            console.log(money)
+            console.log(everyEightBatchesTotalAmount)
+            console.log('========')
+          }
+
           Object.keys(everyEightBatches).forEach(key => {
             let everyEightBatchesTotalAmountArr = `${this.$tools.addZero(everyEightBatchesTotalAmount[key])}`.replace(/[.]/g, '').split('').reverse()
             everyEightBatchesTotalAmountArr.push('￥')
-            // newData.push({
-            //   ...exportData,
-            //   everyEightBatches: everyEightBatches[key],
-            //   f: everyEightBatchesTotalAmountArr[0], // 分
-            //   j: everyEightBatchesTotalAmountArr[1], // 角
-            //   y: everyEightBatchesTotalAmountArr[2], // 元
-            //   s: everyEightBatchesTotalAmountArr[3], // 十
-            //   b: everyEightBatchesTotalAmountArr[4], // 百
-            //   q: everyEightBatchesTotalAmountArr[5], // 千
-            //   w: everyEightBatchesTotalAmountArr[6], // 万
-            //   sw: everyEightBatchesTotalAmountArr[7], // 十万
-            //   bw: everyEightBatchesTotalAmountArr[8] // 百万
-            // })
             exportData = {
               ...exportData,
               everyEightBatches: everyEightBatches[key],
@@ -481,7 +482,6 @@ export default {
               sw: everyEightBatchesTotalAmountArr[7], // 十万
               bw: everyEightBatchesTotalAmountArr[8] // 百万
             }
-            this.$message.destroy() // 等全部执行完后，再把message全局销毁
             let spread = newSpread('StoreroomOut')
             spread = fixedForm(spread, 'StoreroomOut', exportData)
             spread = floatForm(spread, 'StoreroomOut', exportData.everyEightBatches)
@@ -491,16 +491,7 @@ export default {
           })
         })
       })
-      // this.$message.loading('正在生成', 3, () => { // 3s后关闭执行关闭回调函数
-      //   newData.forEach(exportData => {
-      //     let spread = newSpread('StoreroomOut')
-      //     spread = fixedForm(spread, 'StoreroomOut', exportData)
-      //     spread = floatForm(spread, 'StoreroomOut', exportData.everyEightBatches)
-      //     let fileName = `出库单_${exportData.typeApplicationToDept}_${exportData.date}_${exportData.num}.xlsx`
-      //     saveExcel(spread, fileName)
-      //     floatReset(spread, 'StoreroomOut', exportData.everyEightBatches.length)
-      //   })
-      // })
+      this.$message.destroy() // 等全部执行完后，再把message全局销毁
     },
     search () {
       let {sortedInfo, filteredInfo} = this

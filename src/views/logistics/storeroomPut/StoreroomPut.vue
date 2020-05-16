@@ -101,9 +101,21 @@
           style="left: -12%;top: 25%"
           @ok="viewDist"
           okText="提交">
+          <div style="width: 100%; margin-top: -20px; margin-bottom: 10px">
+            <a-radio-group @change="onRadioChange" v-model="radioValue">
+              <a-radio-button :value="true">月选</a-radio-button>
+              <a-radio-button :value="false">范围</a-radio-button>
+            </a-radio-group>
+          </div>
           <a-month-picker
             style="width: 100%;"
+            v-if="radioValue"
             @change="handleMonthChange"
+          />
+          <range-date
+            v-else
+            @change="handleDateRangeChange"
+            ref="dateRange"
           />
         </a-modal>
       </div>
@@ -187,11 +199,12 @@ export default {
   components: { PutInfo, PutAdd, PutEdit, RangeDate, CanteenTypeManage, SupplierManage },
   data () {
     return {
+      radioValue: true,
       advanced: false,
       modalVisible: false,
-      // popconfirmVisible: false,
       dateData: {
-        dateForm: {}
+        dateForm: {},
+        dateRange: {}
       },
       putInfo: {
         visiable: false,
@@ -417,10 +430,17 @@ export default {
       }
     },
     viewDist () {
+      let date = null
+      let dateRangeFrom = null
+      let dateRangeTo = null
       if (JSON.stringify(this.dateData.dateForm) !== '{}') {
+        date = `${this.dateData.dateForm.year}-${this.dateData.dateForm.month}`
+        let title = `${this.dateData.dateForm.year}年${this.dateData.dateForm.month}月食堂材料用量明细表`
+        let fileName = `食堂材料用量明细表_${this.dateData.dateForm.year}-${this.dateData.dateForm.month}.xlsx`
         this.modalVisible = false
+        this.$message.loading('正在生成', 0)
         this.$get('storeroom/canteen', {
-          date: `${this.dateData.dateForm.year}-${this.dateData.dateForm.month}`
+          date, dateRangeFrom, dateRangeTo
         }).then((r) => {
           let newData = []
           let amount = 0
@@ -435,17 +455,45 @@ export default {
             ])
           })
           newData.push(['总计', amount, money])
-          this.$message.loading('正在生成', 3, () => { // 3s后关闭执行关闭回调函数
-            let spread = newSpread('Canteen')
-            spread = fixedForm(spread, 'Canteen', {title: `${this.dateData.dateForm.year}年${this.dateData.dateForm.month}月食堂材料用量明细表`})
-            spread = floatForm(spread, 'Canteen', newData)
-            let fileName = `食堂材料用量明细表_${this.dateData.dateForm.year}-${this.dateData.dateForm.month}.xlsx`
-            saveExcel(spread, fileName)
-            floatReset(spread, 'Canteen', newData.length)
+
+          let spread = newSpread('Canteen')
+          spread = fixedForm(spread, 'Canteen', { title })
+          spread = floatForm(spread, 'Canteen', newData)
+          saveExcel(spread, fileName)
+          floatReset(spread, 'Canteen', newData.length)
+          this.onRadioChange()
+          this.radioValue = true
+          this.$message.destroy() // 等全部执行完后，再把message全局销毁
+        })
+      } else if (JSON.stringify(this.dateData.dateRange) !== '{}') {
+        dateRangeFrom = this.dateData.dateRange.dateRangeFrom
+        dateRangeTo = this.dateData.dateRange.dateRangeTo
+        this.modalVisible = false
+        this.$message.loading('正在生成', 0)
+        this.$get('storeroom/canteenSupplier', {
+          dateRangeFrom, dateRangeTo, day: moment(dateRangeTo).diff(moment(dateRangeFrom), 'days') + 1
+        }).then((r) => {
+          let dataSource = r.data
+          Object.keys(dataSource).forEach(key => {
+            let newData = []
+            dataSource[key].forEach(item => {
+              newData.push([
+                item.date,
+                item.money
+              ])
+            })
+            let spread = newSpread('CanteenSupplier')
+            spread = fixedForm(spread, 'CanteenSupplier', { title: `${key}结账日（${dateRangeFrom}~${dateRangeTo}）` })
+            spread = floatForm(spread, 'CanteenSupplier', newData)
+            saveExcel(spread, `食堂材料供应商结账表_${dateRangeFrom}至${dateRangeTo}_${key}.xlsx`)
+            floatReset(spread, 'CanteenSupplier', newData.length)
           })
+          this.onRadioChange()
+          this.radioValue = true
+          this.$message.destroy() // 等全部执行完后，再把message全局销毁
         })
       } else {
-        this.$message.warning('请选择查看月份')
+        return this.$message.warning('请选择查看时间')
       }
     },
     handleMonthChange (value) {
@@ -456,6 +504,23 @@ export default {
       this.dateData.dateForm = {
         year: value.format('YYYY'),
         month: value.format('MM')
+      }
+    },
+    handleDateRangeChange (value) {
+      if (!value) {
+        this.dateData.dateRange = {}
+        return
+      }
+      this.dateData.dateRange = {
+        dateRangeFrom: value[0],
+        dateRangeTo: value[1]
+      }
+    },
+    onRadioChange (e) {
+      // 切换radio时 重置日期选择data
+      this.dateData = {
+        dateForm: {},
+        dateRange: {}
       }
     },
     showModal () {
@@ -472,11 +537,22 @@ export default {
         content: '当您点击确定按钮后，这些记录将会被彻底删除',
         centered: true,
         onOk () {
-          that.$delete('storeroomPut/' + that.selectedRowKeys.join(',')).then(() => {
-            that.$message.success('删除成功')
-            that.selectedRowKeys = []
-            that.selectedRows = []
-            that.search()
+          that.loading = true
+          that.$delete('storeroomPut/' + that.selectedRowKeys.join(',')).then((r) => {
+            that.loading = false
+            if (r.data.status === 0) {
+              that.$warning({
+                title: r.data.message,
+                content: `抱歉，单号为【${r.data.outRecords.map(a => a.num).join('; ')}】
+                有相关出库记录，请先删除相应出库单，再删除入库单。想查看具体要删除的出库单，请复制入库单名称或物资名称到【出入库物品明细】模块进行查询即可查看`,
+                centered: true
+              })
+            } else if (r.data.status === 1) {
+              that.$message.success('删除成功')
+              that.selectedRowKeys = []
+              that.selectedRows = []
+              that.search()
+            }
           })
         },
         onCancel () {
@@ -491,7 +567,6 @@ export default {
         return
       }
       this.$message.loading('正在生成', 0)
-      // let newData = []
       this.selectedRows.forEach(item => {
         let dateArr = `${item.date}`.split('-')
         let exportData = {
@@ -512,9 +587,11 @@ export default {
           r.data.forEach((storeroom, index) => { // 这里四舍五入后两位小数
             // let storeroomMoney = Math.round(this.$tools.accMultiply(storeroom.money, storeroom.amount) * 100) / 100
             let storeroomMoney = this.$tools.rounding(this.$tools.accMultiply(storeroom.money, storeroom.amount), 2)
+            console.log(this.$tools.accMultiply(storeroom.money, storeroom.amount))
+            console.log(storeroomMoney)
             let storeroomMoneyArr = `${this.$tools.addZero(storeroomMoney)}`.replace(/[.]/g, '').split('').reverse()
             let storeroomExportItem = [
-              '', // 货号
+              '', // 货号 (index + 1)
               storeroom.name,
               storeroom.unit,
               storeroom.amount,
@@ -534,31 +611,30 @@ export default {
             if (everyEightBatches[divideEight]) {
               everyEightBatches[divideEight].push(storeroomExportItem)
               everyEightBatchesTotalAmount[divideEight] = this.$tools.accAdd(everyEightBatchesTotalAmount[divideEight], storeroomMoney)
-              // console.log(everyEightBatchesTotalAmount)
             } else {
               everyEightBatches[divideEight] = [storeroomExportItem]
               everyEightBatchesTotalAmount[divideEight] = 0
               everyEightBatchesTotalAmount[divideEight] = this.$tools.accAdd(everyEightBatchesTotalAmount[divideEight], storeroomMoney)
-              // console.log(everyEightBatchesTotalAmount)
             }
           })
-          // console.log(everyEightBatchesTotalAmount)
+
+          // 测试
+          let money = Object.values(everyEightBatchesTotalAmount).reduce((prev, current, index, arr) => {
+            return this.$tools.accAdd(prev, current)
+          })
+          if (item.money === money) {
+            console.log('true')
+          } else {
+            console.log('========')
+            console.log(item.money)
+            console.log(money)
+            console.log(everyEightBatchesTotalAmount)
+            console.log('========')
+          }
+
           Object.keys(everyEightBatches).forEach(key => {
             let everyEightBatchesTotalAmountArr = `${this.$tools.addZero(everyEightBatchesTotalAmount[key])}`.replace(/[.]/g, '').split('').reverse()
             everyEightBatchesTotalAmountArr.push('￥')
-            // newData.push({
-            //   ...exportData,
-            //   everyEightBatches: everyEightBatches[key],
-            //   f: everyEightBatchesTotalAmountArr[0], // 分
-            //   j: everyEightBatchesTotalAmountArr[1], // 角
-            //   y: everyEightBatchesTotalAmountArr[2], // 元
-            //   s: everyEightBatchesTotalAmountArr[3], // 十
-            //   b: everyEightBatchesTotalAmountArr[4], // 百
-            //   q: everyEightBatchesTotalAmountArr[5], // 千
-            //   w: everyEightBatchesTotalAmountArr[6], // 万
-            //   sw: everyEightBatchesTotalAmountArr[7], // 十万
-            //   bw: everyEightBatchesTotalAmountArr[8] // 百万
-            // })
             exportData = {
               ...exportData,
               everyEightBatches: everyEightBatches[key],
@@ -572,7 +648,6 @@ export default {
               sw: everyEightBatchesTotalAmountArr[7], // 十万
               bw: everyEightBatchesTotalAmountArr[8] // 百万
             }
-            this.$message.destroy() // 等全部执行完后，再把message全局销毁
             let spread = newSpread('StoreroomPut')
             spread = fixedForm(spread, 'StoreroomPut', exportData)
             spread = floatForm(spread, 'StoreroomPut', exportData.everyEightBatches)
@@ -582,16 +657,7 @@ export default {
           })
         })
       })
-      // this.$message.loading('正在生成', 3, () => { // 3s后关闭执行关闭回调函数
-      //   newData.forEach(exportData => {
-      //     let spread = newSpread('StoreroomPut')
-      //     spread = fixedForm(spread, 'StoreroomPut', exportData)
-      //     spread = floatForm(spread, 'StoreroomPut', exportData.everyEightBatches)
-      //     let fileName = `入库单_${exportData.typeApplicationToDept}_${exportData.date}_${exportData.num}.xlsx`
-      //     saveExcel(spread, fileName)
-      //     floatReset(spread, 'StoreroomPut', exportData.everyEightBatches.length)
-      //   })
-      // })
+      this.$message.destroy() // 等全部执行完后，再把message全局销毁
     },
     search () {
       let {sortedInfo, filteredInfo} = this
@@ -673,6 +739,7 @@ export default {
       })
     },
     fetch (params = {}) {
+      // console.log(this.$tools.rounding(999.99959, 3))
       // 显示loading
       this.loading = true
       if (this.paginationInfo) {

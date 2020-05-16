@@ -14,7 +14,7 @@
                  autocomplete="off"
                  v-decorator="['name',
                   {rules: [
-                    {pattern: '^[^(^)]+$', message: '不能包含 ^ 符号'},
+                    {pattern: '^[^^]+$', message: '不能包含 ^ 符号'},
                     {required: true, message: '不能为空'},
                     {max: 20, message: '长度不能超过20个字符'}
                   ]}]"/>
@@ -57,12 +57,13 @@ export default {
       loading: false,
       formItemLayout,
       form: this.$form.createForm(this),
-      id: ''
+      id: null
     }
   },
   methods: {
     reset () {
       this.loading = false
+      this.id = null
       this.form.resetFields()
     },
     onClose () {
@@ -81,6 +82,7 @@ export default {
     handleSubmit () {
       this.form.validateFields((err, values) => {
         if (!err) {
+          this.loading = true
           this.$put('price', {
             ...values,
             id: this.id

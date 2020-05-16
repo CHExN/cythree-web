@@ -72,6 +72,7 @@ const fileNameData = {
   WcCostAccountSecondHalf: '公厕下半年台账.json',
   OfficeSuppliesApplicationForm: '办公用品申领单.json',
   Canteen: '食堂用品.json',
+  CanteenSupplier: '食堂用品供应商分类.json',
   FixedAssets: '固定资产申请单.json',
   FixedAssetsAcceptance: '固定资产验收单.json',
   Attendance: '考勤.json',
@@ -93,6 +94,7 @@ const startRowData = {
   WcCostAccountSecondHalf: 4,
   OfficeSuppliesApplicationForm: 4,
   Canteen: 3,
+  CanteenSupplier: 3,
   FixedAssets: 5,
   Attendance: 5,
   Staff: 2,
@@ -172,6 +174,9 @@ const rowColData = {
     date: {row: 1, col: 5}
   },
   Canteen: {
+    title: {row: 0, col: 1}
+  },
+  CanteenSupplier: {
     title: {row: 0, col: 1}
   },
   FixedAssets: {

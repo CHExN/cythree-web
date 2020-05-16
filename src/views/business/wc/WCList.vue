@@ -124,7 +124,7 @@ export default {
   },
   methods: {
     determine (record) {
-      this.$emit('change', record.wcName, record.wcNum)
+      this.$emit('change', record.wcName, record.wcNum, record.wcId)
       this.onClose()
     },
     onClose () {

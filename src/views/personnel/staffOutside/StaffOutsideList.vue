@@ -29,6 +29,17 @@
               </a-col>
               <a-col :md="24" >
               <a-form-item
+                label="所属"
+                :labelCol="{span: 4}"
+                :wrapperCol="{span: 18, offset: 1}">
+                <a-select>
+                  <a-select-option key="1">全部</a-select-option>
+                  <a-select-option key="2">归属人员</a-select-option>
+                  <a-select-option key="3">分队人员</a-select-option>
+                  <a-select-option key="3">劳务派遣人员</a-select-option>
+                </a-select>
+              </a-form-item>
+              <a-form-item
                 label="分队"
                 :labelCol="{span: 4}"
                 :wrapperCol="{span: 18, offset: 1}">

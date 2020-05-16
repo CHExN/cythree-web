@@ -25,8 +25,8 @@
           <!-- <detail-list-item term="修改时间">{{insuranceOutsideInfoData.modifyTime}}</detail-list-item> -->
         </detail-list>
       </a-card>
-      <a-divider style="margin-bottom: 32px"/>
-      <a-card :loading='loading' :bordered="false">
+      <a-divider v-hasPermission="'staffOutside:view'" style="margin-bottom: 32px"/>
+      <a-card v-hasPermission="'staffOutside:view'" :loading='loading' :bordered="false">
         <detail-list title="人员信息">
           <detail-list-item term="姓名">{{staffOutsideData.name}}</detail-list-item>
           <detail-list-item term="分队">{{staffOutsideData.team}}</detail-list-item>
@@ -43,10 +43,11 @@
           <detail-list-item term="座机联系电话">{{staffOutsideData.phoneLandLine}}</detail-list-item>
           <detail-list-item term="手机联系电话">{{staffOutsideData.phoneCell}}</detail-list-item>
           <detail-list-item term="出生年月">{{staffOutsideData.birthDate}}</detail-list-item>
-          <detail-list-item term="年龄">{{this.$tools.getAge(staffOutsideData.birthDate)}}</detail-list-item>
-          <!-- <detail-list-item term="退休年份">{{staffOutsideData.retirementYear}}</detail-list-item> -->
-          <detail-list-item term="调入环卫或报到日期">{{staffOutsideData.transferDate}}</detail-list-item>
-          <detail-list-item term="到本场队日期">{{staffOutsideData.toTeamDate}}</detail-list-item>
+          <!-- <detail-list-item term="年龄">{{this.$tools.getAge(staffOutsideData.birthDate)}}</detail-list-item> -->
+          <detail-list-item term="年龄">{{staffOutsideData.age}}</detail-list-item>
+          <detail-list-item term="退休年龄">{{staffOutsideData.retirementAge}}</detail-list-item>
+          <detail-list-item term="退休日期">{{staffOutsideData.retirementDate}}</detail-list-item>
+          <detail-list-item term="调入日期">{{staffOutsideData.transferDate}}</detail-list-item>
           <detail-list-item term="岗位">{{staffOutsideData.post}}</detail-list-item>
           <detail-list-item term="岗位类别">{{staffOutsideData.technicalType}}</detail-list-item>
           <detail-list-item term="备注">{{staffOutsideData.remark}}</detail-list-item>
@@ -58,6 +59,7 @@
 <script>
 import DetailList from '@/components/tool/DetailList'
 import AStepItem from '../../../components/tool/AStepItem'
+import { mapState } from 'vuex'
 
 const DetailListItem = DetailList.Item
 const AStepItemGroup = AStepItem.Group
@@ -79,9 +81,13 @@ export default {
       loading: false
     }
   },
+  computed: {
+    ...mapState({
+      permissions: state => state.account.permissions
+    })
+  },
   methods: {
     handleCancleClick () {
-      this.staffOutsideData = {}
       this.$emit('close')
     },
     getNewTransfer (newTransfer) {
@@ -115,7 +121,8 @@ export default {
   },
   watch: {
     insuranceOutsideInfoVisiable () {
-      if (this.insuranceOutsideInfoVisiable) {
+      if (this.insuranceOutsideInfoVisiable && this.permissions.includes('staffOutside:view')) {
+        this.staffOutsideData = {}
         this.loading = true
         this.$get('staffOutside/getStaffOutsideByStaffId', {
           staffId: this.insuranceOutsideInfoData.staffId

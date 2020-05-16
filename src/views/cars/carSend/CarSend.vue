@@ -201,7 +201,7 @@ export default {
         title: '创建时间',
         dataIndex: 'createTime',
         customRender: (text, row, index) => {
-          return text.replace(/T/, ' ')
+          return this.$tools.getDateTime(text)
         }
       }, {
         title: '操作',

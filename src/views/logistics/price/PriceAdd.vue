@@ -14,7 +14,7 @@
                  autocomplete="off"
                  v-decorator="['name',
                   {rules: [
-                    {pattern: '^[^(^)]+$', message: '不能包含 ^ 符号'},
+                    {pattern: '^[^^]+$', message: '不能包含 ^ 符号'},
                     {required: true, message: '不能为空'},
                     {max: 20, message: '长度不能超过20个字符'}
                   ]}]"/>
@@ -71,6 +71,7 @@ export default {
     handleSubmit () {
       this.form.validateFields((err, values) => {
         if (!err) {
+          this.loading = true
           this.$post('price', {
             ...values
           }).then(() => {

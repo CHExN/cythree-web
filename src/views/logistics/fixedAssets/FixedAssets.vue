@@ -329,7 +329,6 @@ export default {
           })
           storeroomArr[item.id] = arr
           if (this.selectedRows.length === Object.keys(storeroomArr).length) {
-            this.$message.destroy() // 等全部执行完后，再把message全局销毁
             newData.forEach(item => {
               let spread = newSpread('FixedAssets')
               spread = fixedForm(spread, 'FixedAssets', item)
@@ -338,6 +337,7 @@ export default {
               saveExcel(spread, fileName)
               floatReset(spread, 'FixedAssets', storeroomArr[`${item.id}`].length) // sheet.addRows有bug，用这个解决
             })
+            this.$message.destroy() // 等全部执行完后，再把message全局销毁
           }
         })
       })

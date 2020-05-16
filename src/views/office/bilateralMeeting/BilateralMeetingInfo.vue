@@ -48,7 +48,7 @@
         <detail-list-item term="申请人">{{bilateralMeetingInfoData.applicant}}</detail-list-item>
         <detail-list-item term="拟上会议题">{{bilateralMeetingInfoData.bilateralMeeting}}</detail-list-item>
         <detail-list-item term="提议事由梗概">{{bilateralMeetingInfoData.proposedCauseSummary}}</detail-list-item>
-        <detail-list-item term="上会时间">{{bilateralMeetingInfoData.meetingTime ?  bilateralMeetingInfoData.meetingTime.replace(/T/, ' ') : '未定'}}</detail-list-item>
+        <detail-list-item term="上会时间">{{bilateralMeetingInfoData.meetingTime ?  this.$tools.getDateTime(bilateralMeetingInfoData.meetingTime) : '未定'}}</detail-list-item>
       </detail-list>
       <a-divider style="margin-bottom: 32px"/>
       <detail-list title="意见信息">

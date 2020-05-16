@@ -6,29 +6,34 @@
           <div :class="advanced ? null: 'fold'">
             <a-col :md="12" :sm="24" >
               <a-form-item
+                label="分队"
+                :labelCol="{span: 5}"
+                :wrapperCol="{span: 18, offset: 1}">
+                <a-select
+                  mode="multiple"
+                  :allowClear="true"
+                  @change="handleTeamChange">
+                  <a-select-option v-for="i in filteredTeamOptions" :key="i">{{ i }}</a-select-option>
+                </a-select>
+              </a-form-item>
+            </a-col>
+            <a-col :md="12" :sm="24" >
+              <a-form-item
                 label="姓名"
                 :labelCol="{span: 5}"
                 :wrapperCol="{span: 18, offset: 1}">
                 <a-input v-model="queryParams.name"/>
               </a-form-item>
             </a-col>
-            <a-col :md="12" :sm="24" >
-              <a-form-item
-                label="身份证号"
-                :labelCol="{span: 5}"
-                :wrapperCol="{span: 18, offset: 1}">
-                <a-input v-model="queryParams.idNum"/>
-              </a-form-item>
-            </a-col>
             <template v-if="advanced">
-              <!-- <a-col :md="12" :sm="24" >
+              <a-col :md="12" :sm="24" >
                 <a-form-item
-                  label="无固定期"
+                  label="身份证号"
                   :labelCol="{span: 5}"
                   :wrapperCol="{span: 18, offset: 1}">
-                  <a-input v-model="queryParams.isFixedPeriod"/>
+                  <a-input v-model="queryParams.idNum"/>
                 </a-form-item>
-              </a-col> -->
+              </a-col>
               <a-col :md="12" :sm="24" >
                 <a-form-item
                   label="续签备注"
@@ -43,6 +48,18 @@
                   :labelCol="{span: 5}"
                   :wrapperCol="{span: 18, offset: 1}">
                   <a-input v-model="queryParams.remark"/>
+                </a-form-item>
+              </a-col>
+              <a-col :md="12" :sm="24" >
+                <a-form-item
+                  label="在职与否"
+                  :labelCol="{span: 5}"
+                  :wrapperCol="{span: 18, offset: 1}">
+                  <a-select v-model="isLeave">
+                    <a-select-option value="0,1">全部</a-select-option>
+                    <a-select-option value="0">在职</a-select-option>
+                    <a-select-option value="1">非在职</a-select-option>
+                  </a-select>
                 </a-form-item>
               </a-col>
               <a-col :md="12" :sm="24" >
@@ -93,8 +110,23 @@
     <div>
       <div class="operator">
         <a-button type="primary" ghost @click="add" v-hasPermission="'contractOutside:add'">新增</a-button>
-        <a-button @click="batchDelete" v-hasPermission="'contractOutside:delete'">删除</a-button>
-        <a-button @click="exportExcel" v-hasPermission="'contractOutside:export'">导出Excel</a-button>
+        <span v-show="deleted===0">
+          <a-button v-hasPermission="'contractOutside:delete'" @click="batchDelete">删除</a-button>
+        </span>
+        <span v-show="deleted===1">
+          <a-button v-hasPermission="'contractOutside:deleteTrue'" @click="batchDelete">删除</a-button>
+          <a-button v-hasNoPermission="'contractOutside:deleteTrue'" disabled title="无权限">删除</a-button>
+        </span>
+        <a-dropdown v-hasAnyPermission="'contractOutside:export'">
+          <a-menu slot="overlay">
+            <a-menu-item key="export-data" @click="exportExcel" v-hasPermission="'contractOutside:export'">导出Excel</a-menu-item>
+            <a-menu-item key="deleted" @click="setDeleted">{{deleted === 0 ? '查看回收站' : '回到页面'}}</a-menu-item>
+            <a-menu-item key="restore" v-if="deleted === 1 && selectedRowKeys.length > 0" @click="restore" v-hasPermission="'contractOutside:restore'">恢复</a-menu-item>
+          </a-menu>
+          <a-button>
+            更多操作 <a-icon type="down" />
+          </a-button>
+        </a-dropdown>
       </div>
       <!-- 表格区域 -->
       <a-table ref="TableInfo"
@@ -112,13 +144,14 @@
         <template slot="jobAgreement" slot-scope="text">
           <span>{{text===null?'0':text.split(',').length}}期</span>
         </template>
-        <!-- <template slot="contractPeriod" slot-scope="text">
-          <span>{{text.replace(/,/g, '; ')}}</span>
-        </template> -->
         <template slot="operation" slot-scope="text, record">
-          <a-icon v-hasPermission="'contractOutside:update'" type="setting" theme="twoTone" twoToneColor="#4a9ff5" @click="edit(record)" title="修改"></a-icon>
-          &nbsp;
-          <a-icon v-hasPermission="'contractOutside:view'" type="eye" theme="twoTone" twoToneColor="#42b983" @click="view(record)" title="查看"></a-icon>
+          <div v-if="deleted===0">
+            <a-icon v-if="record.type==='0'" v-hasPermission="'contractOutside:attributionUpdate'" type="setting" theme="twoTone" twoToneColor="#4a9ff5" @click="edit(record)" title="修改"></a-icon>
+            <a-icon v-if="record.type!=='0'" v-hasPermission="'contractOutside:update'" type="setting" theme="twoTone" twoToneColor="#4a9ff5" @click="edit(record)" title="修改"></a-icon>
+            &nbsp;
+            <a-icon v-hasPermission="'contractOutside:view'" type="eye" theme="twoTone" twoToneColor="#42b983" @click="view(record)" title="查看"></a-icon>
+          </div>
+          <a-badge v-else status="warning" text="无操作"></a-badge>
         </template>
       </a-table>
     </div>
@@ -155,6 +188,8 @@ export default {
   components: {RangeDate, ContractOutsideInfo, ContractOutsideAdd, ContractOutsideEdit},
   data () {
     return {
+      deleted: 0,
+      isLeave: '0',
       advanced: false,
       contractOutsideInfo: {
         visiable: false,
@@ -168,7 +203,10 @@ export default {
         visiable: false,
         data: {}
       },
-      queryParams: {},
+      teamData: [],
+      queryParams: {
+        team: []
+      },
       // queryParams: {
       //   contractPeriodFromFrom: '',
       //   contractPeriodFromTo: '',
@@ -196,6 +234,9 @@ export default {
     }
   },
   computed: {
+    filteredTeamOptions () {
+      return this.teamData.filter(o => !this.queryParams.team.includes(o))
+    },
     columns () {
       return [{
         title: '总序号',
@@ -209,6 +250,9 @@ export default {
       }, {
         title: '身份证号',
         dataIndex: 'idNum'
+      }, {
+        title: '分队',
+        dataIndex: 'team'
       }, {
         title: '合同期总数',
         dataIndex: 'contractPeriod',
@@ -230,9 +274,38 @@ export default {
     }
   },
   mounted () {
+    this.loadSelect()
     this.fetch()
   },
   methods: {
+    restore () {
+      let that = this
+      this.$confirm({
+        title: '确定恢复所选中的记录?',
+        content: '当您点击确定按钮后，选中的信息与相应的人员信息将会被移出回收站',
+        centered: true,
+        onOk () {
+          that.loading = true
+          that.$put('contractOutside/togetherRestore', {
+            contractOutsideIds: that.selectedRowKeys.join(',')
+          }).then(() => {
+            that.loading = false
+            that.$message.success('已全部恢复')
+            that.selectedRowKeys = []
+            that.search()
+          })
+        },
+        onCancel () {
+          that.selectedRowKeys = []
+        }
+      })
+    },
+    setDeleted () {
+      this.deleted = this.deleted === 0 ? 1 : 0
+      // 每次切换垃圾桶的时候就重置选中
+      this.selectedRowKeys = []
+      this.search()
+    },
     onSelectChange (selectedRowKeys) {
       this.selectedRowKeys = selectedRowKeys
     },
@@ -240,6 +313,7 @@ export default {
       this.advanced = !this.advanced
       // 每次展开，把隐藏的内容清空
       if (!this.advanced) {
+        this.queryParams.idNum = ''
         this.queryParams.remarkRenew = ''
         this.queryParams.remark = ''
         this.queryParams.contractPeriodFromFrom = ''
@@ -285,6 +359,9 @@ export default {
     handleContractOutsideInfoClose () {
       this.contractOutsideInfo.visiable = false
     },
+    handleTeamChange (value) {
+      this.queryParams.team = value || ''
+    },
     handleContractPeriodFromChange (value) {
       if (value) {
         this.queryParams.contractPeriodFromFrom = value[0]
@@ -317,13 +394,42 @@ export default {
       let that = this
       this.$confirm({
         title: '确定删除所选中的记录?',
-        content: '当您点击确定按钮后，这些记录将会被彻底删除',
+        content: '当您点击确定按钮后，接下来将进行选择',
         centered: true,
         onOk () {
-          that.$delete('contractOutside/' + that.selectedRowKeys.join(',')).then(() => {
-            that.$message.success('删除成功')
-            that.selectedRowKeys = []
-            that.search()
+          let content = that.deleted === 0
+            ? '当您点击单删按钮后，选中记录将会被移动到回收站；点击全删按钮后，选中记录与相应的人员信息会被移动到回收站'
+            : '当您点击单删按钮后，选中记录将会被彻底删除；点击全删按钮后，选中记录与相应的人员信息会被彻底删除（不论相应记录是否在回收站）'
+          that.$confirm({
+            title: '是否一同删除相应人员信息',
+            content,
+            centered: true,
+            cancelText: '单删',
+            okText: '全删',
+            onOk () {
+              that.loading = true
+              that.$delete('contractOutside/together', {
+                contractOutsideIds: that.selectedRowKeys.join(','),
+                deleted: that.deleted
+              }).then(() => {
+                that.loading = false
+                that.$message.success(that.deleted === 0 ? '已全部移动至回收站' : '已全部彻底删除')
+                that.selectedRowKeys = []
+                that.search()
+              })
+            },
+            onCancel () {
+              that.loading = true
+              that.$delete('contractOutside', {
+                contractOutsideIds: that.selectedRowKeys.join(','),
+                deleted: that.deleted
+              }).then(() => {
+                that.loading = false
+                that.$message.success(that.deleted === 0 ? '已移动至回收站' : '已彻底删除')
+                that.selectedRowKeys = []
+                that.search()
+              })
+            }
           })
         },
         onCancel () {
@@ -346,6 +452,7 @@ export default {
         sortOrder = sortedInfo.order
       }
       this.$export('contractOutside/excel', {
+        isLeave: this.isLeave,
         sortField: sortField,
         sortOrder: sortOrder,
         pageSize: pageSize,
@@ -382,7 +489,9 @@ export default {
       // 重置列排序规则
       this.sortedInfo = null
       // 重置查询参数
-      this.queryParams = {}
+      this.queryParams = {
+        team: []
+      }
       if (this.advanced) {
         // 清空时间选择
         this.$refs.contractPeriodFrom.reset()
@@ -390,6 +499,7 @@ export default {
         this.$refs.jobAgreementFrom.reset()
         this.$refs.jobAgreementTo.reset()
       }
+      this.isLeave = '0'
       this.fetch()
     },
     handleTableChange (pagination, filters, sorter) {
@@ -404,6 +514,12 @@ export default {
         sortOrder: sorter.order,
         ...this.queryParams,
         ...filters
+      })
+    },
+    loadSelect () {
+      this.$get('staffOutside/getTeam', {
+      }).then((r) => {
+        this.teamData = r.data.filter(d => d)
       })
     },
     fetch (params = {}) {
@@ -421,6 +537,8 @@ export default {
         params.pageNum = this.pagination.defaultCurrent
       }
       this.$get('contractOutside', {
+        isLeave: this.isLeave,
+        deleted: this.deleted,
         ...params
       }).then((r) => {
         let data = r.data

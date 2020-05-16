@@ -175,14 +175,6 @@
               </a-col>
               <a-col :md="12" :sm="24" >
                 <a-form-item
-                  label="减少日期"
-                  :labelCol="{span: 5}"
-                  :wrapperCol="{span: 18, offset: 1}">
-                  <range-date @change="handleDateChange" ref="createTime"></range-date>
-                </a-form-item>
-              </a-col>
-              <a-col :md="12" :sm="24" >
-                <a-form-item
                   label="在职与否"
                   :labelCol="{span: 5}"
                   :wrapperCol="{span: 18, offset: 1}">
@@ -191,6 +183,22 @@
                     <a-select-option value="0">在职</a-select-option>
                     <a-select-option value="1">非在职</a-select-option>
                   </a-select>
+                </a-form-item>
+              </a-col>
+              <a-col :md="12" :sm="24" >
+                <a-form-item
+                  label="增加日期"
+                  :labelCol="{span: 5}"
+                  :wrapperCol="{span: 18, offset: 1}">
+                  <range-date @change="handleCreateDateChange" ref="createDate"></range-date>
+                </a-form-item>
+              </a-col>
+              <a-col :md="12" :sm="24" >
+                <a-form-item
+                  label="减少日期"
+                  :labelCol="{span: 5}"
+                  :wrapperCol="{span: 18, offset: 1}">
+                  <range-date @change="handleReduceDateChange" ref="reduceDate"></range-date>
                 </a-form-item>
               </a-col>
             </template>
@@ -209,8 +217,41 @@
     <div>
       <div class="operator">
         <a-button type="primary" ghost @click="add" v-hasPermission="'staffOutside:add'">新增</a-button>
-        <a-button @click="batchDelete" v-hasPermission="'staffOutside:delete'">删除</a-button>
-        <a-button @click="exportExcel" v-hasPermission="'staffOutside:export'">导出Excel</a-button>
+        <span v-show="deleted===0">
+          <a-button v-hasPermission="'staffOutside:delete'" @click="batchDelete">删除</a-button>
+        </span>
+        <span v-show="deleted===1">
+          <a-button v-hasPermission="'staffOutside:deleteTrue'" @click="batchDelete">删除</a-button>
+          <a-button v-hasNoPermission="'staffOutside:deleteTrue'" disabled title="无权限">删除</a-button>
+        </span>
+        <a-dropdown>
+          <a-menu slot="overlay">
+            <a-menu-item key="export-all-data" @click="exportAllExcel" v-hasPermission="'attributionOutside:allExport'">导出全部编外</a-menu-item>
+            <a-menu-item key="export-data" @click="exportExcel" v-hasPermission="'staffOutside:export'">导出编外分队</a-menu-item>
+            <a-menu-item key="staff-increase" @click="showModal(0)">增加人员报表</a-menu-item>
+            <a-menu-item key="staff-decrease" @click="showModal(1)">减少人员报表</a-menu-item>
+            <a-menu-item key="deleted" @click="setDeleted">{{deleted === 0 ? '查看回收站' : '回到页面'}}</a-menu-item>
+            <a-menu-item key="restore" v-if="deleted === 1 && selectedRowKeys.length > 0" @click="restore" v-hasPermission="'staffOutside:restore'">恢复</a-menu-item>
+          </a-menu>
+          <a-button>
+            更多操作 <a-icon type="down" />
+          </a-button>
+        </a-dropdown>
+        &nbsp;
+        <a-modal
+          title="选择编外人员变动报表日期范围"
+          v-model="modalVisible"
+          :mask="false"
+          :maskClosable="false"
+          :width='350'
+          style="left: -12%;top: 25%"
+          @ok="staffChange"
+          okText="提交">
+          <range-date
+            @change="handleDateChange"
+            ref="createTime">
+          </range-date>
+        </a-modal>
       </div>
       <!-- 表格区域 -->
       <a-table ref="TableInfo"
@@ -231,12 +272,15 @@
           </a-popover>
         </template>
         <template slot="operation" slot-scope="text, record">
-          <a-icon v-if="record.type !== '0'" type="up-square" theme="twoTone" twoToneColor="#08c" @click="sort(0, record)" title="向上调整排序"></a-icon>
-          <a-icon v-if="record.type !== '0'" type="down-square" theme="twoTone" twoToneColor="#08c" @click="sort(1, record)" title="向下调整排序"></a-icon>
-          &nbsp;
-          <a-icon v-hasPermission="'staffOutside:update'" type="setting" theme="twoTone" twoToneColor="#4a9ff5" @click="edit(record)" title="修改"></a-icon>
-          &nbsp;
-          <a-icon v-hasPermission="'staffOutside:view'" type="eye" theme="twoTone" twoToneColor="#42b983" @click="view(record)" title="查看"></a-icon>
+          <div v-if="deleted===0">
+            <a-icon type="up-square" theme="twoTone" twoToneColor="#08c" @click="sort(0, record)" title="向上调整排序"></a-icon>
+            <a-icon type="down-square" theme="twoTone" twoToneColor="#08c" @click="sort(1, record)" title="向下调整排序"></a-icon>
+            &nbsp;
+            <a-icon v-hasPermission="'staffOutside:update'" type="setting" theme="twoTone" twoToneColor="#4a9ff5" @click="edit(record)" title="修改"></a-icon>
+            &nbsp;
+            <a-icon v-hasPermission="'staffOutside:view'" type="eye" theme="twoTone" twoToneColor="#42b983" @click="view(record)" title="查看"></a-icon>
+          </div>
+          <a-badge v-else status="warning" text="无操作"></a-badge>
         </template>
       </a-table>
     </div>
@@ -273,12 +317,17 @@ import DeptInputTree from '../../system/dept/DeptInputTree'
 import StaffOutsideInfo from './StaffOutsideInfo'
 import StaffOutsideAdd from './StaffOutsideAdd'
 import StaffOutsideEdit from './StaffOutsideEdit'
+import { newSpread, floatForm, floatReset, saveExcel } from '@/utils/spreadJS'
 
 export default {
   name: 'StaffOutside',
   components: { RangeDate, DeptInputTree, StaffOutsideInfo, StaffOutsideAdd, StaffOutsideEdit },
   data () {
     return {
+      deleted: 0,
+      changeType: '',
+      changeDate: [],
+      modalVisible: false,
       isLeave: '0',
       advanced: false,
       staffOutsideInfo: {
@@ -346,6 +395,9 @@ export default {
         title: '姓名',
         dataIndex: 'name'
       }, {
+        title: '事由',
+        dataIndex: 'cause'
+      }, {
         title: '人员类型',
         dataIndex: 'temporary'
       }, {
@@ -372,11 +424,11 @@ export default {
         // onFilter 用于筛选当前数据
         onFilter: (value, record) => record.gender.includes(value)
       }, {
-        title: '分队',
-        dataIndex: 'team'
-      }, {
         title: '岗位',
         dataIndex: 'post'
+      }, {
+        title: '分队',
+        dataIndex: 'team'
       }, {
         title: '岗位职务',
         dataIndex: 'technicalType'
@@ -407,9 +459,6 @@ export default {
         // filterMultiple 用于指定多选和单选(true多/false单)
         filterMultiple: true
       }, {
-        title: '事由',
-        dataIndex: 'cause'
-      }, {
         title: '操作',
         dataIndex: 'operation',
         scopedSlots: { customRender: 'operation' },
@@ -423,6 +472,95 @@ export default {
     this.fetch()
   },
   methods: {
+    restore () {
+      let that = this
+      this.$confirm({
+        title: '确定恢复所选中的记录?',
+        content: '当您点击确定按钮后，接下来将进行选择',
+        centered: true,
+        onOk () {
+          that.$confirm({
+            title: '是否一同恢复相应合同信息',
+            content: '当您点击否，选中记录将会被移出回收站；点击是，选中记录与相应的合同信息会一同被移出回收站',
+            centered: true,
+            cancelText: '否',
+            okText: '是',
+            onOk () {
+              that.loading = true
+              that.$put('staffOutside/togetherRestore', {
+                staffOutsideIds: that.selectedRowKeys.join(',')
+              }).then(() => {
+                that.loading = false
+                that.$message.success('已全部恢复')
+                that.selectedRowKeys = []
+                that.search()
+              })
+            },
+            onCancel () {
+              that.loading = true
+              that.$put('staffOutside/restore', {
+                staffOutsideIds: that.selectedRowKeys.join(',')
+              }).then(() => {
+                that.loading = false
+                that.$message.success('已恢复')
+                that.selectedRowKeys = []
+                that.search()
+              })
+            }
+          })
+        },
+        onCancel () {
+          that.selectedRowKeys = []
+        }
+      })
+    },
+    setDeleted () {
+      this.deleted = this.deleted === 0 ? 1 : 0
+      // 每次切换垃圾桶的时候就重置选中
+      this.selectedRowKeys = []
+      this.search()
+    },
+    staffChange () {
+      if (this.changeDate.length === 0) {
+        this.$message.warning('请选择日期')
+        return
+      }
+      this.$message.loading('正在生成', 0)
+      this.modalVisible = false
+      this.$get('staffOutside/getIncreaseOrDecreaseStaffOutside', {
+        createTimeFrom: this.changeDate[0],
+        createTimeTo: this.changeDate[1],
+        isLeave: this.changeType
+      }).then((r) => {
+        let newData = []
+        r.data.forEach(item => {
+          newData.push([
+            item.type,
+            item.name,
+            item.idNum,
+            item.gender === '1' ? '男' : '女',
+            item.technicalType,
+            item.leaveDate
+          ])
+        })
+        this.$message.destroy() // 把message全局销毁
+        let spread = newSpread('Staff')
+        spread = floatForm(spread, 'Staff', newData)
+        let fileName = `${this.changeType === 0 ? '编外增加' : '编外减少'}人员报表_${this.changeDate[0]}至${this.changeDate[1]}.xlsx`
+        saveExcel(spread, fileName)
+        floatReset(spread, 'Staff', newData.length)
+        // 清空时间选择
+        this.$refs.createTime.reset()
+        this.changeDate = []
+      })
+    },
+    handleDateChange (value) {
+      if (value) this.changeDate = value
+    },
+    showModal (value) {
+      this.changeType = value
+      this.modalVisible = true
+    },
     filterOption (input, option) {
       return option.componentOptions.children[0].text.toUpperCase().indexOf(input.toUpperCase()) >= 0
     },
@@ -510,10 +648,16 @@ export default {
     handleTeamChange (value) {
       this.queryParams.team = value || ''
     },
-    handleDateChange (value) {
+    handleCreateDateChange (value) {
       if (value) {
         this.queryParams.createTimeFrom = value[0]
         this.queryParams.createTimeTo = value[1]
+      }
+    },
+    handleReduceDateChange (value) {
+      if (value) {
+        this.queryParams.reduceTimeFrom = value[0]
+        this.queryParams.reduceTimeTo = value[1]
       }
     },
     onMiniChange (e) {
@@ -538,11 +682,18 @@ export default {
       let that = this
       this.$confirm({
         title: '确定删除所选中的记录?',
-        content: '当您点击确定按钮后，这些记录将会被彻底删除',
+        content: that.deleted === 0
+          ? '当您点击确定按钮后，选中的信息与相应的合同信息将会被移动到回收站'
+          : '当您点击确定按钮后，选中的信息与相应的合同信息将会被彻底删除',
         centered: true,
         onOk () {
-          that.$delete('staffOutside/' + that.selectedRowKeys.join(',')).then(() => {
-            that.$message.success('删除成功')
+          that.loading = true
+          that.$delete('staffOutside/together', {
+            staffOutsideIds: that.selectedRowKeys.join(','),
+            deleted: that.deleted
+          }).then(() => {
+            that.loading = false
+            that.$message.success(that.deleted === 0 ? '已全部移动至回收站' : '已全部彻底删除')
             that.selectedRowKeys = []
             that.search()
           })
@@ -550,6 +701,12 @@ export default {
         onCancel () {
           that.selectedRowKeys = []
         }
+      })
+    },
+    exportAllExcel () {
+      this.$export('staffOutside/allExport', {
+        isLeave: this.isLeave,
+        pageSize: 99999
       })
     },
     exportExcel () {
@@ -566,7 +723,7 @@ export default {
         // 排序方式 ascend正序 descend倒序
         sortOrder = sortedInfo.order
       }
-      this.$export('staffOutside/excel', {
+      this.$export('staffOutside/staffOutsideExport', {
         isLeave: this.isLeave,
         sortField: sortField,
         sortOrder: sortOrder,
@@ -613,7 +770,8 @@ export default {
       }
       if (this.advanced) {
         // 清空时间选择
-        this.$refs.createTime.reset()
+        this.$refs.createDate.reset()
+        this.$refs.reduceDate.reset()
       }
       this.isLeave = '0'
       this.fetch()
@@ -663,6 +821,7 @@ export default {
       }
       this.$get('staffOutside', {
         isLeave: this.isLeave,
+        deleted: this.deleted,
         ...params
       }).then((r) => {
         let data = r.data

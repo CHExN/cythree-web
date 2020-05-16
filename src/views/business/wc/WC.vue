@@ -65,6 +65,23 @@
           </a-button>
         </a-dropdown>
       </div>
+      <div class="full-screen-btn-con">
+        <a-modal v-model="modal" centered :closable="false" :width="360">
+            <div style="text-align: center;">
+              <vue-qr
+                ref="Qrcode"
+                :text="qrCodeConfig.text"
+                :download="qrCodeConfig.name"
+                :margin="10"
+                :size="qrCodeConfig.size"
+                :dotScale="qrCodeConfig.dotScale"
+                :colorDark="qrCodeConfig.colorDark"/>
+            </div>
+            <template  slot="footer">
+              <a-button type="primary" @click="downloadImg">下载二维码</a-button>
+            </template >
+        </a-modal>
+      </div>
       <!-- 表格区域 -->
       <a-table ref="TableInfo"
                :columns="columns"
@@ -84,9 +101,11 @@
           </a-popover>
         </template>
         <template slot="operation" slot-scope="text, record">
-          <a-icon v-hasPermission="'wc:update'" type="setting" theme="twoTone" twoToneColor="#4a9ff5" @click="edit(record)" title="修改"></a-icon>
+          <a-icon v-hasPermission="'wc:update'" type="setting" theme="twoTone" twoToneColor="#4a9ff5" @click="edit(record)" title="修改" />
           &nbsp;
-          <a-icon v-hasPermission="'wc:view'" type="eye" theme="twoTone" twoToneColor="#42b983" @click="view(record)" title="查看"></a-icon>
+          <a-icon type="qrcode" @click="showImage(record)" title="二维码" />
+          &nbsp;
+          <a-icon v-hasPermission="'wc:view'" type="eye" theme="twoTone" twoToneColor="#42b983" @click="view(record)" title="查看" />
           <!-- <a-badge v-hasNoPermission="'wc:update','wc:view'" status="warning" text="无权限"></a-badge> -->
         </template>
       </a-table>
@@ -129,13 +148,21 @@ import WcInfo from './WCInfo'
 import WcAdd from './WCAdd'
 import WcEdit from './WCEdit'
 import WcImportResult from './WCImportResult'
+import VueQr from 'vue-qr'
 
 export default {
   // test
   name: 'WC',
-  components: { WcInfo, WcAdd, WcEdit, WcImportResult },
+  components: { WcInfo, WcAdd, WcEdit, WcImportResult, VueQr },
   data () {
     return {
+      modal: false,
+      qrCodeConfig: {
+        text: 'qiouweyroqiuweyroiquweryqiouweyroiquwery',
+        size: 300,
+        name: '二维码'
+      },
+      // downloadFilename: '',
       fileList: [],
       importData: [],
       times: '',
@@ -244,7 +271,7 @@ export default {
         dataIndex: 'operation',
         scopedSlots: { customRender: 'operation' },
         fixed: 'right',
-        width: 100
+        width: 120
       }]
     }
   },
@@ -253,6 +280,20 @@ export default {
     this.fetch()
   },
   methods: {
+    showImage (record) {
+      this.qrCodeConfig.name = `QR-Code_${record.wcName}_${record.wcNum}`
+      // this.qrCodeConfig.text = record.wcNum
+      this.qrCodeConfig.text = `https://wc.ncsll.com/wc/${record.wcId}`
+      this.modal = true
+    },
+    downloadImg () {
+      const iconUrl = this.$refs.Qrcode.$el.src
+      let a = document.createElement('a')
+      let event = new MouseEvent('click')
+      a.download = this.qrCodeConfig.name
+      a.href = iconUrl
+      a.dispatchEvent(event)
+    },
     handleClose () {
       this.wcImportResultVisible = false
     },

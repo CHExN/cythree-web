@@ -293,8 +293,7 @@ export default {
     },
     handleSearch (name, id) {
       if (name) {
-        this.$get('price/' + name, {
-        }).then((r) => {
+        this.$get('price/name', {name}).then((r) => {
           if (r.data.length) {
             this.autoData[id] = r.data
             this.$refs[id].showSearch = true

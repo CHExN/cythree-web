@@ -2,12 +2,12 @@
   <a-modal
     title="出入库物品明细信息"
     :centered="true"
-    :width="1000"
+    :width="1100"
     :visible="storeroomItemDetailsInfoVisiable"
     :keyboard="false"
     :footer="null"
     @cancel="handleCancleClick">
-    <a-card :bordered="false" style="margin-bottom: 32px">
+    <a-card :bordered="false">
       <detail-list>
         <detail-list-item term="物品名称">{{storeroomItemDetailsInfoData.name}}</detail-list-item>
         <detail-list-item term="型号">{{storeroomItemDetailsInfoData.unit}}</detail-list-item>
@@ -17,7 +17,6 @@
         <detail-list-item term="物资类别">{{storeroomItemDetailsInfoData.typeApplicationToDict}}</detail-list-item>
         <detail-list-item term="供应商">{{storeroomItemDetailsInfoData.supplierToDict}}</detail-list-item>
         <detail-list-item term="入库日期">{{storeroomItemDetailsInfoData.date}}</detail-list-item>
-        <detail-list-item term="入库单号">{{storeroomItemDetailsInfoData.putNum}}</detail-list-item>
       </detail-list>
       <a-divider style="margin-bottom: 32px"/>
       <detail-list title="进付明细">
@@ -68,6 +67,9 @@ export default {
   computed: {
     columns () {
       return [{
+        title: '单号',
+        dataIndex: 'num'
+      }, {
         title: '日期',
         dataIndex: 'date'
       }, {
@@ -120,9 +122,7 @@ export default {
     }
   },
   methods: {
-
     handleCancleClick () {
-      this.dataSource = []
       this.loading = false
       this.$emit('close')
     }
@@ -130,14 +130,15 @@ export default {
   watch: {
     storeroomItemDetailsInfoVisiable () {
       if (this.storeroomItemDetailsInfoVisiable) {
+        this.dataSource = []
         this.loading = true
         this.$get('storeroom/storeroomOutItem', {
           parentId: this.storeroomItemDetailsInfoData.parentId,
           id: this.storeroomItemDetailsInfoData.id
         }).then((r) => {
           this.loading = false
-          // this.dataSource = r.data
           this.dataSource.push({
+            num: this.storeroomItemDetailsInfoData.putNum,
             date: this.storeroomItemDetailsInfoData.date,
             info: `进${this.storeroomItemDetailsInfoData.name}`,
             quantityPut: this.storeroomItemDetailsInfoData.amount,
@@ -162,6 +163,7 @@ export default {
             // 判断月份，如果变化了，就加一条‘本月合计’行
             if (compareMonth !== elementMonth) {
               this.dataSource.push({
+                num: null,
                 date: null,
                 info: '本月合计',
                 quantityPut: this.storeroomItemDetailsInfoData.amount,
@@ -186,6 +188,7 @@ export default {
             amountOut = this.$tools.accAdd(amountOut, this.$tools.accMultiply(element.amount, element.money))
             // 添加出库到某某部门信息
             this.dataSource.push({
+              num: element.outNum,
               date: element.date,
               info: `付${element.toDeptName}`,
               quantityPut: null,
@@ -201,6 +204,7 @@ export default {
             // 判断如果循环完毕了，就加一条‘本月合计’行
             if (r.data.length === index + 1) {
               this.dataSource.push({
+                num: null,
                 date: null,
                 info: '本月合计',
                 quantityPut: 0,

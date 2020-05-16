@@ -102,28 +102,33 @@ export default {
   },
   methods: {
     handleCancleClick () {
+      this.fileList = []
       this.$emit('close')
     },
     handleCancel () {
       this.previewVisible = false
     },
     handlePreview (file) {
-      this.previewImage = file.url || file.thumbUrl
+      this.previewImage = file.url
       this.previewVisible = true
     },
     handleChange ({ file, fileList, event }) {
       if (file.status === 'error') {
         this.$message.error(`${file.name} 上传失败`)
       } else if (file.status === 'removed') {
-        this.fileList = fileList
+        this.fileList = fileList.map(item => item.response || item)
+      } else if (file.status === 'done') {
+        this.$message.success(`${file.name} 上传成功`)
+        this.fileList = fileList.map(item => item.response || item)
+      } else if (file.status === 'uploading') {
+        this.fileList = fileList.map(item => item.response || item)
       }
     },
     handleRemove (file) {
-      let that = this
-      if (file.status === 'removed') {
-        that.$delete('wc/deleteFile/' + file.uid).then(() => {
-          that.$message.success(`${file.name} 删除成功`)
-        })
+      if (file.error) {
+        this.fileList = this.fileList.filter(item => item.uid !== file.uid)
+      } else if (file.status === 'removed') {
+        this.$delete('wc/deleteFile/' + file.uid)
       }
     },
     handleBeforeUpload (file) {
@@ -132,11 +137,11 @@ export default {
       if (!(isJPG || isPNG)) {
         this.$message.error('You can only upload JPG or PNG file!')
       }
-      const isLt2M = file.size / 1024 / 1024 < 2
-      if (!isLt2M) {
-        this.$message.error('Image must smaller than 2MB!')
+      const isLt8M = file.size / 1024 / 1024 < 8
+      if (!isLt8M) {
+        this.$message.error('Image must smaller than 8MB!')
       }
-      return (isJPG || isPNG) && isLt2M
+      return (isJPG || isPNG) && isLt8M
     },
     customRequest ({data, file, filename, onError, onProgress, onSuccess}) {
       const formData = new FormData()
@@ -149,11 +154,9 @@ export default {
       formData.append('wcId', this.wcInfoData.wcId)
       this.$upload('wc/uploadWcPhoto', formData, {
         onUploadProgress: ({ total, loaded }) => {
-          onProgress({ percent: Math.round((loaded / total) * 100).toFixed(2) }, file)
+          onProgress({ percent: Math.round(loaded / total * 100) }, file)
         }
       }).then((response) => {
-        this.$message.success(`${file.name} 上传成功`)
-        this.fileList = [...this.fileList, response.data.data]
         onSuccess(response.data.data, file)
       }).catch(onError)
       return {

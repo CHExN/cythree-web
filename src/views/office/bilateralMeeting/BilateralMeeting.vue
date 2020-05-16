@@ -194,7 +194,7 @@ export default {
         title: '上会时间',
         dataIndex: 'meetingTime',
         customRender: (text, row, index) => {
-          return text ? text.replace(/T/, ' ') : '未定'
+          return text ? this.$tools.getDateTime(text) : '未定'
         }
       }, {
         title: '操作',
@@ -326,12 +326,6 @@ export default {
           '',
           item.applicant
         ])
-        // this.$message.destroy() // 等全部执行完后，再把message全局销毁
-        // let spread = newSpread('StoreroomPut')
-        // spread = floatForm(spread, 'StoreroomPut', exportData.everyEightBatches)
-        // let fileName = `入库单_${exportData.typeApplicationToDept}_${exportData.date}_${exportData.num}.xlsx`
-        // saveExcel(spread, fileName)
-        // floatReset(spread, 'StoreroomPut', exportData.everyEightBatches.length)
       })
       this.$message.loading('正在生成', 1, () => { // 3s后关闭执行关闭回调函数
         let spread = newSpread('BilateralMeeting')

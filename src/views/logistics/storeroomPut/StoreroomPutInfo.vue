@@ -16,7 +16,7 @@
           <detail-list-item term="供应商">{{putInfoData.supplierToDict}}</detail-list-item>
           <detail-list-item term="经手人">{{putInfoData.handle}}</detail-list-item>
           <detail-list-item term="保管员">{{putInfoData.storage}}</detail-list-item>
-          <detail-list-item term="创建时间">{{putInfoData.createTime}}</detail-list-item>
+          <detail-list-item term="创建时间">{{$tools.getDateTime(putInfoData.createTime)}}</detail-list-item>
         </detail-list>
         <a-divider style="margin-bottom: 32px"/>
         <detail-list title="入库名单">
@@ -98,7 +98,6 @@ export default {
   },
   methods: {
     handleCancleClick () {
-      this.dataSource = []
       this.loading = false
       this.$emit('close')
     }
@@ -106,6 +105,7 @@ export default {
   watch: {
     putInfoVisiable () {
       if (this.putInfoVisiable) {
+        this.dataSource = []
         this.loading = true
         this.$get('storeroomPut/storeroomByPutId', {
           putId: this.putInfoData.id

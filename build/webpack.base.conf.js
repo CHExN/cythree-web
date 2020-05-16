@@ -29,7 +29,7 @@ module.exports = {
     vue: 'Vue',
     vuex: 'Vuex',
     'vue-router': 'VueRouter',
-    axios: 'axios',
+    // axios: 'axios',
     moment: 'moment'
   },
   output: {

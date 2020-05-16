@@ -25,22 +25,7 @@
       <div class="operator">
         <a-button type="primary" ghost @click="add" v-hasPermission="'officeSupplies:add'">新增</a-button>
         <a-button @click="batchDelete" v-hasPermission="'officeSupplies:delete'">删除</a-button>
-        <a-button v-hasPermission="'officeSupplies:view'" @click="showModal">导出申领单</a-button>
-        &nbsp;
-        <a-modal
-          title="选择导出日期"
-          v-model="modalVisible"
-          :mask="false"
-          :maskClosable="false"
-          :width='350'
-          style="left: -12%;top: 25%"
-          @ok="viewDist"
-          okText="提交">
-          <a-month-picker
-            style="width: 100%;"
-            @change="handleMonthChange"
-          />
-        </a-modal>
+        <a-button v-hasPermission="'officeSupplies:view'" @click="exportExcel">导出申领单</a-button>
       </div>
       <!-- 表格区域 -->
       <a-table ref="TableInfo"
@@ -116,10 +101,6 @@ export default {
   data () {
     return {
       advanced: false,
-      modalVisible: false,
-      dateData: {
-        dateForm: {}
-      },
       officeSuppliesInfo: {
         visiable: false,
         data: {}
@@ -142,6 +123,7 @@ export default {
       paginationInfo: null,
       dataSource: [],
       selectedRowKeys: [],
+      selectedRows: [],
       putingData: {},
       loading: false,
       pagination: {
@@ -207,72 +189,10 @@ export default {
   mounted () {
     this.fetch()
   },
-  // docker run -d -p 6379:6379 \
-  //  -v /home/cythree/redis/conf/redis.conf:/usr/local/etc/redis/redis.conf \
-  //  --name redis redis:latest
-
-  // docker run -d -p 80:80  \
-  // -v /home/cythree/nginx/conf/nginx.conf:/etc/nginx/nginx.conf  \
-  // -v /home/cythree/nginx/html:/etc/nginx/html \
-  // -v /home/cythree/nginx/logs:/var/log/nginx \
-  // -v /home/cythree/files:/home/cythree/files \
-  // --name nginx nginx:latest
   methods: {
-    viewDist () {
-      if (JSON.stringify(this.dateData.dateForm) !== '{}') {
-        this.modalVisible = false
-        this.$get('storeroom/officeSupplies', {
-          date: `${this.dateData.dateForm.year}-${this.dateData.dateForm.month}`
-        }).then((r) => {
-          let newData = {}
-          r.data.forEach(item => {
-            if (newData[item.toDeptName]) {
-              newData[item.toDeptName].push([
-                item.name,
-                item.type,
-                item.amount,
-                item.date,
-                item.remark
-              ])
-            } else {
-              newData[item.toDeptName] = [[
-                item.name,
-                item.type,
-                item.amount,
-                item.date,
-                item.remark
-              ]]
-            }
-          })
-          this.$message.loading('正在生成', 3, () => { // 3s后关闭执行关闭回调函数
-            Object.keys(newData).forEach(key => {
-              let spread = newSpread('OfficeSuppliesApplicationForm')
-              spread = fixedForm(spread, 'OfficeSuppliesApplicationForm', {deptName: `部门: ${key}`, date: `${this.dateData.dateForm.year}年${this.dateData.dateForm.month}月`})
-              spread = floatForm(spread, 'OfficeSuppliesApplicationForm', newData[key])
-              let fileName = `办公用品申领单_${key}_${this.dateData.dateForm.year}-${this.dateData.dateForm.month}.xlsx`
-              saveExcel(spread, fileName)
-              floatReset(spread, 'OfficeSuppliesApplicationForm', newData[key].length)
-            })
-          })
-        })
-      } else {
-        this.$message.warning('请选择查看月份')
-      }
-    },
-    handleMonthChange (value) {
-      if (!value) {
-        this.dateData.dateForm = {}
-        this.dateTitle = ''
-        return
-      }
-      this.dateData.dateForm = {
-        year: value.format('YYYY'),
-        month: value.format('MM')
-      }
-      this.dateTitle = value.format('YYYY年MM月')
-    },
-    onSelectChange (selectedRowKeys) {
+    onSelectChange (selectedRowKeys, selectedRows) {
       this.selectedRowKeys = selectedRowKeys
+      this.selectedRows = selectedRows
     },
     isPass (is, record) {
       let data = {
@@ -325,29 +245,32 @@ export default {
     storage (record) {
       this.putingData = record
       this.$get('application/applicationPlan', {
-        applicationId: this.putingData.id
+        applicationId: this.putingData.id,
+        status: true
       }).then((r) => {
-        this.$refs.putAdd.setTableValues(record.typeApplication, r.data)
+        this.$refs.putAdd.setTableValues(record.typeApplication, record.id, r.data)
       })
       this.putAdd.visiable = true
     },
     handlePutAddClose () {
       this.putAdd.visiable = false
     },
-    handlePutAddSuccess () {
+    handlePutAddSuccess (isProcess) {
       this.putAdd.visiable = false
       this.$message.success('新增入库成功')
-      this.loading = true
-      this.$put('application', {
-        id: this.putingData.id,
-        createDate: this.putingData.createDate,
-        typeApplication: this.putingData.typeApplication,
-        username: this.putingData.username,
-        process: 2
-      }).then((r) => {
-        this.search()
-        this.putingData = {}
-      })
+      if (isProcess) {
+        this.loading = true
+        this.$put('application', {
+          createDate: this.putingData.createDate,
+          id: this.putingData.id,
+          typeApplication: this.putingData.typeApplication,
+          username: this.putingData.username,
+          process: 2
+        }).then((r) => {
+          this.search()
+          this.putingData = {}
+        })
+      }
     },
     handleOfficeSuppliesInfoClose () {
       this.officeSuppliesInfo.visiable = false
@@ -375,16 +298,44 @@ export default {
           that.$delete('application/' + that.selectedRowKeys.join(',')).then(() => {
             that.$message.success('删除成功')
             that.selectedRowKeys = []
+            that.selectedRows = []
             that.search()
           })
         },
         onCancel () {
           that.selectedRowKeys = []
+          that.selectedRows = []
         }
       })
     },
-    showModal () {
-      this.modalVisible = true
+    exportExcel () {
+      if (!this.selectedRowKeys.length) {
+        this.$message.warning('请选择需要导出的记录')
+        return
+      }
+      this.$message.loading('正在生成', 2)
+      this.selectedRows.forEach((item, index) => {
+        let dateArr = item.createDate.split('-')
+        let date = `${dateArr[0]}年${dateArr[1]}月`
+        this.$get('application/applicationPlan', { applicationId: item.id }).then((r) => {
+          let planArr = []
+          r.data.forEach(item => {
+            planArr.push([
+              item.name,
+              item.type,
+              item.amount,
+              date,
+              item.remark
+            ])
+          })
+          let spread = newSpread('OfficeSuppliesApplicationForm')
+          spread = fixedForm(spread, 'OfficeSuppliesApplicationForm', {deptName: `部门: ${item.deptName}`, date})
+          spread = floatForm(spread, 'OfficeSuppliesApplicationForm', planArr)
+          let fileName = `办公用品申领单_${item.deptName}_${date}.xlsx`
+          saveExcel(spread, fileName)
+          floatReset(spread, 'OfficeSuppliesApplicationForm', planArr.length)
+        })
+      })
     },
     search () {
       let {sortedInfo, filteredInfo} = this
@@ -404,6 +355,7 @@ export default {
     reset () {
       // 取消选中
       this.selectedRowKeys = []
+      this.selectedRows = []
       // 重置分页
       this.$refs.TableInfo.pagination.current = this.pagination.defaultCurrent
       if (this.paginationInfo) {

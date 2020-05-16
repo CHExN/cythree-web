@@ -122,21 +122,6 @@
           v-decorator="['birthDate']"
         />
       </a-form-item>
-      <!-- <a-form-item label='年龄' v-bind="formItemLayout">
-        <a-input-number
-          :min="0"
-          :max="200"
-          autocomplete="off"
-          placeholder='年龄'
-          style="width: 100%;"
-          v-decorator="['age']"/>
-      </a-form-item> -->
-      <!-- <a-form-item label='退休年份' v-bind="formItemLayout">
-        <a-input
-          placeholder='退休年份'
-          autocomplete="off"
-          v-decorator="['retirementYear']"/>
-      </a-form-item> -->
       <a-form-item label='家庭住址' v-bind="formItemLayout">
         <a-textarea
           placeholder='家庭住址'
@@ -174,20 +159,20 @@
           v-decorator="['politicalFace']"
         />
       </a-form-item>
+       <a-form-item label='增加日期' v-bind="formItemLayout">
+        <a-date-picker
+          placeholder='增加日期，【增加人员报表】就是根据此项进行查询'
+          format='YYYY-MM-DD'
+          style="width: 100%;"
+          v-decorator="['addDate']"
+        />
+      </a-form-item>
       <a-form-item label='调入日期' v-bind="formItemLayout">
         <a-date-picker
-          placeholder='调入或报到日期，【增加人员报表】就是根据此项进行查询'
+          placeholder='调入或报到日期'
           format='YYYY-MM-DD'
           style="width: 100%;"
           v-decorator="['transferDate']"
-        />
-      </a-form-item>
-      <a-form-item label='到本场队日期' v-bind="formItemLayout">
-        <a-date-picker
-          placeholder='到本场队日期'
-          format='YYYY-MM-DD'
-          style="width: 100%;"
-          v-decorator="['toTeamDate']"
         />
       </a-form-item>
       <a-form-item label='岗位' v-bind="formItemLayout">
@@ -288,22 +273,16 @@ export default {
     onIdNumChange () {
       const idNum = this.form.getFieldValue('idNum')
       const birthDate = moment(this.$tools.getBirthday(idNum))
-      // const age = this.$tools.getAge(birthDate)
       const birthplace = this.$tools.getBirthplace(idNum)
       const gender = this.$tools.getGender(idNum)
-      // const retirementYear = this.$tools.getRetirement(birthDate, gender) // 退休年份
 
       this.form.getFieldDecorator('birthDate')
-      // this.form.getFieldDecorator('age')
       this.form.getFieldDecorator('birthplace')
       this.form.getFieldDecorator('gender')
-      // this.form.getFieldDecorator('retirementYear')
 
       this.form.setFieldsValue({ birthDate })
-      // this.form.setFieldsValue({ age })
       this.form.setFieldsValue({ birthplace })
       this.form.setFieldsValue({ gender: gender + '' })
-      // this.form.setFieldsValue({ retirementYear })
     },
     onClose () {
       this.reset()
@@ -312,7 +291,7 @@ export default {
     setFormValues ({...staffOutside}) {
       this.staffId = staffOutside.staffId
       this.sortNum2 = staffOutside.sortNum2
-      const fields = ['leaveDate', 'birthDate', 'transferDate', 'toTeamDate']
+      const fields = ['leaveDate', 'birthDate', 'addDate', 'transferDate']
       const excludes = ['sortNum1', 'sortNum2']
       let obj = {}
       Object.keys(staffOutside).forEach((key) => {
@@ -329,14 +308,14 @@ export default {
     handleSubmit () {
       this.form.validateFields((err, values) => {
         if (!err) {
-          const {leaveDate, birthDate, transferDate, toTeamDate} = values
+          const {leaveDate, birthDate, addDate, transferDate} = values
           const staffOutsideData = {
             staffId: this.staffId,
             ...values,
             leaveDate: leaveDate ? leaveDate.format('YYYY-MM-DD') : leaveDate,
             birthDate: birthDate ? birthDate.format('YYYY-MM-DD') : birthDate,
-            transferDate: transferDate ? transferDate.format('YYYY-MM-DD') : transferDate,
-            toTeamDate: toTeamDate ? toTeamDate.format('YYYY-MM-DD') : toTeamDate
+            addDate: addDate ? addDate.format('YYYY-MM-DD') : addDate,
+            transferDate: transferDate ? transferDate.format('YYYY-MM-DD') : transferDate
           }
           this.loading = true
           this.$put('staffOutside', {

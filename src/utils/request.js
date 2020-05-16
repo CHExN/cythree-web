@@ -11,6 +11,7 @@ moment.locale('zh-cn')
 // 统一配置
 let CYTHREE_REQUEST = axios.create({
   baseURL: 'http://127.0.0.1:9527/',
+  // baseURL: 'https://wc.ncsll.com/api',
   // baseURL: 'http://114.115.154.244:9527/',
   responseType: 'json',
   validateStatus (status) {
@@ -219,7 +220,8 @@ const request = {
     return CYTHREE_REQUEST.post(url, params, {
       ...config,
       headers: {
-        'Content-Type': 'multipart/form-data'
+        'Content-Type': 'multipart/form-data',
+        'X-Requested-With': 'XMLHttpRequest'
       }
     })
   }

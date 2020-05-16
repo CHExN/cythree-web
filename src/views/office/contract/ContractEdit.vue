@@ -141,6 +141,7 @@
           :remove="handleRemove"
           :customRequest="customRequest"
           :beforeUpload="handleBeforeUpload"
+          @change="handleChange"
         >
           <p class="ant-upload-drag-icon">
             <a-icon type="inbox" />
@@ -230,12 +231,22 @@ export default {
         this.fileList = r.data.data
       })
     },
+    handleChange ({ file, fileList, event }) {
+      if (file.status === 'error') {
+        this.$message.error(`${file.name} 上传失败`)
+      } else if (file.status === 'removed') {
+        this.fileList = fileList.map(item => item.response || item)
+      } else if (file.status === 'done') {
+        this.$message.success(`${file.name} 上传成功`)
+        this.fileList = fileList.map(item => item.response || item)
+      } else if (file.status === 'uploading') {
+        this.fileList = fileList.map(item => item.response || item)
+      }
+    },
     handleRemove (file) {
       let that = this
       if (file.status === 'removed') {
-        that.$delete('contract/deleteFile/' + file.uid).then(() => {
-          that.$message.success(`${file.name.slice(file.name.indexOf('_') + 1)} 删除成功`)
-        })
+        that.$delete('contract/deleteFile/' + file.uid)
         const index = that.fileList.indexOf(file)
         const newFileList = that.fileList.slice()
         newFileList.splice(index, 1)
@@ -260,11 +271,9 @@ export default {
       formData.append('id', this.id)
       this.$upload('contract/uploadContractFile', formData, {
         onUploadProgress: ({ total, loaded }) => {
-          onProgress({ percent: Math.round((loaded / total) * 100).toFixed(2) }, file)
+          onProgress({ percent: Math.round(loaded / total * 100) }, file)
         }
       }).then((response) => {
-        this.$message.success(`${file.name} 上传成功`)
-        this.fileList = [...this.fileList, response.data.data]
         onSuccess(response.data.data, file)
       }).catch(onError)
       return {

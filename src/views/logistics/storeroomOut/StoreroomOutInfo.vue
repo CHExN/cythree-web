@@ -17,7 +17,7 @@
           <detail-list-item term="出库部门">{{outInfoData.toDeptName}}</detail-list-item>
           <detail-list-item term="经手人">{{outInfoData.handle}}</detail-list-item>
           <detail-list-item term="保管员">{{outInfoData.storage}}</detail-list-item>
-          <detail-list-item term="创建时间">{{outInfoData.createTime}}</detail-list-item>
+          <detail-list-item term="创建时间">{{$tools.getDateTime(outInfoData.createTime)}}</detail-list-item>
         </detail-list>
         <a-divider style="margin-bottom: 32px"/>
         <detail-list title="出库名单">
@@ -85,7 +85,6 @@ export default {
   },
   methods: {
     handleCancleClick () {
-      this.dataSource = []
       this.loading = false
       this.$emit('close')
     }
@@ -93,6 +92,7 @@ export default {
   watch: {
     outInfoVisiable () {
       if (this.outInfoVisiable) {
+        this.dataSource = []
         this.loading = true
         this.$get('storeroomOut/storeroomByOutId', {
           outId: this.outInfoData.id
