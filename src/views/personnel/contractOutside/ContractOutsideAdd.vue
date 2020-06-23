@@ -51,11 +51,16 @@
             {rules: [{ required: true, message: '日期选择不能为空'}]}
           ]"
         />
-        <a-icon
+        <!-- <a-icon
           v-if="form.getFieldValue('contractPeriodKeys').length > 1"
           class="dynamic-delete-button"
           type="minus-circle-o"
           :disabled="form.getFieldValue('contractPeriodKeys').length === 1"
+          @click="() => contractPeriodRemove(k)"
+        /> -->
+        <a-icon
+          class="dynamic-delete-button"
+          type="minus-circle-o"
           @click="() => contractPeriodRemove(k)"
         />
       </a-form-item>
@@ -83,11 +88,16 @@
           style="width: 90%; margin-right: 8px"
           v-decorator="[`jobAgreementDate[${k}]`]"
         />
-        <a-icon
+        <!-- <a-icon
           v-if="form.getFieldValue('jobAgreementKeys').length > 1"
           class="dynamic-delete-button"
           type="minus-circle-o"
           :disabled="form.getFieldValue('jobAgreementKeys').length === 1"
+          @click="() => jobAgreementRemove(k)"
+        /> -->
+        <a-icon
+          class="dynamic-delete-button"
+          type="minus-circle-o"
           @click="() => jobAgreementRemove(k)"
         />
       </a-form-item>
@@ -195,9 +205,7 @@ export default {
       // can use data-binding to get
       const contractPeriodKeys = form.getFieldValue('contractPeriodKeys')
       // We need at least one passenger
-      if (contractPeriodKeys.length === 1) {
-        return
-      }
+      // if (contractPeriodKeys.length === 1) return
 
       // can use data-binding to set
       form.setFieldsValue({
@@ -218,9 +226,7 @@ export default {
     jobAgreementRemove (k) {
       const { form } = this
       const jobAgreementKeys = form.getFieldValue('jobAgreementKeys')
-      if (jobAgreementKeys.length === 1) {
-        return
-      }
+      // if (jobAgreementKeys.length === 1) return
       form.setFieldsValue({
         jobAgreementKeys: jobAgreementKeys.filter(key => key !== k)
       })
@@ -263,15 +269,18 @@ export default {
       this.form.validateFields((err, values) => {
         if (!err) {
           // filter去数组空值假值
-          let contractPeriodArr = this.form.getFieldValue('contractPeriod').filter(d => d)
+          let contractPeriodArr = this.form.getFieldValue('contractPeriod') || []
+          contractPeriodArr = contractPeriodArr.filter(d => d)
           let contractPeriodDateArr = []
-          this.form.getFieldValue('contractPeriodDate').forEach(element => {
+          const contractPeriodDate = this.form.getFieldValue('contractPeriodDate') || []
+          contractPeriodDate.forEach(element => {
             contractPeriodDateArr.push(`${element[0].format('YYYY-MM-DD')}~${element[1].format('YYYY-MM-DD')}`)
           })
-          let jobAgreementArr = this.form.getFieldValue('jobAgreement').filter(d => d)
+          let jobAgreementArr = this.form.getFieldValue('jobAgreement') || []
+          jobAgreementArr = jobAgreementArr.filter(d => d)
           let jobAgreementDateArr = []
-          this.form.getFieldValue('jobAgreementDate').forEach(element => {
-            if (!element) return
+          const jobAgreementDate = this.form.getFieldValue('jobAgreementDate') || []
+          jobAgreementDate.forEach(element => {
             jobAgreementDateArr.push(`${element[0].format('YYYY-MM-DD')}~${element[1].format('YYYY-MM-DD')}`)
           })
           this.loading = true

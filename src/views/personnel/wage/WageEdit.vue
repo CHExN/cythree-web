@@ -9,14 +9,6 @@
     :visible="wageEditVisiable"
     style="height: calc(100% - 55px);overflow: auto;padding-bottom: 53px;">
     <a-form :form="form">
-      <!-- <a-form-item label='编制类别' v-bind="formItemLayout">
-        <a-radio-group @change="onRadioChange" v-decorator="['insideOrOutside',
-          {rules: [{ required: true, message: '请选择编制类别' }]}
-        ]">
-          <a-radio-button value="0">编内</a-radio-button>
-          <a-radio-button value="1">编外</a-radio-button>
-        </a-radio-group>
-      </a-form-item> -->
       <a-form-item label='选择人员' v-bind="formItemLayout">
         <a-input
           @click="selectName"
@@ -40,9 +32,7 @@
         <a-input-number
           style="width: 100%;"
           placeholder='岗位工资'
-          v-decorator="['currentIncome',{
-            rules: [{ required: true, message: '岗位工资不能为空'}]
-          }]"/>
+          v-decorator="['currentIncome']"/>
       </a-form-item>
       <a-form-item label='补发薪级' v-bind="formItemLayout">
         <a-input-number
@@ -122,12 +112,46 @@
           placeholder='综合补助'
           v-decorator="['comprehensiveSubsidy']"/>
       </a-form-item>
+
+      <a-form-item label='空列1' v-bind="formItemLayout">
+        <a-input-number
+          style="width: 100%;"
+          placeholder='空列1'
+          v-decorator="['emptyColumn01']"/>
+      </a-form-item>
+      <a-form-item label='空列2' v-bind="formItemLayout">
+        <a-input-number
+          style="width: 100%;"
+          placeholder='空列2'
+          v-decorator="['emptyColumn02']"/>
+      </a-form-item>
+      <a-form-item label='空列3' v-bind="formItemLayout">
+        <a-input-number
+          style="width: 100%;"
+          placeholder='空列3'
+          v-decorator="['emptyColumn03']"/>
+      </a-form-item>
+      <a-form-item label='空列4' v-bind="formItemLayout">
+        <a-input-number
+          style="width: 100%;"
+          placeholder='空列4'
+          v-decorator="['emptyColumn04']"/>
+      </a-form-item>
+      <a-form-item label='空列5' v-bind="formItemLayout">
+        <a-input-number
+          style="width: 100%;"
+          placeholder='空列5'
+          v-decorator="['emptyColumn05']"/>
+      </a-form-item>
+
       <a-form-item label='应发工资' v-bind="formItemLayout">
         <a-input-number
+          disabled
           style="width: 100%;"
           placeholder='应发工资'
           v-decorator="['payable']"/>
       </a-form-item>
+
       <a-form-item label='住房公积金' v-bind="formItemLayout">
         <a-input-number
           style="width: 100%;"
@@ -171,39 +195,40 @@
           v-decorator="['taxDeduction']"/>
       </a-form-item>
 
-      <a-form-item label='空列01' v-bind="formItemLayout">
+      <a-form-item label='空列6' v-bind="formItemLayout">
         <a-input-number
           style="width: 100%;"
-          placeholder='空列01'
-          v-decorator="['emptyColumn01']"/>
+          placeholder='空列6'
+          v-decorator="['emptyColumn06']"/>
       </a-form-item>
-      <a-form-item label='空列02' v-bind="formItemLayout">
+      <a-form-item label='空列7' v-bind="formItemLayout">
         <a-input-number
           style="width: 100%;"
-          placeholder='空列02'
-          v-decorator="['emptyColumn02']"/>
+          placeholder='空列7'
+          v-decorator="['emptyColumn07']"/>
       </a-form-item>
-      <a-form-item label='空列03' v-bind="formItemLayout">
+      <a-form-item label='空列8' v-bind="formItemLayout">
         <a-input-number
           style="width: 100%;"
-          placeholder='空列03'
-          v-decorator="['emptyColumn03']"/>
+          placeholder='空列8'
+          v-decorator="['emptyColumn08']"/>
       </a-form-item>
-      <a-form-item label='空列04' v-bind="formItemLayout">
+      <a-form-item label='空列9' v-bind="formItemLayout">
         <a-input-number
           style="width: 100%;"
-          placeholder='空列04'
-          v-decorator="['emptyColumn04']"/>
+          placeholder='空列9'
+          v-decorator="['emptyColumn09']"/>
       </a-form-item>
-      <a-form-item label='空列05' v-bind="formItemLayout">
+      <a-form-item label='空列10' v-bind="formItemLayout">
         <a-input-number
           style="width: 100%;"
-          placeholder='空列05'
-          v-decorator="['emptyColumn05']"/>
+          placeholder='空列10'
+          v-decorator="['emptyColumn10']"/>
       </a-form-item>
 
       <a-form-item label='实发工资' v-bind="formItemLayout">
         <a-input-number
+          disabled
           style="width: 100%;"
           placeholder='实发工资'
           v-decorator="['realWage']"/>
@@ -342,7 +367,12 @@ export default {
           values.holidayCosts = values.holidayCosts || 0
           values.annualLeavePay = values.annualLeavePay || 0
           values.comprehensiveSubsidy = values.comprehensiveSubsidy || 0
-          values.payable = values.payable || 0
+          values.emptyColumn01 = values.emptyColumn01 || 0
+          values.emptyColumn02 = values.emptyColumn02 || 0
+          values.emptyColumn03 = values.emptyColumn03 || 0
+          values.emptyColumn04 = values.emptyColumn04 || 0
+          values.emptyColumn05 = values.emptyColumn05 || 0
+          // values.payable = values.payable || 0
           values.housingFund = values.housingFund || 0
           values.basicPensionIp = values.basicPensionIp || 0
           values.unemploymentIp = values.unemploymentIp || 0
@@ -350,12 +380,12 @@ export default {
           values.medicalMutualAid = values.medicalMutualAid || 0
           values.corporateAnnuity = values.corporateAnnuity || 0
           values.taxDeduction = values.taxDeduction || 0
-          values.realWage = values.realWage || 0
-          values.emptyColumn01 = values.emptyColumn01 || 0
-          values.emptyColumn02 = values.emptyColumn02 || 0
-          values.emptyColumn03 = values.emptyColumn03 || 0
-          values.emptyColumn04 = values.emptyColumn04 || 0
-          values.emptyColumn05 = values.emptyColumn05 || 0
+          values.emptyColumn06 = values.emptyColumn06 || 0
+          values.emptyColumn07 = values.emptyColumn07 || 0
+          values.emptyColumn08 = values.emptyColumn08 || 0
+          values.emptyColumn09 = values.emptyColumn09 || 0
+          values.emptyColumn10 = values.emptyColumn10 || 0
+          // values.realWage = values.realWage || 0
           this.$put('wage', {
             ...values,
             id: this.id,

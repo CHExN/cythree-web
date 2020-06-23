@@ -7,91 +7,89 @@
     :keyboard="false"
     :footer="null"
     @cancel="handleCancleClick">
-    <a-card :bordered="false">
-      <a-card :bordered="false">
-        <detail-list title="合同信息">
-          <template v-for="(k, index) in contractPeriod">
-            <detail-list-item :key="index" :term="k">{{contractPeriodDate[index]}}</detail-list-item>
-          </template>
-          <!-- <detail-list-item term="无固定期">{{contractOutsideInfoData.isFixedPeriod}}</detail-list-item> -->
-          <detail-list-item term="续签备注">{{contractOutsideInfoData.remarkRenew}}</detail-list-item>
-          <detail-list-item term="备注">{{contractOutsideInfoData.remark}}</detail-list-item>
-        </detail-list>
-      </a-card>
-      <a-divider style="margin-bottom: 32px"/>
-      <a-card :bordered="false">
-        <detail-list title="岗位协议信息">
-          <template v-for="(k, index) in jobAgreement">
-            <detail-list-item :key="index" :term="k">{{jobAgreementDate[index]}}</detail-list-item>
-          </template>
-        </detail-list>
-      </a-card>
-      <a-divider v-hasPermission="'staffOutside:view'" style="margin-bottom: 32px"/>
-      <a-card v-hasPermission="'staffOutside:view'" :loading='loading' :bordered="false">
-        <detail-list title="人员信息">
-          <detail-list-item term="姓名">{{staffOutsideData.name}}</detail-list-item>
-          <detail-list-item term="分队">{{staffOutsideData.team}}</detail-list-item>
-          <detail-list-item term="人员类型">{{staffOutsideData.temporary}}</detail-list-item>
-          <detail-list-item term="事由">{{staffOutsideData.cause}}</detail-list-item>
-          <detail-list-item term="性别">{{getGender(staffOutsideData.gender)}}</detail-list-item>
-          <detail-list-item term="民族">{{staffOutsideData.clan}}</detail-list-item>
-          <detail-list-item term="籍贯">{{staffOutsideData.birthplace}}</detail-list-item>
-          <detail-list-item term="学历">{{staffOutsideData.culture}}</detail-list-item>
-          <detail-list-item term="户籍性质">{{getHouseholdRegistrationType(staffOutsideData.householdRegistrationType)}}</detail-list-item>
-          <detail-list-item term="政治面貌">{{staffOutsideData.politicalFace}}</detail-list-item>
-          <detail-list-item term="家庭住址">{{staffOutsideData.address}}</detail-list-item>
-          <detail-list-item term="身份证号码">{{staffOutsideData.idNum}}</detail-list-item>
-          <detail-list-item term="座机联系电话">{{staffOutsideData.phoneLandLine}}</detail-list-item>
-          <detail-list-item term="手机联系电话">{{staffOutsideData.phoneCell}}</detail-list-item>
-          <detail-list-item term="出生年月">{{staffOutsideData.birthDate}}</detail-list-item>
-          <!-- <detail-list-item term="年龄">{{this.$tools.getAge(staffOutsideData.birthDate)}}</detail-list-item> -->
-          <detail-list-item term="年龄">{{staffOutsideData.age}}</detail-list-item>
-          <detail-list-item term="退休年龄">{{staffOutsideData.retirementAge}}</detail-list-item>
-          <detail-list-item term="退休日期">{{staffOutsideData.retirementDate}}</detail-list-item>
-          <detail-list-item term="调入日期">{{staffOutsideData.transferDate}}</detail-list-item>
-          <detail-list-item term="岗位">{{staffOutsideData.post}}</detail-list-item>
-          <detail-list-item term="岗位类别">{{staffOutsideData.technicalType}}</detail-list-item>
-          <detail-list-item term="备注">{{staffOutsideData.remark}}</detail-list-item>
-        </detail-list>
-      </a-card>
-      <a-divider v-hasPermission="'staffOutside:addDeletePhoto'" style="margin-bottom: 32px"/>
-      <div>
-        <div v-hasPermission="'staffOutside:addDeletePhoto'">
-          <a-upload
-            accept="image/jpg,image/png,image/jpeg,image/bmp"
-            listType="picture-card"
-            :fileList="fileList"
-            :remove="handleRemove"
-            :customRequest="customRequest"
-            :beforeUpload="handleBeforeUpload"
-            @preview="handlePreview"
-            @change="handleChange">
-            <div v-if="fileList.length < 8">
-              <a-icon type="plus" />
-              <div class="ant-upload-text">Upload</div>
-            </div>
-          </a-upload>
-          <a-modal :visible="previewVisible" :footer="null" @cancel="handleCancel">
-            <img alt="example" style="width: 100%;" :src="previewImage" />
-          </a-modal>
-        </div>
-        <div v-hasNoPermission="'staffOutside:addDeletePhoto'">
-          <a-upload
-            accept="image/jpg,image/png,image/jpeg,image/bmp"
-            listType="picture-card"
-            :fileList="fileList"
-            :showUploadList="{ showPreviewIcon: true, showRemoveIcon: false }"
-            :customRequest="customRequest"
-            :beforeUpload="handleBeforeUpload"
-            @preview="handlePreview"
-            @change="handleChange">
-          </a-upload>
-          <a-modal :visible="previewVisible" :footer="null" @cancel="handleCancel">
-            <img alt="example" style="width: 100%;" :src="previewImage" />
-          </a-modal>
-        </div>
-      </div>
+    <a-card :bordered="false" v-if="contractPeriod.length > 0">
+      <detail-list title="合同信息">
+        <template v-for="(k, index) in contractPeriod">
+          <detail-list-item :key="index" :term="k">{{contractPeriodDate[index]}}</detail-list-item>
+        </template>
+        <!-- <detail-list-item term="无固定期">{{contractOutsideInfoData.isFixedPeriod}}</detail-list-item> -->
+        <detail-list-item term="续签备注">{{contractOutsideInfoData.remarkRenew}}</detail-list-item>
+        <detail-list-item term="备注">{{contractOutsideInfoData.remark}}</detail-list-item>
+      </detail-list>
     </a-card>
+    <a-divider style="margin-bottom: 32px" v-if="contractPeriod.length > 0 && jobAgreement.length > 0"/>
+    <a-card :bordered="false" v-if="jobAgreement.length > 0">
+      <detail-list title="岗位协议信息">
+        <template v-for="(k, index) in jobAgreement">
+          <detail-list-item :key="index" :term="k">{{jobAgreementDate[index]}}</detail-list-item>
+        </template>
+      </detail-list>
+    </a-card>
+    <a-divider v-hasPermission="'staffOutside:view'" v-if="contractPeriod.length > 0 || jobAgreement.length > 0" style="margin-bottom: 32px"/>
+    <a-card v-hasPermission="'staffOutside:view'" :loading='loading' :bordered="false">
+      <detail-list title="人员信息">
+        <detail-list-item term="姓名">{{staffOutsideData.name}}</detail-list-item>
+        <detail-list-item term="分队">{{staffOutsideData.team}}</detail-list-item>
+        <detail-list-item term="人员类型">{{staffOutsideData.temporary}}</detail-list-item>
+        <detail-list-item term="事由">{{staffOutsideData.cause}}</detail-list-item>
+        <detail-list-item term="性别">{{getGender(staffOutsideData.gender)}}</detail-list-item>
+        <detail-list-item term="民族">{{staffOutsideData.clan}}</detail-list-item>
+        <detail-list-item term="籍贯">{{staffOutsideData.birthplace}}</detail-list-item>
+        <detail-list-item term="学历">{{staffOutsideData.culture}}</detail-list-item>
+        <detail-list-item term="户籍性质">{{getHouseholdRegistrationType(staffOutsideData.householdRegistrationType)}}</detail-list-item>
+        <detail-list-item term="政治面貌">{{staffOutsideData.politicalFace}}</detail-list-item>
+        <detail-list-item term="家庭住址">{{staffOutsideData.address}}</detail-list-item>
+        <detail-list-item term="身份证号码">{{staffOutsideData.idNum}}</detail-list-item>
+        <detail-list-item term="座机联系电话">{{staffOutsideData.phoneLandLine}}</detail-list-item>
+        <detail-list-item term="手机联系电话">{{staffOutsideData.phoneCell}}</detail-list-item>
+        <detail-list-item term="出生年月">{{staffOutsideData.birthDate}}</detail-list-item>
+        <!-- <detail-list-item term="年龄">{{this.$tools.getAge(staffOutsideData.birthDate)}}</detail-list-item> -->
+        <detail-list-item term="年龄">{{staffOutsideData.age}}</detail-list-item>
+        <detail-list-item term="退休年龄">{{staffOutsideData.retirementAge}}</detail-list-item>
+        <detail-list-item term="退休日期">{{staffOutsideData.retirementDate}}</detail-list-item>
+        <detail-list-item term="调入日期">{{staffOutsideData.transferDate}}</detail-list-item>
+        <detail-list-item term="岗位">{{staffOutsideData.post}}</detail-list-item>
+        <detail-list-item term="岗位类别">{{staffOutsideData.technicalType}}</detail-list-item>
+        <detail-list-item term="备注">{{staffOutsideData.remark}}</detail-list-item>
+      </detail-list>
+    </a-card>
+    <a-divider v-hasPermission="'staffOutside:addDeletePhoto'" style="margin-bottom: 32px"/>
+    <div>
+      <div v-hasPermission="'staffOutside:addDeletePhoto'">
+        <a-upload
+          accept="image/jpg,image/png,image/jpeg,image/bmp"
+          listType="picture-card"
+          :fileList="fileList"
+          :remove="handleRemove"
+          :customRequest="customRequest"
+          :beforeUpload="handleBeforeUpload"
+          @preview="handlePreview"
+          @change="handleChange">
+          <div v-if="fileList.length < 8">
+            <a-icon type="plus" />
+            <div class="ant-upload-text">Upload</div>
+          </div>
+        </a-upload>
+        <a-modal :visible="previewVisible" :footer="null" @cancel="handleCancel">
+          <img alt="example" style="width: 100%;" :src="previewImage" />
+        </a-modal>
+      </div>
+      <div v-hasNoPermission="'staffOutside:addDeletePhoto'">
+        <a-upload
+          accept="image/jpg,image/png,image/jpeg,image/bmp"
+          listType="picture-card"
+          :fileList="fileList"
+          :showUploadList="{ showPreviewIcon: true, showRemoveIcon: false }"
+          :customRequest="customRequest"
+          :beforeUpload="handleBeforeUpload"
+          @preview="handlePreview"
+          @change="handleChange">
+        </a-upload>
+        <a-modal :visible="previewVisible" :footer="null" @cancel="handleCancel">
+          <img alt="example" style="width: 100%;" :src="previewImage" />
+        </a-modal>
+      </div>
+    </div>
   </a-modal>
 </template>
 <script>
@@ -164,11 +162,14 @@ export default {
       }
     },
     handleRemove (file) {
-      if (file.error) {
-        this.fileList = this.fileList.filter(item => item.uid !== file.uid)
-      } else if (file.status === 'removed') {
+      if (file.uid) {
         this.$delete('staffOutside/deleteFile/' + file.uid)
       }
+      // if (file.error) {
+      //   this.fileList = this.fileList.filter(item => item.uid !== file.uid)
+      // } else if (file.status === 'removed') {
+      //   this.$delete('staffOutside/deleteFile/' + file.uid)
+      // }
     },
     handleBeforeUpload (file) {
       const isJPG = file.type === 'image/jpeg'

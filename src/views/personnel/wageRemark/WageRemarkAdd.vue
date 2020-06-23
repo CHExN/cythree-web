@@ -9,53 +9,14 @@
     :visible="wageRemarkAddVisiable"
     style="height: calc(100% - 55px);overflow: auto;padding-bottom: 53px;">
     <a-form :form="form">
-      <a-form-item label='月份' v-bind="formItemLayout">
-        <a-month-picker
-          autoFocus
-          placeholder='月份'
-          style="width: 100%;"
-          v-decorator="['yearMonth',
-            {rules: [{ required: true, message: '月份不能为空'}]}
-          ]"
-        />
+      <a-form-item label='年份' v-bind="formItemLayout">
+        <a-input v-model="year" disabled/>
       </a-form-item>
-      <a-form-item label='空列1' v-bind="formItemLayout">
+      <a-form-item v-for="i in remarkCount" :key="i" :label="`空列${i}`" v-bind="formItemLayout">
         <a-input
-          placeholder='空列1'
+          :placeholder="`空列${i}`"
           autocomplete="off"
-          v-decorator="['emptyColumn01',
-            {rules: [{pattern: '^[^,]+$', message: '不能包含 , 符号'}]}
-          ]"/>
-      </a-form-item>
-      <a-form-item label='空列2' v-bind="formItemLayout">
-        <a-input
-          placeholder='空列2'
-          autocomplete="off"
-          v-decorator="['emptyColumn02',
-            {rules: [{pattern: '^[^,]+$', message: '不能包含 , 符号'}]}
-          ]"/>
-      </a-form-item>
-      <a-form-item label='空列3' v-bind="formItemLayout">
-        <a-input
-          placeholder='空列3'
-          autocomplete="off"
-          v-decorator="['emptyColumn03',
-            {rules: [{pattern: '^[^,]+$', message: '不能包含 , 符号'}]}
-          ]"/>
-      </a-form-item>
-      <a-form-item label='空列4' v-bind="formItemLayout">
-        <a-input
-          placeholder='空列4'
-          autocomplete="off"
-          v-decorator="['emptyColumn04',
-            {rules: [{pattern: '^[^,]+$', message: '不能包含 , 符号'}]}
-          ]"/>
-      </a-form-item>
-      <a-form-item label='空列5' v-bind="formItemLayout">
-        <a-input
-          placeholder='空列5'
-          autocomplete="off"
-          v-decorator="['emptyColumn05',
+          v-decorator="[`emptyColumn${$tools.zero(i)}`,
             {rules: [{pattern: '^[^,]+$', message: '不能包含 , 符号'}]}
           ]"/>
       </a-form-item>
@@ -69,6 +30,8 @@
   </a-drawer>
 </template>
 <script>
+import moment from 'moment'
+moment.locale('zh-cn')
 
 const formItemLayout = {
   labelCol: { span: 4 },
@@ -81,6 +44,12 @@ export default {
       default: false
     },
     insideOrOutside: {
+      require: true
+    },
+    remarkCount: {
+      require: true
+    },
+    year: {
       require: true
     }
   },
@@ -104,15 +73,18 @@ export default {
       this.form.validateFields((err, values) => {
         if (!err) {
           this.loading = true
-          let yearMonth = values.yearMonth
           let emptyColumnArr = []
-          for (let i = 1; i < 6; ++i) {
-            emptyColumnArr.push(values[`emptyColumn0${i}`] || '')
+          for (let i = 1; i <= this.remarkCount; ++i) {
+            emptyColumnArr.push(values[`emptyColumn${this.$tools.zero(i)}`] || '')
           }
+          let isTrue = true
+          emptyColumnArr.forEach(entity => {
+            if (entity) isTrue = false
+          })
+          if (isTrue) return this.$message.warning('请至少填写一项')
           this.$post('wageRemark', {
+            year: this.year,
             remark: emptyColumnArr.join(),
-            year: yearMonth.format('YYYY'),
-            month: yearMonth.format('MM'),
             insideOrOutside: this.insideOrOutside
           }).then((r) => {
             this.reset()

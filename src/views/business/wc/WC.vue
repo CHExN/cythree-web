@@ -92,14 +92,6 @@
                :scroll="{ x: 900 }"
                rowKey="wcId"
                @change="handleTableChange">
-        <template slot="wcName" slot-scope="text">
-          <a-popover placement="topLeft">
-            <template slot="content">
-              <div>{{text}}</div>
-            </template>
-            <p style="width: 150px;margin-bottom: 0">{{text}}</p>
-          </a-popover>
-        </template>
         <template slot="operation" slot-scope="text, record">
           <a-icon v-hasPermission="'wc:update'" type="setting" theme="twoTone" twoToneColor="#4a9ff5" @click="edit(record)" title="修改" />
           &nbsp;
@@ -213,12 +205,14 @@ export default {
       sortedInfo = sortedInfo || {}
       filteredInfo = filteredInfo || {}
       return [{
-        title: '公厕名称',
+        title: '公厕名',
         dataIndex: 'wcName',
-        scopedSlots: { customRender: 'wcName' },
-        sorter: true,
-        sortOrder: sortedInfo.columnKey === 'wcName' && sortedInfo.order,
-        width: 300
+        ellipsis: true,
+        customRender: (text, row, index) => {
+          // return <a-popover placement="topLeft" content={text}>{text}</a-popover>
+          return <a-tooltip placement="topLeft" title={text}>{text}</a-tooltip>
+        },
+        width: '18%'
       }, {
         title: '公厕编号',
         dataIndex: 'wcNum',
@@ -257,7 +251,7 @@ export default {
         sorter: true,
         sortOrder: sortedInfo.columnKey === 'wcOwn' && sortedInfo.order
       }, {
-        title: '所在街乡',
+        title: '所属街乡',
         dataIndex: 'streetTown',
         sorter: true,
         sortOrder: sortedInfo.columnKey === 'streetTown' && sortedInfo.order

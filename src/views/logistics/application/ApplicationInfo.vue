@@ -232,13 +232,16 @@ export default {
       }
     },
     handleRemove (file) {
-      if (file.error) {
-        this.fileList = this.fileList.filter(item => item.uid !== file.uid)
-      } else if (file.status === 'removed') {
-        this.$delete('application/deleteFile/' + file.uid)// .then(() => {
-        //   that.$message.success(`${file.name} 删除成功`)
-        // })
+      if (file.uid) {
+        this.$delete('application/deleteFile/' + file.uid)
       }
+      // if (file.error) {
+      //   this.fileList = this.fileList.filter(item => item.uid !== file.uid)
+      // } else if (file.status === 'removed') {
+      //   this.$delete('application/deleteFile/' + file.uid)// .then(() => {
+      //   that.$message.success(`${file.name} 删除成功`)
+      // })
+      // }
     },
     handleBeforeUpload (file) {
       const isJPG = file.type === 'image/jpeg'

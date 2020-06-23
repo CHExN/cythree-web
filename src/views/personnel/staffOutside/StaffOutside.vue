@@ -218,11 +218,11 @@
       <div class="operator">
         <a-button type="primary" ghost @click="add" v-hasPermission="'staffOutside:add'">新增</a-button>
         <span v-show="deleted===0">
-          <a-button v-hasPermission="'staffOutside:delete'" @click="batchDelete">删除</a-button>
+          <a-button v-hasPermission="'staffOutside:delete'" v-hasRole="'劳资'" @click="batchDelete">删除</a-button>
         </span>
         <span v-show="deleted===1">
           <a-button v-hasPermission="'staffOutside:deleteTrue'" @click="batchDelete">删除</a-button>
-          <a-button v-hasNoPermission="'staffOutside:deleteTrue'" disabled title="无权限">删除</a-button>
+          <!-- <a-button v-hasNoPermission="'staffOutside:deleteTrue'" disabled title="无权限">删除</a-button> -->
         </span>
         <a-dropdown>
           <a-menu slot="overlay">
@@ -278,11 +278,36 @@
             &nbsp;
             <a-icon v-hasPermission="'staffOutside:update'" type="setting" theme="twoTone" twoToneColor="#4a9ff5" @click="edit(record)" title="修改"></a-icon>
             &nbsp;
+            <a-popconfirm
+              title="是否向劳资提交删除申请？"
+              :visible="false"
+              @visibleChange="handlePopconfirmVisibleChange(record)"
+              @confirm="confirm(record)"
+              @cancel="cancel(record)"
+              okText="Yes"
+              cancelText="No"
+              :ref="`popconfirm${record.staffId}`"
+            >
+              <a-icon v-hasPermission="'staffOutside:unitDelete'" type="rest" theme="twoTone" twoToneColor="#ff66a3" title="删除"></a-icon>
+            </a-popconfirm>
+            &nbsp;
             <a-icon v-hasPermission="'staffOutside:view'" type="eye" theme="twoTone" twoToneColor="#42b983" @click="view(record)" title="查看"></a-icon>
           </div>
           <a-badge v-else status="warning" text="无操作"></a-badge>
         </template>
       </a-table>
+      <div>
+        <a-modal
+          title="备注信息"
+          centered
+          :visible="remarkVisible"
+          :confirm-loading="confirmLoading"
+          @ok="handleOk"
+          @cancel="handleCancel"
+        >
+          <a-textarea placeholder="备注" :rows="4" v-model="remark" />
+        </a-modal>
+      </div>
     </div>
     <!-- 编外人员信息查看 -->
     <staff-outside-info
@@ -328,6 +353,10 @@ export default {
       changeType: '',
       changeDate: [],
       modalVisible: false,
+      remarkVisible: false,
+      confirmLoading: false,
+      record: {},
+      remark: '',
       isLeave: '0',
       advanced: false,
       staffOutsideInfo: {
@@ -463,7 +492,7 @@ export default {
         dataIndex: 'operation',
         scopedSlots: { customRender: 'operation' },
         fixed: 'right',
-        width: 130
+        width: 150
       }]
     }
   },
@@ -588,6 +617,8 @@ export default {
         this.queryParams.max = ''
         this.queryParams.createTimeFrom = ''
         this.queryParams.createTimeTo = ''
+        this.queryParams.reduceTimeFrom = ''
+        this.queryParams.reduceTimeTo = ''
       }
     },
     sort (isUp, record) {
@@ -597,7 +628,7 @@ export default {
         isUp: isUp
       }).then((r) => {
         this.loading = false
-        let statusArr = {
+        const statusArr = {
           '-1': 'error',
           '0': 'warning',
           '1': 'success'
@@ -610,6 +641,9 @@ export default {
       this.staffOutsideInfo.data = record
       this.staffOutsideInfo.visiable = true
     },
+    handleStaffOutsideInfoClose () {
+      this.staffOutsideInfo.visiable = false
+    },
     add () {
       this.staffOutsideAdd.visiable = true
     },
@@ -619,6 +653,7 @@ export default {
     handleStaffOutsideAddSuccess () {
       this.staffOutsideAdd.visiable = false
       this.$message.success('新增编外人员成功')
+      this.loadSelect()
       this.search()
     },
     edit (record) {
@@ -631,10 +666,8 @@ export default {
     handleStaffOutsideEditSuccess () {
       this.staffOutsideEdit.visiable = false
       this.$message.success('修改编外人员成功')
+      this.loadSelect()
       this.search()
-    },
-    handleStaffOutsideInfoClose () {
-      this.staffOutsideInfo.visiable = false
     },
     handleIsDisabilityCertificateChange (value) {
       this.queryParams.isDisabilityCertificate = value || ''
@@ -674,7 +707,65 @@ export default {
         this.queryParams.max = value
       }
     },
-    batchDelete () {
+    handleOk (e) {
+      this.confirmLoading = true
+      this.$post('reviewDelete', {
+        info: `总序号为${this.record.sortNum1}的${this.record.team}人员「${this.record.name}」`,
+        remark: this.remark,
+        tableId: this.record.staffId,
+        type: 0
+      }).then((r) => {
+        this.remarkVisible = false
+        this.confirmLoading = false
+        this.remark = ''
+        this.record = {}
+        this.$message.success('已提交删除申请')
+      })
+    },
+    handleCancel (e) {
+      this.remarkVisible = false
+    },
+    confirm (record) {
+      this.record = record
+      this.remarkVisible = true
+      this.$refs[`popconfirm${this.record.staffId}`].visible = false
+    },
+    cancel (record) {
+      this.$refs[`popconfirm${record.staffId}`].visible = false
+    },
+    handlePopconfirmVisibleChange (record) {
+      if (this.$refs[`popconfirm${record.staffId}`].visible) {
+        this.$refs[`popconfirm${record.staffId}`].visible = false
+        return
+      }
+      // 这里先查找对应的最新一条删除申请，只有返回审核通过，才把进去
+      this.$message.loading('loading...', 0)
+      this.$get('reviewDelete/getOne', {
+        tableId: record.staffId,
+        type: 0
+      }).then((r) => {
+        this.$message.destroy()
+        if (!r.data) {
+          this.$refs[`popconfirm${record.staffId}`].visible = true
+        } else if (r.data.process === '0') {
+          this.$message.warning('您已提交删除申请，请耐心等待审核结果通知')
+        } else if (r.data.process === '1') {
+          this.selectedRowKeys = [record.staffId]
+          this.batchDelete(r.data.id) // 删除
+        } else if (r.data.process === '2') {
+          if (new Date(r.data.createTime).getTime() + (24 * 60 * 60 * 1000) < new Date().getTime()) {
+            this.$message.warning('您上次删除申请未通过')
+            this.$refs[`popconfirm${record.staffId}`].visible = true
+          } else {
+            this.$message.error('您的删除申请未通过，请24小时后再重新尝试')
+          }
+        } else { // r.data.process === '3'
+          this.$message.warning('您已删过此条数据，如想再次删除请再次提交申请')
+          this.$refs[`popconfirm${record.staffId}`].visible = true
+        }
+      })
+    },
+    batchDelete (reviewId) {
       if (!this.selectedRowKeys.length) {
         this.$message.warning('请选择需要删除的记录')
         return
@@ -695,6 +786,7 @@ export default {
             that.loading = false
             that.$message.success(that.deleted === 0 ? '已全部移动至回收站' : '已全部彻底删除')
             that.selectedRowKeys = []
+            if (reviewId) that.$put('reviewDelete', { id: reviewId, process: 3, type: 0 }) // 修改状态
             that.search()
           })
         },

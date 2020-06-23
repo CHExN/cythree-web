@@ -29,7 +29,7 @@
         </a-col>
       </a-row>
     </a-form>
-    <a-card title="物资名单" :bordered="false">
+    <a-card :bordered="false">
       <a-table
         :columns="columns"
         :dataSource="dataSource"
@@ -57,7 +57,15 @@
           />
         </template>
 
+        <template slot="operation" slot-scope="text, record">
+          <a-popconfirm v-if="record.status==='1'" title="是否要删除此行？" @confirm="remove(record.id)">
+            <a>删除</a>
+          </a-popconfirm>
+          <a-badge v-else status="warning" text="无操作"></a-badge>
+        </template>
+
       </a-table>
+      <a-button v-if="process!==2" style="width: 100%; margin-top: 16px; margin-bottom: 8px" type="dashed" icon="plus" @click="newRow">新增物品</a-button>
     </a-card>
     <div class="drawer-bootom-button">
       <a-popconfirm title="确定放弃编辑？" @confirm="onClose" okText="确定" cancelText="取消">
@@ -88,8 +96,10 @@ export default {
       id: '',
       loading: false,
       editLoading: false,
+      tableIndex: 0,
       dataSource: [],
-      deptName: ''
+      deptName: '',
+      process: 0
     }
   },
   computed: {
@@ -97,7 +107,7 @@ export default {
       return [{
         title: '物品名称',
         dataIndex: 'name',
-        width: '20%',
+        width: '23%',
         scopedSlots: { customRender: 'name' }
       }, {
         title: '型号',
@@ -117,8 +127,12 @@ export default {
       }, {
         title: '备注',
         dataIndex: 'remark',
-        width: '23%',
+        width: '20%',
         scopedSlots: { customRender: 'remark' }
+      }, {
+        title: '操作',
+        dataIndex: 'action',
+        scopedSlots: { customRender: 'operation' }
       }]
     }
   },
@@ -127,6 +141,7 @@ export default {
       this.loading = false
       this.form.resetFields()
       this.dataSource = []
+      this.tableIndex = 0
     },
     onClose () {
       this.editLoading = false
@@ -146,6 +161,7 @@ export default {
       }
     },
     setFormValues ({...officeSupplies}) {
+      this.process = officeSupplies.process
       this.id = officeSupplies.id
       this.deptName = officeSupplies.deptName
       this.form.getFieldDecorator('createDate')
@@ -154,6 +170,26 @@ export default {
     handleSubmit () {
       this.form.validateFields((err, values) => {
         if (!err) {
+          let isReturn = false
+          this.dataSource.forEach(item => {
+            if (!item.name) {
+              this.$message.warning('请填写物品名称')
+              isReturn = true
+            }
+            if (!item.amount) {
+              this.$message.warning('请填写数量')
+              isReturn = true
+            }
+            if (!item.unit) {
+              this.$message.warning('请填写单位')
+              isReturn = true
+            }
+          })
+          if (this.dataSource.length === 0) {
+            this.$message.warning('计划单至少要有一条数据')
+            isReturn = true
+          }
+          if (isReturn) return
           this.editLoading = true
           let planList = JSON.stringify(this.dataSource)
           this.$put('application', {
@@ -169,6 +205,22 @@ export default {
           })
         }
       })
+    },
+    newRow () {
+      this.tableIndex++
+      this.dataSource.push({
+        id: this.tableIndex,
+        name: '',
+        type: '',
+        unit: '',
+        amount: 1,
+        remark: '',
+        status: '1'
+      })
+    },
+    remove (id) {
+      const newData = this.dataSource.filter(item => item.id !== id)
+      this.dataSource = newData
     }
   },
   watch: {

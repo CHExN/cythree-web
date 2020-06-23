@@ -34,11 +34,21 @@
         </a-col>
         <a-col :md="12" :sm="24">
           <a-form-item label='物资类别' v-bind="formItemLayout">
-            <a-select disabled placeholder='物资类别' v-decorator="['typeApplication', {
+            <a-select placeholder='物资类别' v-decorator="['typeApplication', {
               initialValue: [dictData.typeApplication && dictData.typeApplication.length > 0 ? dictData.typeApplication[0].key : ''],
               rules: [{ required: true, message: '请选择物资类别' }]
             }]">
               <a-select-option v-for="i in dictData.typeApplication" :key="i.key">{{ i.value }}</a-select-option>
+            </a-select>
+          </a-form-item>
+        </a-col>
+        <a-col :md="12" :sm="24">
+          <a-form-item label='供应商' v-bind="formItemLayout">
+            <a-select placeholder='供应商' v-decorator="['supplier', {
+              initialValue: [dictData.supplier && dictData.supplier.length > 0 ? dictData.supplier[0].key : ''],
+              rules: [{ required: true, message: '请选择供应商' }]
+            }]">
+              <a-select-option v-for="i in dictData.supplier" :key="i.key">{{ i.value }}</a-select-option>
             </a-select>
           </a-form-item>
         </a-col>
@@ -207,6 +217,7 @@ export default {
         obj[key] = put[key]
       })
       obj['date'] = moment(obj['date'])
+      obj['supplier'] = Number(obj['supplier'])
       this.form.setFieldsValue(obj)
     },
     reset () {
@@ -315,6 +326,18 @@ export default {
           this.loading = false
           this.setTableValues(r.data)
         })
+        this.$get('supplier/all', {
+        }).then((r) => {
+          let dictList = {}
+          r.data.forEach((item) => {
+            if (dictList.supplier) {
+              dictList.supplier.push({key: item.id, value: item.name})
+            } else {
+              dictList.supplier = [{key: item.id, value: item.name}]
+            }
+          })
+          this.dictData = {...this.dictData, ...dictList}
+        })
         this.$get('dict/cy_storeroom', {
         }).then((r) => {
           let dictList = {}
@@ -326,7 +349,7 @@ export default {
               dictList[fieldName] = [{key: item.keyy, value: item.valuee}]
             }
           })
-          this.dictData = dictList
+          this.dictData = {...this.dictData, ...dictList}
         })
       }
     }

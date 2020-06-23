@@ -152,6 +152,9 @@ export default {
           }
           let storeroomList = JSON.stringify(this.dataSource, function (key, value) {
             return key === 'date' ||
+            key === 'ids' ||
+            key === 'idArr' ||
+            key === 'names' ||
             key === 'toDeptId' ||
             key === 'parentId' ||
             key === 'createTimeFrom' ||

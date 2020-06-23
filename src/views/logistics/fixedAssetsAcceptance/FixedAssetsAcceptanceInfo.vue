@@ -7,7 +7,7 @@
     :keyboard="false"
     :footer="null"
     @cancel="handleCancleClick">
-      <a-card :bordered="false" style="margin-bottom: 32px">
+      <a-card :bordered="false">
         <detail-list>
           <detail-list-item term="项目名称">{{fixedAssetsAcceptanceInfoData.name}}</detail-list-item>
           <detail-list-item term="合同编号">{{fixedAssetsAcceptanceInfoData.num}}</detail-list-item>
@@ -99,6 +99,7 @@ export default {
   },
   methods: {
     handleCancleClick () {
+      this.dataSource = []
       this.loading = false
       this.$emit('close')
     },
@@ -115,7 +116,6 @@ export default {
     fixedAssetsAcceptanceInfoVisiable () {
       if (this.fixedAssetsAcceptanceInfoVisiable) {
         if (this.fixedAssetsAcceptanceInfoData.storeroomOutId) {
-          this.dataSource = []
           this.loading = true
           this.$get('storeroomOut/storeroomByOutId', {
             outId: this.fixedAssetsAcceptanceInfoData.storeroomOutId

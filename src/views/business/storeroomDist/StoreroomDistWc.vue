@@ -1,7 +1,8 @@
 <template>
   <a-drawer
     :title="dateTitle+' 记录'"
-    width=1200
+    :closable="false"
+    width=1600
     placement="right"
     @close="onClose"
     :visible="storeroomDistWcVisiable"
@@ -56,6 +57,14 @@
                   <a-input v-model="queryParams.username"/>
                 </a-form-item>
               </a-col>
+              <a-col :md="12" :sm="24" >
+                <a-form-item
+                  label="插入日期"
+                  :labelCol="{span: 5}"
+                  :wrapperCol="{span: 18, offset: 1}">
+                  <range-date @change="handleDateChange" ref="createTime"></range-date>
+                </a-form-item>
+              </a-col>
             </template>
           </div>
           <span style="float: right; margin: 3px auto 1em;">
@@ -70,12 +79,18 @@
       </a-form>
     </div>
     <div>
+      <div class="operator">
+        <!-- <a-button @click="batchDelete" v-hasPermission="'wcStoreroom:delete'">删除</a-button> -->
+        <a-button @click="batchDelete">删除</a-button>
+      </div>
       <!-- 表格区域 -->
       <a-table ref="TableInfo"
                :columns="columns"
                :dataSource="dataSource"
                :pagination="pagination"
                :loading="loading"
+               :rowSelection="{selectedRowKeys: selectedRowKeys, onChange: onSelectChange}"
+               rowKey="id"
                @change="handleTableChange">
         <template slot="amount" slot-scope="text">
           <span>{{ $tools.addZero(text) }}</span>
@@ -88,8 +103,11 @@
   </a-drawer>
 </template>
 <script>
+import RangeDate from '@/components/datetime/RangeDate'
+
 export default {
   name: 'distWC',
+  components: { RangeDate },
   props: {
     storeroomDistWcVisiable: {
       default: false
@@ -106,8 +124,11 @@ export default {
       advanced: false,
       dataSource: [],
       dictData: {},
+      filteredInfo: null,
+      sortedInfo: null,
       paginationInfo: null,
       queryParams: {},
+      selectedRowKeys: [],
       pagination: {
         size: 'small',
         pageSizeOptions: ['20', '40', '80', '160'],
@@ -121,6 +142,8 @@ export default {
   },
   computed: {
     columns () {
+      let { sortedInfo } = this
+      sortedInfo = sortedInfo || {}
       return [{
         title: '公厕名称',
         dataIndex: 'wcName'
@@ -131,8 +154,18 @@ export default {
         title: '所属分队',
         dataIndex: 'wcOwn'
       }, {
+        title: '物品编号',
+        dataIndex: 'storeroomId'
+      }, {
         title: '物品名称',
         dataIndex: 'name'
+      }, {
+        title: '型号',
+        dataIndex: 'type',
+        width: '6%'
+      }, {
+        title: '单位',
+        dataIndex: 'unit'
       }, {
         title: '物资类别',
         dataIndex: 'typeApplication',
@@ -142,20 +175,35 @@ export default {
       }, {
         title: '分配数量',
         dataIndex: 'amount',
-        scopedSlots: { customRender: 'amount' }
+        scopedSlots: { customRender: 'amount' },
+        sorter: true,
+        sortOrder: sortedInfo.columnKey === 'amount' && sortedInfo.order
       }, {
         title: '分配日期',
         dataIndex: 'date',
-        scopedSlots: { customRender: 'date' }
+        scopedSlots: { customRender: 'date' },
+        sorter: true,
+        sortOrder: sortedInfo.columnKey === 'date' && sortedInfo.order
       }, {
         title: '操作账号',
         dataIndex: 'username'
+      }, {
+        title: '插入时间',
+        dataIndex: 'createTime',
+        customRender: (text, row, index) => {
+          return this.$tools.getDateTime(text)
+        },
+        sorter: true,
+        sortOrder: sortedInfo.columnKey === 'createTime' && sortedInfo.order
       }]
     }
   },
   mounted () {
   },
   methods: {
+    onSelectChange (selectedRowKeys) {
+      this.selectedRowKeys = selectedRowKeys
+    },
     onClose () {
       this.$emit('close')
       this.reboot()
@@ -167,10 +215,41 @@ export default {
         this.queryParams.name = ''
         this.queryParams.wcName = ''
         this.queryParams.username = ''
+        this.queryParams.createTimeFrom = ''
+        this.queryParams.createTimeTo = ''
       }
     },
     handleTypeApplicationChange (value) {
       this.queryParams.typeApplication = value || ''
+    },
+    handleDateChange (value) {
+      if (value) {
+        this.queryParams.createTimeFrom = value[0]
+        this.queryParams.createTimeTo = value[1]
+      }
+    },
+    batchDelete () {
+      if (!this.selectedRowKeys.length) {
+        this.$message.warning('请选择需要删除的记录')
+        return
+      }
+      let that = this
+      this.$confirm({
+        title: '确定删除所选中的记录?',
+        content: '当您点击确定按钮后，这些记录将会被彻底删除',
+        centered: true,
+        onOk () {
+          that.loading = true
+          that.$delete('wcStoreroom/' + that.selectedRowKeys.join(',')).then(() => {
+            that.$message.success('删除成功')
+            that.selectedRowKeys = []
+            that.search()
+          })
+        },
+        onCancel () {
+          that.selectedRowKeys = []
+        }
+      })
     },
     loadSelect () {
       this.$get('dict/cy_storeroom', {
@@ -188,20 +267,42 @@ export default {
       })
     },
     search () {
+      let {sortedInfo, filteredInfo} = this
+      let sortField, sortOrder
+      // 获取当前列的排序和列的过滤规则
+      if (sortedInfo) {
+        sortField = sortedInfo.field
+        sortOrder = sortedInfo.order
+      }
       this.fetch({
-        ...this.queryParams
+        sortField: sortField,
+        sortOrder: sortOrder,
+        ...this.queryParams,
+        ...filteredInfo
       })
     },
     reset () {
+      // 取消选中
+      this.selectedRowKeys = []
       // 重置分页
       this.$refs.TableInfo.pagination.current = this.pagination.defaultCurrent
       if (this.paginationInfo) {
         this.paginationInfo.current = this.pagination.defaultCurrent
         this.paginationInfo.pageSize = this.pagination.defaultPageSize
       }
-      this.paginationInfo = null
+      // 重置列过滤器规则
+      this.filteredInfo = null
+      // 重置列排序规则
+      this.sortedInfo = null
       // 重置查询参数
-      this.queryParams = {}
+      this.queryParams = {
+        createTimeFrom: '',
+        createTimeTo: ''
+      }
+      if (this.advanced) {
+        // 清空时间选择
+        this.$refs.createTime.reset()
+      }
     },
     reboot () {
       this.reset()
@@ -209,8 +310,14 @@ export default {
     },
     handleTableChange (pagination, filters, sorter) {
       this.paginationInfo = pagination
+      this.filteredInfo = filters
+      this.sortedInfo = sorter
+
       this.fetch({
-        ...this.queryParams
+        sortField: sorter.field,
+        sortOrder: sorter.order,
+        ...this.queryParams,
+        ...filters
       })
     },
     fetch (params = {}) {

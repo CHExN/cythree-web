@@ -87,7 +87,7 @@
         </a-col>
       </a-row>
     </a-form>
-    <a-card title="采购计划" :bordered="false">
+    <a-card :bordered="false">
       <a-table
         :columns="columns"
         :dataSource="dataSource"
@@ -184,7 +184,7 @@ export default {
       return [{
         title: '物品名称',
         dataIndex: 'name',
-        width: '20%',
+        width: '23%',
         scopedSlots: { customRender: 'name' }
       }, {
         title: '型号',
@@ -204,7 +204,7 @@ export default {
       }, {
         title: '备注',
         dataIndex: 'remark',
-        width: '23%',
+        width: '20%',
         scopedSlots: { customRender: 'remark' }
       }, {
         title: '操作',

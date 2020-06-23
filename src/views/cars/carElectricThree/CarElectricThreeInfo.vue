@@ -14,7 +14,7 @@
           <detail-list-item term="钢架号">{{carElectricThreeInfoData.steelFrameNumber}}</detail-list-item>
           <detail-list-item term="电机号">{{carElectricThreeInfoData.motorNumber}}</detail-list-item>
           <detail-list-item term="车牌号">{{carElectricThreeInfoData.carNumber}}</detail-list-item>
-          <detail-list-item term="身份证号">{{carElectricThreeInfoData.idNum}}</detail-list-item>
+          <!-- <detail-list-item term="身份证号">{{carElectricThreeInfoData.idNum}}</detail-list-item> -->
           <detail-list-item term="使用人">{{carElectricThreeInfoData.user}}</detail-list-item>
           <detail-list-item term="使用部门">{{carElectricThreeInfoData.useDeptName}}</detail-list-item>
           <detail-list-item term="车辆配发日期">{{carElectricThreeInfoData.carAllotmentDate}}</detail-list-item>
@@ -24,6 +24,7 @@
           <detail-list-item term="是否临牌">{{getIfLicense(carElectricThreeInfoData.ifLicense)}}</detail-list-item>
           <detail-list-item term="存储地点">{{carElectricThreeInfoData.storageLocation}}</detail-list-item>
           <detail-list-item term="车辆状态">{{getStatus(carElectricThreeInfoData.status)}}</detail-list-item>
+          <detail-list-item term="备注">{{carElectricThreeInfoData.remark}}</detail-list-item>
         </detail-list>
       </a-card>
   </a-modal>

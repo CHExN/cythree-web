@@ -260,9 +260,6 @@ export default {
         this.$refs[`popconfirm${record.id}`].visible = false
         return
       }
-      // let now = new Date()
-      // let is = false
-      // is = record.createTime.substr(0, 7) === moment(`${now.getFullYear()}-${now.getMonth() + 1}`).format('YYYY-MM')
       let is = moment().isBefore(moment(record.createTime).add(30, 'days'))
       if (is) {
         this.edit(record)
@@ -278,7 +275,7 @@ export default {
           if (!r.data) {
             this.$refs[`popconfirm${record.id}`].visible = true
           } else if (r.data.process === '0') {
-            this.$message.warning('您已提交修改申请，请耐心等待审核成功通知')
+            this.$message.warning('您已提交修改申请，请耐心等待审核结果通知')
           } else if (r.data.process === '1') {
             this.edit(record, {
               tableName: 'storeroomOut',
@@ -292,8 +289,7 @@ export default {
             } else {
               this.$message.error('您的修改申请未通过，请24小时后再重新尝试')
             }
-          // } else if (r.data.process === '3') {
-          } else {
+          } else { // r.data.process === '3'
             this.$message.warning('您已修改过此条数据，如想再次修改请再次提交申请')
             this.$refs[`popconfirm${record.id}`].visible = true
           }

@@ -112,15 +112,11 @@ export default {
     },
     successColumns () {
       return [{
-        title: '水表编号',
-        dataIndex: 'waterNum'
+        title: '公厕编号',
+        dataIndex: 'wcNum'
       }, {
         title: '金额合计',
         dataIndex: 'totalAmount'
-      }, {
-        title: '登记日期',
-        dataIndex: 'createDate',
-        scopedSlots: { customRender: 'createDate' }
       }]
     },
     errorColumns () {

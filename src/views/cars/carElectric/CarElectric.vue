@@ -47,6 +47,14 @@
               </a-col>
               <a-col :md="12" :sm="24" >
                 <a-form-item
+                  label="备注"
+                  :labelCol="{span: 5}"
+                  :wrapperCol="{span: 18, offset: 1}">
+                  <a-input v-model="queryParams.remark"/>
+                </a-form-item>
+              </a-col>
+              <a-col :md="12" :sm="24" >
+                <a-form-item
                   label="配发日期"
                   :labelCol="{span: 5}"
                   :wrapperCol="{span: 18, offset: 1}">
@@ -113,7 +121,6 @@
           <a-icon v-hasPermission="'carElectric:update'" type="setting" theme="twoTone" twoToneColor="#4a9ff5" @click="edit(record)" title="修改"></a-icon>
           &nbsp;
           <a-icon v-hasPermission="'carElectric:view'" type="eye" theme="twoTone" twoToneColor="#42b983" @click="view(record)" title="查看"></a-icon>
-          <a-badge v-hasNoPermission="'carElectric:update','carElectric:view'" status="warning" text="无权限"></a-badge>
         </template>
       </a-table>
     </div>
@@ -206,7 +213,8 @@ export default {
       filteredInfo = filteredInfo || {}
       return [{
         title: '车辆类型',
-        dataIndex: 'carType'
+        dataIndex: 'carType',
+        width: '10%'
       }, {
         title: '车辆品牌',
         dataIndex: 'carBrands'
@@ -216,26 +224,6 @@ export default {
         scopedSlots: { customRender: 'carNumber' },
         sorter: true,
         sortOrder: sortedInfo.columnKey === 'carNumber' && sortedInfo.order
-      }, {
-        title: '在职否',
-        dataIndex: 'isLeave',
-        customRender: (text, row, index) => {
-          switch (text) {
-            case '0':
-              return <a-tag color="cyan">在职</a-tag>
-            case '1':
-              return <a-tag color="red">非在职</a-tag>
-            default:
-              return text
-          }
-        },
-        filters: [
-          { text: '在职', value: '0' },
-          { text: '非在职', value: '1' }
-        ],
-        filterMultiple: false,
-        filteredValue: filteredInfo.isLeave || null,
-        onFilter: (value, record) => record.isLeave.includes(value)
       }, {
         title: '使用人',
         dataIndex: 'user'
@@ -322,6 +310,7 @@ export default {
         this.queryParams.carNumber = ''
         this.queryParams.carBrands = ''
         this.queryParams.carType = ''
+        this.queryParams.remark = ''
         this.queryParams.carAllotmentDateFrom = ''
         this.queryParams.carAllotmentDateTo = ''
         this.queryParams.batteryReplacementDate1From = ''

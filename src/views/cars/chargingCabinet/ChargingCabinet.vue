@@ -105,7 +105,6 @@
           <a-icon v-hasPermission="'chargingCabinet:update'" type="setting" theme="twoTone" twoToneColor="#4a9ff5" @click="edit(record)" title="修改"></a-icon>
           &nbsp;
           <a-icon v-hasPermission="'chargingCabinet:view'" type="eye" theme="twoTone" twoToneColor="#42b983" @click="view(record)" title="查看"></a-icon>
-          <a-badge v-hasNoPermission="'chargingCabinet:update','chargingCabinet:view'" status="warning" text="无权限"></a-badge>
         </template>
       </a-table>
     </div>
@@ -200,30 +199,11 @@ export default {
         dataIndex: 'assetName'
       }, {
         title: '品牌型号',
-        dataIndex: 'brandModel'
+        dataIndex: 'brandModel',
+        width: '26%'
       }, {
         title: '配发日期',
         dataIndex: 'allotmentDate'
-      }, {
-        title: '在职否',
-        dataIndex: 'isLeave',
-        customRender: (text, row, index) => {
-          switch (text) {
-            case '0':
-              return <a-tag color="cyan">在职</a-tag>
-            case '1':
-              return <a-tag color="red">非在职</a-tag>
-            default:
-              return text
-          }
-        },
-        filters: [
-          { text: '在职', value: '0' },
-          { text: '非在职', value: '1' }
-        ],
-        filterMultiple: false,
-        filteredValue: filteredInfo.isLeave || null,
-        onFilter: (value, record) => record.isLeave.includes(value)
       }, {
         title: '责任人',
         dataIndex: 'user'

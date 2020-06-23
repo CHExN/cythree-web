@@ -51,9 +51,6 @@
                  :dataSource="importData"
                  :pagination="pagination"
                  :scroll="{ x: 900 }">
-          <template slot="createDate" slot-scope="text">
-            {{text.split(' ')[0]}}
-          </template>
         </a-table>
       </a-tab-pane>
       <a-tab-pane tab="失败记录" key="2" v-if="errors.length">
@@ -112,15 +109,11 @@ export default {
     },
     successColumns () {
       return [{
-        title: '电表编号',
-        dataIndex: 'electricityNum'
+        title: '公厕编号',
+        dataIndex: 'wcNum'
       }, {
         title: '金额合计',
         dataIndex: 'totalAmount'
-      }, {
-        title: '登记日期',
-        dataIndex: 'createDate',
-        scopedSlots: { customRender: 'createDate' }
       }]
     },
     errorColumns () {

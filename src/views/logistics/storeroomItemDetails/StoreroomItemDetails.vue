@@ -19,24 +19,24 @@
             </a-col>
             <a-col :md="12" :sm="24" >
               <a-form-item
-                label="供应商"
+                label="物品名称"
                 :labelCol="{span: 5}"
                 :wrapperCol="{span: 18, offset: 1}">
-                <a-select
-                  mode="multiple"
-                  :allowClear="true"
-                  @change="handleSupplierChange">
-                  <a-select-option v-for="i in Object.keys(dictData.supplier||[])" :key="i">{{ dictData.supplier[i] }}</a-select-option>
-                </a-select>
+                <a-textarea auto-size v-model="queryParams.name"/>
               </a-form-item>
             </a-col>
             <template v-if="advanced">
               <a-col :md="12" :sm="24" >
                 <a-form-item
-                  label="物品名称"
+                  label="供应商"
                   :labelCol="{span: 5}"
                   :wrapperCol="{span: 18, offset: 1}">
-                  <a-input v-model="queryParams.name"/>
+                  <a-select
+                    mode="multiple"
+                    :allowClear="true"
+                    @change="handleSupplierChange">
+                    <a-select-option v-for="i in Object.keys(dictData.supplier||[])" :key="i">{{ dictData.supplier[i] }}</a-select-option>
+                  </a-select>
                 </a-form-item>
               </a-col>
               <a-col :md="12" :sm="24" >
@@ -184,6 +184,8 @@ export default {
         data: {}
       },
       dataSource: [],
+      filteredInfo: null,
+      sortedInfo: null,
       paginationInfo: null,
       pagination: {
         pageSizeOptions: ['10', '20', '30', '40', '100'],
@@ -202,41 +204,57 @@ export default {
   },
   computed: {
     columns () {
+      let { sortedInfo } = this
+      sortedInfo = sortedInfo || {}
       return [{
         title: '物品名称',
         dataIndex: 'name'
       }, {
         title: '型号',
-        dataIndex: 'type'
+        dataIndex: 'type',
+        width: '8%'
       }, {
         title: '入库数量',
         dataIndex: 'amount',
-        scopedSlots: { customRender: 'amount' }
+        scopedSlots: { customRender: 'amount' },
+        sorter: true,
+        sortOrder: sortedInfo.columnKey === 'amount' && sortedInfo.order,
+        width: '9%'
       }, {
         title: '单位',
-        dataIndex: 'unit'
+        dataIndex: 'unit',
+        width: '6%'
       }, {
         title: '单价',
         dataIndex: 'money',
-        scopedSlots: { customRender: 'money' }
+        scopedSlots: { customRender: 'money' },
+        sorter: true,
+        sortOrder: sortedInfo.columnKey === 'money' && sortedInfo.order,
+        width: '9%'
       }, {
         title: '物资类别',
         dataIndex: 'typeApplication',
         customRender: (text, row, index) => {
           return this.dictData.typeApplication[text]
-        }
+        },
+        width: '7%'
       }, {
         title: '供应商',
         dataIndex: 'supplier',
         customRender: (text, row, index) => {
           return this.dictData.supplier[text]
-        }
+        },
+        width: '9%'
       }, {
         title: '入库日期',
-        dataIndex: 'date'
+        dataIndex: 'date',
+        sorter: true,
+        sortOrder: sortedInfo.columnKey === 'date' && sortedInfo.order,
+        width: '9%'
       }, {
         title: '入库单号',
-        dataIndex: 'putNum'
+        dataIndex: 'putNum',
+        width: '13%'
       }, {
         title: '操作',
         dataIndex: 'operation',
@@ -301,28 +319,12 @@ export default {
         }).then((r) => {
           r.data.forEach((item, index) => {
             newData.push([
-              this.dictData.wcSort[item.wcSort],
-              item.wcOwn,
-              item.wcNum,
-              item.wcName,
-              item.a,
-              item.b,
-              item.c,
-              item.d,
-              null,
-              item.e,
-              item.f,
-              item.g,
-              item.h,
-              item.i,
-              item.j,
-              null,
-              item.k,
-              item.l,
-              item.m,
-              item.n,
-              item.o,
-              item.p
+              this.dictData.wcSort[item.wcSort], item.wcOwn, item.wcNum, item.wcName, item.a,
+              item.b, item.c, item.d, null,
+              item.e, item.f, item.g, item.h, item.i, item.j, null,
+              item.k, item.l, item.m, item.n, item.o, item.p,
+              item.q, item.r, item.s, item.t, item.u, item.v, null,
+              item.w, item.x, item.y, item.z, item.aa, item.ab, null
             ])
           })
           if (newData.length === r.data.length) {
@@ -360,7 +362,7 @@ export default {
     toggleAdvanced () {
       this.advanced = !this.advanced
       if (!this.advanced) {
-        this.queryParams.name = ''
+        this.queryParams.supplier = ''
         this.queryParams.putNum = ''
         this.queryParams.unit = ''
         this.queryParams.receipt = ''
@@ -392,8 +394,18 @@ export default {
       }
     },
     search () {
+      let {sortedInfo, filteredInfo} = this
+      let sortField, sortOrder
+      // 获取当前列的排序和列的过滤规则
+      if (sortedInfo) {
+        sortField = sortedInfo.field
+        sortOrder = sortedInfo.order
+      }
       this.fetch({
-        ...this.queryParams
+        sortField: sortField,
+        sortOrder: sortOrder,
+        ...this.queryParams,
+        ...filteredInfo
       })
     },
     reset () {
@@ -403,7 +415,10 @@ export default {
         this.paginationInfo.current = this.pagination.defaultCurrent
         this.paginationInfo.pageSize = this.pagination.defaultPageSize
       }
-      this.paginationInfo = null
+      // 重置列过滤器规则
+      this.filteredInfo = null
+      // 重置列排序规则
+      this.sortedInfo = null
       // 重置查询参数
       this.queryParams = {
         createTimeFrom: '',
@@ -417,8 +432,14 @@ export default {
     },
     handleTableChange (pagination, filters, sorter) {
       this.paginationInfo = pagination
+      this.filteredInfo = filters
+      this.sortedInfo = sorter
+
       this.fetch({
-        ...this.queryParams
+        sortField: sorter.field,
+        sortOrder: sorter.order,
+        ...this.queryParams,
+        ...filters
       })
     },
     loadSelect () {

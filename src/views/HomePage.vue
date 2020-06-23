@@ -36,7 +36,7 @@
     <a-row :gutter="24">
       <a-col v-hasPermission="'totalExpenses:view'" :sm="24" :md="12" :xl="6" :style="{ marginBottom: '24px' }">
         <chart-card :loading="loading" title="总支出" :total="`￥${totalExpenditureThisYear}`">
-          <a-tooltip title="本年总支出" slot="action">
+          <a-tooltip title="本年采购总支出" slot="action">
             <a-icon type="info-circle-o" />
           </a-tooltip>
           <div>
@@ -73,7 +73,7 @@
       </a-col>
       <a-col v-hasPermission="'annualProgress:view'" :sm="24" :md="12" :xl="6" :style="{ marginBottom: '24px' }">
         <chart-card :loading="loading" title="年进度" :total="`${yearProgress}%`">
-          <a-tooltip title="对比日期为今年的一月一号至来年的一月一号" slot="action">
+          <a-tooltip title="对比日期为今年的1月1日至来年的1月1日" slot="action">
             <a-icon type="info-circle-o" />
           </a-tooltip>
           <div>
@@ -89,7 +89,7 @@
         <div class="salesCard">
           <a-tabs default-active-key="1" size="large" :tab-bar-style="{marginBottom: '24px', paddingLeft: '16px'}">
             <div class="extra-wrapper" slot="tabBarExtraContent">
-              <a-select @change="handleYearChange" v-model="yearValue" :style="{width: '256px'}">
+              <a-select @change="handleYearChange" v-model="yearValue" :style="{width: '150px'}">
                 <a-select-option v-for="i in 20" :key="2017 + i">{{ `${2017 + i}年` }}</a-select-option>
               </a-select>
             </div>
@@ -114,35 +114,54 @@
       <a-row :gutter="24" type="flex" :style="{ marginTop: '24px' }">
 
         <a-col :xl="12" :lg="24" :md="24" :sm="24" :xs="24">
-      <a-spin :spinning="loadingMoreMore" >
-          <a-card class="antd-pro-pages-dashboard-analysis-salesCard" title="入库类别占比"
-            :loading="loading" :bordered="false" :hoverable="true" :style="{ height: '100%' }">
-            <div slot="extra" style="height: inherit;">
-              <div class="analysis-salesTypeRadio">
-                <a-month-picker :allowClear="false" v-model="monthValue" @change="handleMonthChange"/>
-                <!-- <a-radio-group defaultValue="a">
-                  <a-radio-button value="a">全部渠道</a-radio-button>
-                  <a-radio-button value="b">线上</a-radio-button>
-                  <a-radio-button value="c">门店</a-radio-button>
-                </a-radio-group> -->
+          <a-spin :spinning="loadingMoreMore" >
+            <a-card class="antd-pro-pages-dashboard-analysis-salesCard" title="入库物资类别占比"
+              :loading="loading" :bordered="false" :hoverable="true" :style="{ height: '100%' }">
+              <div slot="extra" style="height: inherit;">
+                <div class="analysis-salesTypeRadio">
+                  <a-month-picker :style="{width: '150px'}" :allowClear="false" v-model="typeApplicationMonthValue" @change="handleTypeApplicationProportionChange"/>
+                  <!-- <a-radio-group defaultValue="a">
+                    <a-radio-button value="a">全部渠道</a-radio-button>
+                    <a-radio-button value="b">线上</a-radio-button>
+                    <a-radio-button value="c">门店</a-radio-button>
+                  </a-radio-group> -->
+                </div>
               </div>
-            </div>
-            <h4>占比度</h4>
-            <div>
               <!-- style="width: calc(100% - 240px);" -->
-              <div>
-                <v-chart :force-fit="true" :height="405" :data="pieData" :scale="pieScale">
-                  <v-tooltip :showTitle="false" dataKey="item*percent" />
-                  <v-axis />
-                  <!-- position="right" :offsetX="-140" -->
-                  <v-legend dataKey="item*count"/>
-                  <v-pie position="percent" color="item" :vStyle="pieStyle" />
-                  <v-coord type="theta" :radius="0.75" :innerRadius="0.6" />
-                </v-chart>
+              <v-chart :force-fit="true" :height="450" :data="typeApplicationPieData" :scale="typeApplicationPieScale">
+                <v-tooltip :showTitle="false" dataKey="item*percent" />
+                <v-axis />
+                <!-- position="right" :offsetX="-140" -->
+                <v-legend dataKey="item"/>
+                <v-pie position="money" color="item" :vStyle="typeApplicationPieStyle" label="percent" />
+                <v-coord type="theta" :radius="0.75" :innerRadius="0.6" />
+              </v-chart>
+            </a-card>
+          </a-spin>
+        </a-col>
+
+        <a-col :xl="12" :lg="24" :md="24" :sm="24" :xs="24">
+          <a-spin :spinning="loadingMoreMoreMore" >
+            <a-card class="antd-pro-pages-dashboard-analysis-salesCard" title="入库供应商占比"
+              :loading="loading" :bordered="false" :hoverable="true" :style="{ height: '100%' }">
+              <div slot="extra" style="height: inherit;">
+                <div class="analysis-salesTypeRadio">
+                  <a-select :style="{width: '150px'}" v-model="supplierTypeApplication" @change="handleTypeApplicationChange">
+                    <a-select-option key="">全部</a-select-option>
+                    <a-select-option v-for="i in Object.keys(dictData.typeApplication||[])" :key="i">{{ dictData.typeApplication[i] }}</a-select-option>
+                  </a-select>
+                  <a-month-picker :style="{width: '150px'}" :allowClear="false" v-model="supplierMonthValue" @change="handleSupplierProportionChange"/>
+                </div>
               </div>
-            </div>
-          </a-card>
-      </a-spin>
+              <v-chart :force-fit="true" :height="450" :data="supplierPieData" :scale="supplierPieScale">
+                <v-tooltip :showTitle="false" dataKey="item*percent" />
+                <v-axis />
+                <v-legend dataKey="item"/>
+                <v-pie position="money" color="item" :vStyle="supplierPieStyle" label="percent" />
+                <v-coord type="theta" :radius="0.75" :innerRadius="0.6" />
+              </v-chart>
+            </a-card>
+          </a-spin>
         </a-col>
 
       </a-row>
@@ -167,20 +186,33 @@ export default {
       loading: true,
       loadingMore: false,
       loadingMoreMore: false,
+      loadingMoreMoreMore: false,
 
-      pieData: [],
-      pieScale: [{
+      typeApplicationPieData: [],
+      typeApplicationPieScale: [{
         dataKey: 'percent',
         min: 0,
         formatter: '.0%'
       }],
-      pieStyle: {
+      typeApplicationPieStyle: {
+        stroke: '#fff',
+        lineWidth: 1
+      },
+
+      supplierPieData: [],
+      supplierPieScale: [{
+        dataKey: 'percent',
+        min: 0,
+        formatter: '.0%'
+      }],
+      supplierPieStyle: {
         stroke: '#fff',
         lineWidth: 1
       },
 
       rankList: [],
       barData: [],
+      dictData: {},
 
       miniAreaData: [],
       miniBarData: [],
@@ -202,7 +234,9 @@ export default {
       dayPercentageStoreroom: 0,
 
       yearValue: moment().year(),
-      monthValue: moment()
+      typeApplicationMonthValue: moment(),
+      supplierMonthValue: moment(),
+      supplierTypeApplication: ''
     }
   },
   computed: {
@@ -230,14 +264,37 @@ export default {
         this.loadingMore = false
       })
     },
-    handleMonthChange (value) {
+    handleTypeApplicationProportionChange (value) {
       this.loadingMoreMore = true
-      this.$get(`storeroomPut/index/${value.format('YYYY')}-${value.format('MM')}`).then((r) => {
-        this.ringDiagramDataProcessing(r.data.data.storeroomPutTypeApplicationProportion)
+      this.typeApplicationMonthValue = value
+      this.$get(`storeroomPut/typeApplicationProportion/${value.format('YYYY')}-${value.format('MM')}`).then((r) => {
+        this.typeApplicationRingDiagramDataProcessing(r.data.data.storeroomPutTypeApplicationProportion)
         this.loadingMoreMore = false
       })
     },
-    ringDiagramDataProcessing (storeroomPutTypeApplicationProportion) {
+    handleSupplierProportionChange (value) {
+      this.loadingMoreMoreMore = true
+      this.supplierMonthValue = value
+      this.$get(`storeroomPut/supplierProportion`, {
+        date: `${this.supplierMonthValue.format('YYYY')}-${this.supplierMonthValue.format('MM')}`,
+        typeApplication: this.supplierTypeApplication
+      }).then((r) => {
+        this.supplierRingDiagramDataProcessing(r.data.data.storeroomPutSupplierProportion)
+        this.loadingMoreMoreMore = false
+      })
+    },
+    handleTypeApplicationChange (value) {
+      this.loadingMoreMoreMore = true
+      this.supplierTypeApplication = value
+      this.$get(`storeroomPut/supplierProportion`, {
+        date: `${this.supplierMonthValue.format('YYYY')}-${this.supplierMonthValue.format('MM')}`,
+        typeApplication: this.supplierTypeApplication
+      }).then((r) => {
+        this.supplierRingDiagramDataProcessing(r.data.data.storeroomPutSupplierProportion)
+        this.loadingMoreMoreMore = false
+      })
+    },
+    typeApplicationRingDiagramDataProcessing (storeroomPutTypeApplicationProportion) {
       const dv = new DataSet.View().source(storeroomPutTypeApplicationProportion)
       dv.transform({
         type: 'percent',
@@ -245,7 +302,19 @@ export default {
         dimension: 'item',
         as: 'percent'
       })
-      this.pieData = dv.rows
+      this.typeApplicationPieData = dv.rows
+      // console.log(this.typeApplicationPieData)
+    },
+    supplierRingDiagramDataProcessing (storeroomPutSupplierProportion) {
+      const dv = new DataSet.View().source(storeroomPutSupplierProportion)
+      dv.transform({
+        type: 'percent',
+        field: 'money',
+        dimension: 'item',
+        as: 'percent'
+      })
+      this.supplierPieData = dv.rows
+      // console.log(this.supplierPieData)
     },
     tableDiagramDataProcessing (allMonthWcConsumptionByYear, allOwnWcConsumptionByYear) {
       let newData = {
@@ -285,15 +354,31 @@ export default {
         let value2 = obj2[property]
         return value1 - value2
       }
+    },
+    loadSelect () {
+      this.$get('dict/cy_storeroom', {
+      }).then((r) => {
+        let dictList = {}
+        r.data.forEach((item) => {
+          let fieldName = this.$tools.toHump(item.fieldName.toLowerCase())
+          if (dictList[fieldName]) {
+            dictList[fieldName][item.keyy] = item.valuee
+          } else {
+            dictList[fieldName] = {[item.keyy]: item.valuee}
+          }
+        })
+        this.dictData = dictList
+      })
     }
   },
   mounted () {
     this.loading = true
     this.loadingMore = true
     this.welcomeMessage = this.welcome()
+    this.loadSelect()
     this.$get(`loadData`, {
       year: this.yearValue,
-      date: `${this.monthValue.format('YYYY')}-${this.monthValue.format('MM')}`
+      date: `${this.typeApplicationMonthValue.format('YYYY')}-${this.typeApplicationMonthValue.format('MM')}`
     }).then((r) => {
       let data = r.data.data
       this.miniAreaData = data.lastSevenVisitCount || [] // 近期系统访问记录
@@ -315,7 +400,11 @@ export default {
       this.tableDiagramDataProcessing(data.allMonthWcConsumptionByYear, data.allOwnWcConsumptionByYear)
 
       // 环形图
-      this.ringDiagramDataProcessing(data.storeroomPutTypeApplicationProportion)
+      this.typeApplicationRingDiagramDataProcessing(data.storeroomPutTypeApplicationProportion)
+
+      // 另一个环形图
+      // console.log(data.storeroomPutSupplierProportion)
+      this.supplierRingDiagramDataProcessing(data.storeroomPutSupplierProportion)
 
       // 设置年进度
       let day = moment().diff(moment().startOf('year'), 'day')

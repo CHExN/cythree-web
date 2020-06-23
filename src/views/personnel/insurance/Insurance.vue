@@ -506,7 +506,7 @@ export default {
         this.$message.loading('正在生成', 3, () => { // 3s后关闭执行关闭回调函数
           let spread = newSpread('Insurance')
           spread = fixedForm(spread, 'Insurance', data)
-          let fileName = `${this.dateTitle}社保实际缴费金额.xlsx`
+          let fileName = `社保实际缴费金额_${this.dateTitle}.xlsx`
           saveExcel(spread, fileName)
         })
       })

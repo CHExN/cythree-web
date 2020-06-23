@@ -385,6 +385,7 @@ export default {
       this.paginationInfo = pagination
       this.filteredInfo = filters
       this.sortedInfo = sorter
+      console.log(sorter)
 
       this.fixedAssetsInfo.visiable = false
       this.fetch({

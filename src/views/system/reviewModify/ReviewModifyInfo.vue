@@ -13,7 +13,7 @@
         <detail-list-item term="模块">{{reviewModifyInfoData.tableCname}}</detail-list-item>
         <detail-list-item term="内容">{{reviewModifyInfoData.info}}</detail-list-item>
         <detail-list-item term="申请人账号">{{reviewModifyInfoData.username}}</detail-list-item>
-        <detail-list-item term="申请时间">{{reviewModifyInfoData.createTime}}</detail-list-item>
+        <detail-list-item term="申请时间">{{$tools.getDateTime(reviewModifyInfoData.createTime)}}</detail-list-item>
         <detail-list-item term="状态变更时间">{{reviewModifyInfoData.modifyTime}}</detail-list-item>
         <detail-list-item term="状态">{{getProcess(reviewModifyInfoData.process)}}</detail-list-item>
       </detail-list>

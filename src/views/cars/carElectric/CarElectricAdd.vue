@@ -44,15 +44,15 @@
             {rules: [{ required: true, message: '车牌号不能为空'}]}
           ]"/>
       </a-form-item>
-      <a-form-item label='编制类别' v-bind="formItemLayout">
+      <!-- <a-form-item label='编制类别' v-bind="formItemLayout">
         <a-radio-group @change="onRadioChange" v-decorator="['insideOrOutside',
           {initialValue: '1', rules: [{ required: true, message: '请选择编制类别' }]}
         ]">
           <a-radio-button value="0">编内</a-radio-button>
           <a-radio-button value="1">编外</a-radio-button>
         </a-radio-group>
-      </a-form-item>
-      <a-form-item label='使用人' v-bind="formItemLayout">
+      </a-form-item> -->
+      <!-- <a-form-item label='使用人' v-bind="formItemLayout">
         <a-input
           @click="selectName"
           readOnly
@@ -61,8 +61,8 @@
           v-decorator="['user',
             {rules: [{ required: true, message: '请选择使用人'}]}
           ]"/>
-      </a-form-item>
-      <!-- <a-form-item label='使用人' v-bind="formItemLayout">
+      </a-form-item> -->
+      <a-form-item label='使用人' v-bind="formItemLayout">
         <a-input
           placeholder='使用人'
           autocomplete="off"
@@ -77,7 +77,7 @@
           v-decorator="['useDeptName',
             {rules: [{ required: true, message: '使用部门不能为空'}]}
           ]"/>
-      </a-form-item> -->
+      </a-form-item>
       <a-form-item label='车辆配发日期' v-bind="formItemLayout">
         <a-date-picker
           placeholder='车辆日期'
@@ -134,6 +134,13 @@
           <a-radio-button value="2">损坏</a-radio-button>
         </a-radio-group>
       </a-form-item>
+      <a-form-item label='备注' v-bind="formItemLayout">
+        <a-textarea
+          placeholder='备注'
+          autocomplete="off"
+          v-decorator="['remark']"
+        />
+      </a-form-item>
     </a-form>
     <div class="drawer-bootom-button">
       <a-popconfirm title="确定放弃编辑？" @confirm="onClose" okText="确定" cancelText="取消">
@@ -141,7 +148,7 @@
       </a-popconfirm>
       <a-button @click="handleSubmit" type="primary" :loading="loading">提交</a-button>
     </div>
-    <staff-inside-list
+    <!-- <staff-inside-list
       :staffInsideListVisiable="staffInsideList.visiable"
       @change="handleStaffInsideListChange"
       @close="handleStaffInsideListClose"
@@ -152,19 +159,19 @@
       @change="handleStaffOutsideListChange"
       @close="handleStaffOutsideListClose"
     >
-    </staff-outside-list>
+    </staff-outside-list> -->
   </a-drawer>
 </template>
 <script>
-import StaffInsideList from '../../personnel/staffInside/StaffInsideList'
-import StaffOutsideList from '../../personnel/staffOutside/StaffOutsideList'
+// import StaffInsideList from '../../personnel/staffInside/StaffInsideList'
+// import StaffOutsideList from '../../personnel/staffOutside/StaffOutsideList'
 const formItemLayout = {
   labelCol: { span: 4 },
   wrapperCol: { span: 17 }
 }
 export default {
   name: 'CarElectricAdd',
-  components: { StaffInsideList, StaffOutsideList },
+  // components: { StaffInsideList, StaffOutsideList },
   props: {
     carElectricAddVisiable: {
       default: false
@@ -180,14 +187,14 @@ export default {
       },
       staffOutsideList: {
         visiable: false
-      },
-      idNum: null
+      }
+      // idNum: null
     }
   },
   methods: {
     reset () {
       this.loading = false
-      this.idNum = null
+      // this.idNum = null
       // 清空表单
       this.form.resetFields()
     },
@@ -195,38 +202,38 @@ export default {
       this.reset()
       this.$emit('close')
     },
-    onRadioChange (e) {
-      // 切换radio时 重置选择人员
-      this.form.getFieldDecorator('user')
-      this.form.setFieldsValue({ user: '' })
-      this.idNum = null
-    },
-    selectName () {
-      let insideOrOutside = this.form.getFieldValue('insideOrOutside')
-      if (insideOrOutside === '0') {
-        this.staffInsideList.visiable = true
-      } else if (insideOrOutside === '1') {
-        this.staffOutsideList.visiable = true
-      } else {
-        this.$message.warning('请先选择编制类别')
-      }
-    },
-    handleStaffInsideListChange (staffName, staffId, idNum) {
-      this.form.getFieldDecorator('user')
-      this.form.setFieldsValue({ user: staffName })
-      this.idNum = idNum
-    },
-    handleStaffInsideListClose () {
-      this.staffInsideList.visiable = false
-    },
-    handleStaffOutsideListChange (staffName, staffId, idNum) {
-      this.form.getFieldDecorator('user')
-      this.form.setFieldsValue({ user: staffName })
-      this.idNum = idNum
-    },
-    handleStaffOutsideListClose () {
-      this.staffOutsideList.visiable = false
-    },
+    // onRadioChange (e) {
+    //   // 切换radio时 重置选择人员
+    //   this.form.getFieldDecorator('user')
+    //   this.form.setFieldsValue({ user: '' })
+    //   this.idNum = null
+    // },
+    // selectName () {
+    //   let insideOrOutside = this.form.getFieldValue('insideOrOutside')
+    //   if (insideOrOutside === '0') {
+    //     this.staffInsideList.visiable = true
+    //   } else if (insideOrOutside === '1') {
+    //     this.staffOutsideList.visiable = true
+    //   } else {
+    //     this.$message.warning('请先选择编制类别')
+    //   }
+    // },
+    // handleStaffInsideListChange (staffName, staffId, idNum) {
+    //   this.form.getFieldDecorator('user')
+    //   this.form.setFieldsValue({ user: staffName })
+    //   this.idNum = idNum
+    // },
+    // handleStaffInsideListClose () {
+    //   this.staffInsideList.visiable = false
+    // },
+    // handleStaffOutsideListChange (staffName, staffId, idNum) {
+    //   this.form.getFieldDecorator('user')
+    //   this.form.setFieldsValue({ user: staffName })
+    //   this.idNum = idNum
+    // },
+    // handleStaffOutsideListClose () {
+    //   this.staffOutsideList.visiable = false
+    // },
     handleSubmit () {
       this.form.validateFields((err, values) => {
         if (!err) {
@@ -237,7 +244,7 @@ export default {
           this.loading = true
           this.$post('carElectric', {
             ...values,
-            idNum: this.idNum,
+            // idNum: this.idNum,
             ifThree: 2
           }).then((r) => {
             this.reset()

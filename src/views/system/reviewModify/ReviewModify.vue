@@ -39,7 +39,7 @@
               </a-col>
               <a-col :md="12" :sm="24" >
                 <a-form-item
-                  label="申请账号"
+                  label="申请人"
                   :labelCol="{span: 5}"
                   :wrapperCol="{span: 18, offset: 1}">
                   <a-input v-model="queryParams.username"/>
@@ -137,20 +137,17 @@ export default {
       let { filteredInfo } = this
       filteredInfo = filteredInfo || {}
       return [{
-        title: '申请账号',
-        dataIndex: 'username'
+        title: '申请人',
+        dataIndex: 'username',
+        width: '10%'
       }, {
         title: '部门',
-        dataIndex: 'deptName'
+        dataIndex: 'deptName',
+        width: '10%'
       }, {
         title: '模块名',
-        dataIndex: 'tableCname'
-      }, {
-        title: '主要信息',
-        dataIndex: 'info'
-      }, {
-        title: '申请时间',
-        dataIndex: 'createTime'
+        dataIndex: 'tableCname',
+        width: '10%'
       }, {
         title: '状态',
         dataIndex: 'process',
@@ -175,7 +172,18 @@ export default {
           { text: '已修改', value: '3' }
         ],
         filterMultiple: true,
-        filteredValue: filteredInfo.process || null
+        filteredValue: filteredInfo.process || null,
+        width: '10%'
+      }, {
+        title: '主要信息',
+        dataIndex: 'info'
+      }, {
+        title: '申请时间',
+        dataIndex: 'createTime',
+        customRender: (text, row, index) => {
+          return this.$tools.getDateTime(text)
+        },
+        width: '20%'
       }, {
         title: '操作',
         dataIndex: 'operation',

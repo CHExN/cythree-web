@@ -75,7 +75,7 @@
         </a-col>
       </a-row>
     </a-form>
-    <a-card title="采购计划" :bordered="false">
+    <a-card :bordered="false">
       <a-table
         :columns="columns"
         :dataSource="dataSource"
@@ -114,7 +114,14 @@
           />
         </template>
 
+        <template slot="operation" slot-scope="text, record">
+          <a-popconfirm title="是否要删除此行？" @confirm="remove(record.id)">
+            <a>删除</a>
+          </a-popconfirm>
+        </template>
+
       </a-table>
+      <a-button style="width: 100%; margin-top: 16px; margin-bottom: 8px" type="dashed" icon="plus" @click="newRow">新增物品</a-button>
     </a-card>
     <div class="drawer-bootom-button">
       <a-popconfirm title="确定放弃编辑？" @confirm="onClose" okText="确定" cancelText="取消">
@@ -145,6 +152,7 @@ export default {
       id: '',
       loading: false,
       editLoading: false,
+      tableIndex: 0,
       dataSource: [],
       deptName: ''
     }
@@ -163,6 +171,10 @@ export default {
         title: '金额',
         dataIndex: 'remark',
         scopedSlots: { customRender: 'remark' }
+      }, {
+        title: '操作',
+        dataIndex: 'action',
+        scopedSlots: { customRender: 'operation' }
       }]
     }
   },
@@ -171,6 +183,7 @@ export default {
       this.loading = false
       this.form.resetFields()
       this.dataSource = []
+      this.tableIndex = 0
     },
     onClose () {
       this.editLoading = false
@@ -199,12 +212,30 @@ export default {
       })
       obj['createDate'] = moment(obj['createDate'])
       this.form.setFieldsValue(obj)
-      // this.form.getFieldDecorator('createDate')
-      // this.form.setFieldsValue({'createDate': moment(fixedAssets.createDate)})
     },
     handleSubmit () {
       this.form.validateFields((err, values) => {
         if (!err) {
+          let isReturn = false
+          this.dataSource.forEach(item => {
+            if (!item.name) {
+              this.$message.warning('请填写物品名称')
+              isReturn = true
+            }
+            if (!item.amount) {
+              this.$message.warning('请填写数量')
+              isReturn = true
+            }
+            if (!item.remark) {
+              this.$message.warning('请填写金额')
+              isReturn = true
+            }
+          })
+          if (this.dataSource.length === 0) {
+            this.$message.warning('计划单至少要有一条数据')
+            isReturn = true
+          }
+          if (isReturn) return
           this.editLoading = true
           let planList = JSON.stringify(this.dataSource)
           this.$put('application', {
@@ -221,6 +252,19 @@ export default {
           })
         }
       })
+    },
+    newRow () {
+      this.tableIndex++
+      this.dataSource.push({
+        id: this.tableIndex,
+        name: '',
+        amount: 1,
+        remark: 1
+      })
+    },
+    remove (id) {
+      const newData = this.dataSource.filter(item => item.id !== id)
+      this.dataSource = newData
     }
   },
   watch: {

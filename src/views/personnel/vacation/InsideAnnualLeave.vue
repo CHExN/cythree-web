@@ -1,7 +1,6 @@
 <template>
   <a-drawer
-    :title="yearValue+'年 编内年假统计'"
-    :maskClosable="false"
+    :title="`${yearValue}年 编内年假统计`"
     width=1300
     placement="right"
     @close="onClose"
@@ -10,21 +9,32 @@
     <div :class="advanced ? 'search' : null">
       <a-form layout="horizontal">
         <a-row>
-          <div :class="advanced ? null: 'fold'">
+          <div :class="advanced ? null: 'fold'" :style="advanced ? {}: { width: '70%' }">
             <a-col :md="12" :sm="24" >
               <a-form-item
                 label="姓名"
                 :labelCol="{span: 5}"
                 :wrapperCol="{span: 18, offset: 1}">
-                <a-input v-model="queryParams.name"/>
+                <a-textarea auto-size v-model="queryParams.name"/>
+              </a-form-item>
+            </a-col>
+            <a-col :md="12" :sm="24" >
+              <a-form-item
+                label="在职与否"
+                :labelCol="{span: 5}"
+                :wrapperCol="{span: 18, offset: 1}">
+                <a-select v-model="isLeave">
+                 <a-select-option value="0,1">全部</a-select-option>
+                  <a-select-option value="0">在职</a-select-option>
+                  <a-select-option value="1">非在职</a-select-option>
+                </a-select>
               </a-form-item>
             </a-col>
           </div>
           <span style="float: right; margin: 3px auto 1em;">
             <a-button type="primary" @click="search">查询</a-button>
             <a-button style="margin-left: 8px" @click="reset">重置</a-button>
-            &nbsp;
-            <a-button type="primary" ghost @click="exportExcel">导出</a-button>
+            <a-button style="margin-left: 8px" type="primary" ghost @click="exportExcel">导出</a-button>
           </span>
         </a-row>
       </a-form>
@@ -36,8 +46,19 @@
                :dataSource="dataSource"
                :pagination="pagination"
                :loading="loading"
+               size="small"
                rowKey="staffId"
                @change="handleTableChange">
+        <template v-for="month in 12" :slot="`month${month}`" slot-scope="text, record">
+          <a-popover v-if="record[`month${month}Remark`]" placement="topLeft" :key="month">
+            <div slot="content">
+              <div v-for="i in record[`month${month}Remark`].split(',')" :key="i">
+                <span>{{i}}</span><br/>
+              </div>
+            </div>
+            {{text}}
+          </a-popover>
+        </template>
       </a-table>
     </div>
   </a-drawer>
@@ -69,12 +90,18 @@ export default {
         showSizeChanger: true,
         showTotal: total => `共 ${total} 条`
       },
+      isLeave: '0',
       loading: false
     }
   },
   computed: {
     columns () {
       return [{
+        title: '序号',
+        align: 'center',
+        dataIndex: 'sortNum',
+        width: '4%'
+      }, {
         title: '姓名',
         align: 'center',
         dataIndex: 'name'
@@ -85,67 +112,95 @@ export default {
       }, {
         title: '工作年限',
         align: 'center',
-        dataIndex: 'workingYears'
+        dataIndex: 'workingYears',
+        width: '7%'
       }, {
         title: '可休天数',
         align: 'center',
-        dataIndex: 'vacationDays'
+        dataIndex: 'vacationDays',
+        width: '7%'
       }, {
         title: '已休天数',
         align: 'center',
-        dataIndex: 'alreadyDays'
+        dataIndex: 'alreadyDays',
+        width: '7%'
       }, {
         title: '剩余天数',
         align: 'center',
-        dataIndex: 'remainingDays'
+        dataIndex: 'remainingDays',
+        width: '7%'
       }, {
         title: '1月',
         align: 'center',
-        dataIndex: 'january'
+        dataIndex: 'month1',
+        scopedSlots: { customRender: 'month1' },
+        width: '4.5%'
       }, {
         title: '2月',
         align: 'center',
-        dataIndex: 'february'
+        dataIndex: 'month2',
+        scopedSlots: { customRender: 'month2' },
+        width: '4.5%'
       }, {
         title: '3月',
         align: 'center',
-        dataIndex: 'march'
+        dataIndex: 'month3',
+        scopedSlots: { customRender: 'month3' },
+        width: '4.5%'
       }, {
         title: '4月',
         align: 'center',
-        dataIndex: 'april'
+        dataIndex: 'month4',
+        scopedSlots: { customRender: 'month4' },
+        width: '4.5%'
       }, {
         title: '5月',
         align: 'center',
-        dataIndex: 'may'
+        dataIndex: 'month5',
+        scopedSlots: { customRender: 'month5' },
+        width: '4.5%'
       }, {
         title: '6月',
         align: 'center',
-        dataIndex: 'june'
+        dataIndex: 'month6',
+        scopedSlots: { customRender: 'month6' },
+        width: '4.5%'
       }, {
         title: '7月',
         align: 'center',
-        dataIndex: 'july'
+        dataIndex: 'month7',
+        scopedSlots: { customRender: 'month7' },
+        width: '4.5%'
       }, {
         title: '8月',
         align: 'center',
-        dataIndex: 'august'
+        dataIndex: 'month8',
+        scopedSlots: { customRender: 'month8' },
+        width: '4.5%'
       }, {
         title: '9月',
         align: 'center',
-        dataIndex: 'september'
+        dataIndex: 'month9',
+        scopedSlots: { customRender: 'month9' },
+        width: '4.5%'
       }, {
         title: '10月',
         align: 'center',
-        dataIndex: 'october'
+        dataIndex: 'month10',
+        scopedSlots: { customRender: 'month10' },
+        width: '4.5%'
       }, {
         title: '11月',
         align: 'center',
-        dataIndex: 'november'
+        dataIndex: 'month11',
+        scopedSlots: { customRender: 'month11' },
+        width: '4.5%'
       }, {
         title: '12月',
         align: 'center',
-        dataIndex: 'december'
+        dataIndex: 'month12',
+        scopedSlots: { customRender: 'month12' },
+        width: '4.5%'
       }]
     }
   },
@@ -163,7 +218,8 @@ export default {
       this.$get('vacation/insideAnnualLeave', {
         ...this.queryParams,
         pageSize: pageSize,
-        day: this.yearValue
+        date: this.yearValue,
+        isLeave: this.isLeave
       }).then((r) => {
         let newData = []
         r.data.rows.forEach(element => {
@@ -179,25 +235,25 @@ export default {
             element.vacationDays,
             element.alreadyDays,
             element.remainingDays,
-            element.january,
-            element.february,
-            element.march,
-            element.april,
-            element.may,
-            element.june,
-            element.july,
-            element.august,
-            element.september,
-            element.october,
-            element.november,
-            element.december
+            element.month1,
+            element.month2,
+            element.month3,
+            element.month4,
+            element.month5,
+            element.month6,
+            element.month7,
+            element.month8,
+            element.month9,
+            element.month10,
+            element.month11,
+            element.month12
           ])
         })
         this.$message.loading('正在生成', 3, () => { // 3s后关闭执行关闭回调函数
           let spread = newSpread('InsideAnnualLeave')
-          spread = fixedForm(spread, 'InsideAnnualLeave', {title: `${this.yearValue}年编内人员年假统计`})
+          spread = fixedForm(spread, 'InsideAnnualLeave', {title: `${this.yearValue}年 编内人员年假统计`})
           spread = floatForm(spread, 'InsideAnnualLeave', newData)
-          let fileName = `编内人员年假统计_${this.yearValue}.xlsx`
+          let fileName = `年假统计_编内人员_${this.yearValue}.xlsx`
           saveExcel(spread, fileName)
           floatReset(spread, 'InsideAnnualLeave', newData.length)
         })
@@ -241,7 +297,8 @@ export default {
       }
       this.$get('vacation/insideAnnualLeave', {
         ...params,
-        day: this.yearValue
+        date: this.yearValue,
+        isLeave: this.isLeave
       }).then((r) => {
         this.dataSource = []
         let data = r.data

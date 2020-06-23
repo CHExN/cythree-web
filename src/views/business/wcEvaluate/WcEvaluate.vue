@@ -98,7 +98,6 @@
                @change="handleTableChange">
         <template slot="operation" slot-scope="text, record">
           <a-icon v-hasPermission="'wcEvaluate:view'" type="eye" theme="twoTone" twoToneColor="#42b983" @click="view(record)" title="查看"></a-icon>
-          <a-badge v-hasNoPermission="'wcEvaluate:view'" status="warning" text="无权限"></a-badge>
         </template>
         <template slot="createTime" slot-scope="text">
           {{ $tools.getDateTime(text) }}
@@ -112,7 +111,7 @@
     <wc-evaluate-info
       :wcEvaluateInfoData="wcEvaluateInfo.data"
       :wcEvaluateInfoVisiable="wcEvaluateInfo.visiable"
-      @close="handlewcEvaluateInfoClose">
+      @close="handleWcEvaluateInfoClose">
     </wc-evaluate-info>
   </a-card>
 </template>
@@ -227,7 +226,7 @@ export default {
       this.wcEvaluateInfo.data = record
       this.wcEvaluateInfo.visiable = true
     },
-    handlewcEvaluateInfoClose () {
+    handleWcEvaluateInfoClose () {
       this.wcEvaluateInfo.visiable = false
     },
     batchDelete () {

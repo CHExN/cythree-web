@@ -88,16 +88,6 @@
             {rules: [{ required: true, message: '金额合计不能为空'}]}
           ]"/>
       </a-form-item>
-      <a-form-item label='登记日期' v-bind="formItemLayout">
-        <a-date-picker
-          placeholder='登记日期'
-          format='YYYY-MM-DD'
-          style="width: 100%;"
-          v-decorator="['createDate',
-            {rules: [{ required: true, message: '登记日期不能为空'}]}
-          ]"
-        />
-      </a-form-item>
     </a-form>
     <div class="drawer-bootom-button">
       <a-popconfirm title="确定放弃编辑？" @confirm="onClose" okText="确定" cancelText="取消">
@@ -115,7 +105,7 @@
 </template>
 <script>
 import moment from 'moment'
-import WcList from '../wc/WCListByElectricityNum'
+import WcList from '../wc/WCList'
 moment.locale('zh-cn')
 const formItemLayout = {
   labelCol: { span: 4 },
@@ -164,8 +154,8 @@ export default {
         obj[key] = electricity[key]
       })
       // 把时间类型插件的数据用moment包装一下
-      obj['createDate'] = moment(obj['createDate'])
       obj['recDate'] = moment(obj['recDate'])
+      this.form.getFieldDecorator('date')
       const date = electricity.year + '-' + electricity.month
       obj['date'] = moment(date)
       this.form.setFieldsValue(obj)
@@ -188,7 +178,7 @@ export default {
         this.form.setFieldsValue({ 'unitPrice': this.totalAmount / this.actualAmount })
       }
     },
-    handleWcListChange (wcName, wcId) {
+    handleWcListChange (wcName, wcNum, wcId) {
       this.form.getFieldDecorator('wcName')
       this.form.setFieldsValue({ 'wcName': wcName })
       this.wcId = wcId
@@ -202,20 +192,19 @@ export default {
     handleSubmit () {
       this.form.validateFields((err, values) => {
         if (!err) {
-          const date = values['date']
-          const createDate = values['createDate']
+          const date = values['date'].format('YYYY-MM').split('-')
           const recDate = values['recDate']
           const electricityData = {
             ...values,
-            'date': date ? date.format('YYYY-MM-DD') : date,
-            'createDate': createDate ? new Date(createDate) : createDate,
-            'recDate': recDate ? new Date(recDate) : recDate
+            wcId: this.wcId,
+            electricityId: this.electricityId,
+            year: date[0],
+            month: date[1],
+            recDate: recDate ? new Date(recDate) : recDate
           }
           this.loading = true
           this.$put('electricity', {
-            ...electricityData,
-            wcId: this.wcId,
-            electricityId: this.electricityId
+            ...electricityData
           }).then((r) => {
             this.reset()
             this.$emit('success')

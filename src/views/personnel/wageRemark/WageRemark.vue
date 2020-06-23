@@ -7,67 +7,41 @@
     @close="onClose"
     :visible="wageRemarkVisiable"
     style="height: calc(100% - 55px);overflow: auto;padding-bottom: 53px;">
-    <div :class="advanced ? 'search' : null">
+    <div>
       <a-form layout="horizontal">
         <a-row>
-          <div :class="advanced ? null: 'fold'">
-            <a-col :md="24">
-              <a-form-item
-                label="月份"
-                :labelCol="{span: 4}"
-                :wrapperCol="{span: 18, offset: 1}">
-                <a-month-picker
-                  v-model="nowMonth"
-                  style="width: 100%;"
-                  :allowClear="false"
-                />
-              </a-form-item>
-            </a-col>
-            <template v-if="advanced">
-              <a-col :md="24">
-                <a-form-item
-                  label="备注"
-                  :labelCol="{span: 4}"
-                  :wrapperCol="{span: 18, offset: 1}">
-                  <a-input v-model="queryParams.remark"/>
-                </a-form-item>
-              </a-col>
-            </template>
-          </div>
-          <span style="float: right; margin: 3px auto 1em;">
-            <a @click="toggleAdvanced" style="margin-left: 8px">
-              {{advanced ? '收起' : '展开'}}
-              <a-icon :type="advanced ? 'up' : 'down'" />
-            </a>
-            &nbsp;
-            <a-button type="primary" @click="search">查询</a-button>
-            <a-button style="margin-left: 8px" @click="reset">重置</a-button>
-          </span>
+          <a-col :md="18">
+            <a-form-item
+              label="年份"
+              :labelCol="{span: 4}"
+              :wrapperCol="{span: 18, offset: 1}">
+              <a-select v-model="year" :style="{width: 'width: 100%;'}" @change="handleYearChange">
+                <a-select-option v-for="i in 20" :key="2017 + i">{{ `${2017 + i}年` }}</a-select-option>
+              </a-select>
+            </a-form-item>
+          </a-col>
+          <a-col :md="6" style="float: right; margin: 3px auto 1em;">
+            <a-button @click="add" v-show="dataSource.length === 0" v-hasPermission="'wageRemark:add'" :disabled="loading" ghost type="primary" >新增</a-button>
+            <a-button @click="edit" v-show="dataSource.length > 0" v-hasPermission="'wageRemark:update'" :disabled="loading">修改</a-button>
+          </a-col>
         </a-row>
       </a-form>
     </div>
     <div>
-      <div class="operator">
-        <a-button type="primary" ghost @click="add" v-hasPermission="'wageRemark:add'">新增</a-button>
-        <a-button @click="edit" v-if="dataSource.length" v-hasPermission="'wageRemark:update'">修改</a-button>
-      </div>
       <!-- 表格区域 -->
       <a-table ref="TableInfo"
                :columns="columns"
                :dataSource="dataSource"
                :loading="loading"
                rowKey="rowKey">
-               <!-- :rowSelection="{selectedRowKeys: selectedRowKeys, onChange: onSelectChange}" -->
-        <!-- <template slot="operation" slot-scope="text, record">
-          <a-icon v-hasPermission="'wageRemark:update'" type="setting" theme="twoTone" twoToneColor="#4a9ff5" @click="edit(record)" title="修改"></a-icon>
-          <a-badge v-hasNoPermission="'wageRemark:update'" status="warning" text="无权限"></a-badge>
-        </template> -->
       </a-table>
     </div>
     <!-- 新增工资备注 -->
     <wage-remark-add
       :wageRemarkAddVisiable="wageRemarkAdd.visiable"
       :insideOrOutside="insideOrOutside"
+      :remarkCount="remarkCount"
+      :year="year"
       @close="handleWageRemarkAddClose"
       @success="handleWageRemarkAddSuccess">
     </wage-remark-add>
@@ -75,8 +49,11 @@
     <wage-remark-edit
       ref="wageRemarkEdit"
       :wageRemarkEditVisiable="wageRemarkEdit.visiable"
+      :remarkCount="remarkCount"
+      :year="year"
       @close="handleWageRemarkEditClose"
-      @success="handleWageRemarkEditSuccess">
+      @success="handleWageRemarkEditSuccess"
+      @delete="handleWageRemarkDeleteSuccess">
     </wage-remark-edit>
   </a-drawer>
 </template>
@@ -99,7 +76,7 @@ export default {
   },
   data () {
     return {
-      nowMonth: moment(),
+      year: moment().year(),
       advanced: false,
       wageRemarkAdd: {
         visiable: false
@@ -107,7 +84,6 @@ export default {
       wageRemarkEdit: {
         visiable: false
       },
-      queryParams: {},
       filteredInfo: null,
       sortedInfo: null,
       dataSource: [],
@@ -115,6 +91,15 @@ export default {
     }
   },
   computed: {
+    remarkCount () {
+      let count = 0
+      if (this.insideOrOutside === '0') {
+        count = 10
+      } else if (this.insideOrOutside === '1') {
+        count = 10
+      }
+      return count
+    },
     columns () {
       return [{
         title: '空列',
@@ -128,23 +113,11 @@ export default {
       }]
     }
   },
-  mounted () {
-    this.fetch()
-  },
   methods: {
-    // onSelectChange (selectedRowKeys) {
-    //   this.selectedRowKeys = selectedRowKeys
-    // },
     onClose () {
       this.loading = false
       this.dataSource = []
       this.$emit('close')
-    },
-    toggleAdvanced () {
-      this.advanced = !this.advanced
-      if (!this.advanced) {
-        this.queryParams.remark = ''
-      }
     },
     add () {
       this.wageRemarkAdd.visiable = true
@@ -155,7 +128,7 @@ export default {
     handleWageRemarkAddSuccess () {
       this.wageRemarkAdd.visiable = false
       this.$message.success('新增工资备注成功')
-      this.search()
+      this.fetch()
     },
     edit () {
       this.$refs.wageRemarkEdit.setFormValues(this.dataSource)
@@ -167,65 +140,20 @@ export default {
     handleWageRemarkEditSuccess () {
       this.wageRemarkEdit.visiable = false
       this.$message.success('修改工资备注成功')
-      this.search()
-    },
-    // batchDelete () {
-    //   if (!this.selectedRowKeys.length) {
-    //     this.$message.warning('请选择需要删除的记录')
-    //     return
-    //   }
-    //   let that = this
-    //   this.$confirm({
-    //     title: '确定删除所选中的记录?',
-    //     content: '当您点击确定按钮后，这些记录将会被彻底删除',
-    //     centered: true,
-    //     onOk () {
-    //       that.$delete('wageRemark/' + that.selectedRowKeys.join(',')).then(() => {
-    //         that.$message.success('删除成功')
-    //         that.selectedRowKeys = []
-    //         that.search()
-    //       })
-    //     },
-    //     onCancel () {
-    //       that.selectedRowKeys = []
-    //     }
-    //   })
-    // },
-    search () {
-      let {sortedInfo, filteredInfo} = this
-      let sortField, sortOrder
-      // 获取当前列的排序和列的过滤规则
-      if (sortedInfo) {
-        sortField = sortedInfo.field
-        sortOrder = sortedInfo.order
-      }
-      this.fetch({
-        sortField: sortField,
-        sortOrder: sortOrder,
-        ...this.queryParams,
-        ...filteredInfo
-      })
-    },
-    reset () {
-      // 重置列过滤器规则
-      this.filteredInfo = null
-      // 重置列排序规则
-      this.sortedInfo = null
-      // 重置查询参数
-      this.queryParams = {}
-      // 重置月份
-      this.nowMonth = moment()
       this.fetch()
     },
-    fetch (params = {}) {
-      // 显示loading
+    handleWageRemarkDeleteSuccess () {
+      this.wageRemarkEdit.visiable = false
+      this.$message.success('删除成功')
+      this.fetch()
+    },
+    handleYearChange (value) {
+      this.fetch()
+    },
+    fetch () {
       this.loading = true
-      if (this.nowMonth) {
-        params.year = this.nowMonth.format('YYYY')
-        params.month = this.nowMonth.format('MM')
-      }
       this.$get('wageRemark', {
-        ...params,
+        year: this.year,
         insideOrOutside: this.insideOrOutside
       }).then((r) => {
         let data = r.data
@@ -234,7 +162,7 @@ export default {
           data.forEach(i => {
             if (i.remark) {
               this.dataSource.push({
-                label: `emptyColumn0${i.rowKey + 1}`,
+                label: `emptyColumn${this.$tools.zero(i.rowKey + 1)}`,
                 remark: i.remark,
                 id: i.id,
                 rowKey: i.rowKey,
@@ -246,6 +174,13 @@ export default {
         }
         this.loading = false
       })
+    }
+  },
+  watch: {
+    wageRemarkVisiable () {
+      if (this.wageRemarkVisiable) {
+        this.fetch()
+      }
     }
   }
 }

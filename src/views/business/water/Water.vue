@@ -14,24 +14,16 @@
             </a-col>
             <a-col :md="12" :sm="24" >
               <a-form-item
-                label="水表编号"
+                label="公厕编号"
                 :labelCol="{span: 5}"
                 :wrapperCol="{span: 18, offset: 1}">
-                <a-input v-model="queryParams.waterNum"/>
+                <a-input v-model="queryParams.wcNum"/>
               </a-form-item>
             </a-col>
             <template v-if="advanced">
               <a-col :md="12" :sm="24" >
                 <a-form-item
-                  label="公厕编号"
-                  :labelCol="{span: 5}"
-                  :wrapperCol="{span: 18, offset: 1}">
-                  <a-input v-model="queryParams.wcNum"/>
-                </a-form-item>
-              </a-col>
-              <a-col :md="12" :sm="24" >
-                <a-form-item
-                  label="月份范围"
+                  label="月份选择"
                   :labelCol="{span: 5}"
                   :wrapperCol="{span: 18, offset: 1}">
                   <a-month-picker
@@ -41,14 +33,14 @@
                   />
                 </a-form-item>
               </a-col>
-              <a-col :md="12" :sm="24" >
+              <!-- <a-col :md="12" :sm="24" >
                 <a-form-item
-                  label="登记日期"
+                  label="创建日期"
                   :labelCol="{span: 5}"
                   :wrapperCol="{span: 18, offset: 1}">
                   <range-date @change="handleDateChange" ref="createTime"></range-date>
                 </a-form-item>
-              </a-col>
+              </a-col> -->
             </template>
           </div>
           <span style="float: right; margin: 3px auto 1em;">
@@ -78,21 +70,6 @@
             更多操作 <a-icon type="down" />
           </a-button>
         </a-dropdown>
-        &nbsp;
-        <a-modal
-          title="选择导入年月"
-          v-model="modalVisible"
-          :mask="false"
-          :maskClosable="false"
-          :width='350'
-          style="left: -12%;top: 25%"
-          @ok="importExcel"
-          okText="提交">
-          <a-month-picker
-            style="width: 100%;"
-            @change="handleYearMonthChange"
-          />
-        </a-modal>
       </div>
       <!-- 表格区域 -->
       <a-table ref="TableInfo"
@@ -104,12 +81,6 @@
                :scroll="{ x: 900 }"
                rowKey="waterId"
                @change="handleTableChange">
-        <template slot="waterNum" slot-scope="text, record">
-          <a-tag :color="record.color==='1'?'orange':'blue'" style="font-size:100%">{{text}}</a-tag>
-        </template>
-        <template slot="createDate" slot-scope="text">
-          {{text.split(' ')[0]}}
-        </template>
         <template slot="operation" slot-scope="text, record">
           <a-icon v-hasPermission="'water:update'" type="setting" theme="twoTone" twoToneColor="#4a9ff5" @click="edit(record)" title="修改"></a-icon>
           <a-badge v-hasNoPermission="'water:update'" status="warning" text="无权限"></a-badge>
@@ -130,33 +101,33 @@
       @success="handleWaterEditSuccess">
     </water-edit>
     <!-- 导入结果 -->
-    <water-import-result
+    <import-result
       @close="handleClose"
       :importData="importData"
       :errors="errors"
       :times="times"
-      :waterImportResultVisible="waterImportResultVisible">
-    </water-import-result>
+      :successColumns="successColumns"
+      :importResultVisible="importResultVisible">
+    </import-result>
   </a-card>
 </template>
 <script>
 import RangeDate from '@/components/datetime/RangeDate'
 import WaterAdd from './WaterAdd'
 import WaterEdit from './WaterEdit'
-import WaterImportResult from './WaterImportResult'
+import ImportResult from '@/components/view/ImportResult'
 
 export default {
   name: 'Water',
-  components: { RangeDate, WaterAdd, WaterEdit, WaterImportResult },
+  components: { RangeDate, WaterAdd, WaterEdit, ImportResult },
   data () {
     return {
       fileList: [],
-      file: '',
       importData: [],
       times: '',
       errors: [],
-      waterImportResultVisible: false,
-      modalVisible: false,
+      successColumns: [],
+      importResultVisible: false,
       advanced: false,
       waterAdd: {
         visiable: false,
@@ -165,10 +136,6 @@ export default {
       waterEdit: {
         visiable: false,
         data: {}
-      },
-      dateData: {
-        dateForm: {},
-        dateTo: {}
       },
       queryParams: {},
       filteredInfo: null,
@@ -197,37 +164,52 @@ export default {
         dataIndex: 'wcName'
       }, {
         title: '公厕编号',
-        dataIndex: 'wcNum'
-      }, {
-        title: '水表编号',
-        dataIndex: 'waterNum'
+        dataIndex: 'wcNum',
+        sorter: true,
+        sortOrder: sortedInfo.columnKey === 'wcNum' && sortedInfo.order
       }, {
         title: '月份',
-        dataIndex: 'month'
+        dataIndex: 'month',
+        customRender: (text, row, index) => {
+          return `${row.year}-${row.month}`
+        },
+        width: '8%'
       }, {
         title: '实际用量',
-        dataIndex: 'actualAmount'
+        dataIndex: 'actualAmount',
+        sorter: true,
+        sortOrder: sortedInfo.columnKey === 'actualAmount' && sortedInfo.order,
+        width: '8%'
       }, {
         title: '单价(元/吨)',
-        dataIndex: 'unitPrice'
+        dataIndex: 'unitPrice',
+        sorter: true,
+        sortOrder: sortedInfo.columnKey === 'unitPrice' && sortedInfo.order,
+        width: '8%'
       }, {
         title: '自来水费',
-        dataIndex: 'tapWaterFee'
+        dataIndex: 'tapWaterFee',
+        sorter: true,
+        sortOrder: sortedInfo.columnKey === 'tapWaterFee' && sortedInfo.order,
+        width: '8%'
       }, {
         title: '水资源费',
-        dataIndex: 'waterResourcesFee'
+        dataIndex: 'waterResourcesFee',
+        sorter: true,
+        sortOrder: sortedInfo.columnKey === 'waterResourcesFee' && sortedInfo.order,
+        width: '8%'
       }, {
         title: '污水',
-        dataIndex: 'sewageFee'
+        dataIndex: 'sewageFee',
+        sorter: true,
+        sortOrder: sortedInfo.columnKey === 'sewageFee' && sortedInfo.order,
+        width: '8%'
       }, {
         title: '金额合计',
-        dataIndex: 'totalAmount'
-      }, {
-        title: '登记日期',
-        dataIndex: 'createDate',
-        scopedSlots: { customRender: 'createDate' },
+        dataIndex: 'totalAmount',
         sorter: true,
-        sortOrder: sortedInfo.columnKey === 'createDate' && sortedInfo.order
+        sortOrder: sortedInfo.columnKey === 'totalAmount' && sortedInfo.order,
+        width: '8%'
       }, {
         title: '操作',
         dataIndex: 'operation',
@@ -242,54 +224,42 @@ export default {
   },
   methods: {
     handleClose () {
-      this.waterImportResultVisible = false
+      this.importResultVisible = false
     },
     downloadTemplate () {
       this.$download('water/template', {}, '水费信息表_导入模板.xlsx')
     },
     beforeUpload (file) {
-      this.modalVisible = true
-      this.file = file
-      return false
-    },
-    importExcel () {
-      if (!this.dateData.dateForm.year || !this.dateData.dateForm.month) {
-        this.$message.warning('请选择日期')
-        return
-      }
-      this.modalVisible = false
       const formData = new FormData()
-      formData.append('file', this.file)
-      formData.append('date', `${this.dateData.dateForm.year}-${this.dateData.dateForm.month}`)
+      formData.append('file', file)
       this.$message.loading('处理中', 0)
       this.$upload('water/import', formData).then((r) => {
         let data = r.data.data
         if (data.data.length) {
           this.fetch()
         }
-        this.file = ''
         this.$message.destroy()
         this.importData = data.data
         this.errors = data.error
         this.times = data.time / 1000
-        this.waterImportResultVisible = true
+        this.successColumns = [{
+          title: '月份',
+          dataIndex: 'year',
+          customRender: (text, row, index) => {
+            return `${row.year}-${row.month}`
+          }
+        }, {
+          title: '公厕编号',
+          dataIndex: 'wcNum'
+        }, {
+          title: '金额合计',
+          dataIndex: 'totalAmount'
+        }]
+        this.importResultVisible = true
       }).catch((r) => {
-        this.file = ''
         this.$message.destroy()
         console.error(r)
       })
-    },
-    handleYearMonthChange (value) {
-      if (!value) {
-        this.dateData.dateForm = {}
-        this.dateTitle = ''
-        return
-      }
-      this.dateData.dateForm = {
-        year: value.format('YYYY'),
-        month: value.format('MM')
-      }
-      this.dateTitle = value.format('YYYY年MM月')
     },
     onSelectChange (selectedRowKeys) {
       this.selectedRowKeys = selectedRowKeys
@@ -298,7 +268,6 @@ export default {
       this.advanced = !this.advanced
       // 每次展开，把隐藏的内容清空
       if (!this.advanced) {
-        this.queryParams.wcNum = ''
         this.queryParams.year = ''
         this.queryParams.month = ''
         this.queryParams.createTimeFrom = ''
@@ -412,14 +381,9 @@ export default {
       this.sortedInfo = null
       // 重置查询参数
       this.queryParams = {}
-      // 重置日期选择data
-      this.dateData = {
-        dateForm: {},
-        dateTo: {}
-      }
       if (this.advanced) {
         // 清空时间选择
-        this.$refs.createTime.reset()
+        // this.$refs.createTime.reset()
       }
       this.fetch()
     },

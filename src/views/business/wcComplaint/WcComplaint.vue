@@ -184,7 +184,7 @@ export default {
         content: '当您点击确定按钮后，这些记录将会被彻底删除',
         centered: true,
         onOk () {
-          that.$delete('wcComplaint/' + that.selectedRowKeys.join(',')).then(() => {
+          that.$delete('wcEvaluate/' + that.selectedRowKeys.join(',')).then(() => {
             that.$message.success('删除成功')
             that.selectedRowKeys = []
             that.search()

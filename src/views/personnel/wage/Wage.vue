@@ -47,6 +47,18 @@
               </a-col>
               <a-col :md="12" :sm="24" >
                 <a-form-item
+                  label="在职与否"
+                  :labelCol="{span: 5}"
+                  :wrapperCol="{span: 18, offset: 1}">
+                  <a-select v-model="isLeave">
+                    <a-select-option value="0,1">全部</a-select-option>
+                    <a-select-option value="0">在职</a-select-option>
+                    <a-select-option value="1">非在职</a-select-option>
+                  </a-select>
+                </a-form-item>
+              </a-col>
+              <a-col :md="12" :sm="24" >
+                <a-form-item
                   label="岗位级别"
                   :labelCol="{span: 5}"
                   :wrapperCol="{span: 18, offset: 1}">
@@ -195,6 +207,7 @@ export default {
       errors: [],
       successColumns: [],
       importResultVisible: false,
+      isLeave: '0,1',
       advanced: false,
       wageAdd: {
         visiable: false,
@@ -256,6 +269,9 @@ export default {
         title: '岗位工资',
         dataIndex: 'currentIncomeSum'
       }, {
+        title: '应发工资',
+        dataIndex: 'payableSum'
+      }, {
         title: '实发工资',
         dataIndex: 'realWageSum'
       }, {
@@ -297,7 +313,6 @@ export default {
       this.modalVisible = false
       const formData = new FormData()
       formData.append('file', this.file)
-      formData.append('insideOrOutside', '0')
       formData.append('date', `${this.dateData.dateTo.year}-${this.dateData.dateTo.month}`)
       this.$message.loading('处理中', 0)
       this.$upload('wage/import', formData).then((r) => {
@@ -320,8 +335,11 @@ export default {
             return `${text}-${row.month}`
           }
         }, {
-          title: '插入日期',
-          dataIndex: 'createTime'
+          title: '插入时间',
+          dataIndex: 'createTime',
+          customRender: (text, row, index) => {
+            return this.$tools.getDateTime(text)
+          }
         }]
         this.importResultVisible = true
       }).catch((r) => {
@@ -375,6 +393,7 @@ export default {
       this.search()
     },
     view (record) {
+      console.log(record)
       this.wageInfo.data = record
       this.wageInfo.data.monthArr = this.monthData.slice(0, this.monthData.indexOf(record.month) + 1).join()
       this.wageInfo.visiable = true
@@ -429,13 +448,12 @@ export default {
         sortOrder = sortedInfo.order
       }
       if (this.nowMonth) {
-        // params.insideOrOutside = this.insOut
-        params.insideOrOutside = '0'
         params.year = this.nowMonth.format('YYYY')
         params.month = this.nowMonth.format('MM')
         params.monthArr = this.monthData.slice(0, this.monthData.indexOf(params.month) + 1).join()
       }
       this.$export('wage/excel', {
+        isLeave: this.isLeave,
         sortField: sortField,
         sortOrder: sortOrder,
         pageSize: pageSize,
@@ -477,8 +495,8 @@ export default {
       }
       // 重置月份
       this.nowMonth = moment()
-      // 重置编制类别
-      // this.insOut = '0'
+      // 重置在职
+      this.isLeave = '0,1'
       this.fetch()
     },
     handleTableChange (pagination, filters, sorter) {
@@ -519,8 +537,7 @@ export default {
         params.monthArr = this.monthData.slice(0, this.monthData.indexOf(params.month) + 1).join()
       }
       this.$get('wage', {
-        // insideOrOutside: this.insOut,
-        insideOrOutside: '0',
+        isLeave: this.isLeave,
         ...params
       }).then((r) => {
         let data = r.data

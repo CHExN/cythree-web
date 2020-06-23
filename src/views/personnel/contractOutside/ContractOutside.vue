@@ -139,10 +139,10 @@
                rowKey="id"
                @change="handleTableChange">
         <template slot="contractPeriod" slot-scope="text, record">
-          <span>{{record.isFixedPeriod==='0' ? '无固定' : (text===null?'0':text.split(',').length)}}期</span>
+          <span>{{ record.isFixedPeriod === '0' ? '无固定' : (text === null || text === '' ? '0' : text.split(',').length) }}期</span>
         </template>
         <template slot="jobAgreement" slot-scope="text">
-          <span>{{text===null?'0':text.split(',').length}}期</span>
+          <span>{{ text===null || text=== '' ? '0' : text.split(',').length }}期</span>
         </template>
         <template slot="operation" slot-scope="text, record">
           <div v-if="deleted===0">

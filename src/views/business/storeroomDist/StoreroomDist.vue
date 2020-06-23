@@ -9,10 +9,8 @@
                 label="物资类别"
                 :labelCol="{span: 5}"
                 :wrapperCol="{span: 18, offset: 1}">
-                  <!-- @change="handleTypeApplicationChange"> -->
                 <a-select
                   v-model="queryParams.typeApplication">
-                  <!-- <a-select-option key="1,2,4">全部</a-select-option> -->
                   <a-select-option key="1,4">全部</a-select-option>
                   <a-select-option v-for="i in Object.keys(dictData.typeApplication||[])" :key="i">{{ dictData.typeApplication[i] }}</a-select-option>
                 </a-select>
@@ -20,24 +18,35 @@
             </a-col>
             <a-col :md="12" :sm="24" >
               <a-form-item
-                label="分队"
+                label="物品名称"
                 :labelCol="{span: 5}"
                 :wrapperCol="{span: 18, offset: 1}">
-                  <!-- @change="handleToDeptIdsChange"> -->
-                <a-select
-                  v-model="queryParams.toDeptIds">
-                  <a-select-option key="26,27,28,29">全部</a-select-option>
-                  <a-select-option v-for="i in Object.keys(dictData.toDeptIds||[])" :key="i">{{ dictData.toDeptIds[i] }}</a-select-option>
-                </a-select>
+                <a-textarea auto-size v-model="queryParams.name"/>
               </a-form-item>
             </a-col>
             <template v-if="advanced">
               <a-col :md="12" :sm="24" >
                 <a-form-item
-                  label="物品名称"
+                  label="分队"
                   :labelCol="{span: 5}"
                   :wrapperCol="{span: 18, offset: 1}">
-                  <a-input v-model="queryParams.name"/>
+                  <a-select
+                    v-model="queryParams.toDeptIds">
+                    <a-select-option key="26,27,28,29">全部</a-select-option>
+                    <a-select-option v-for="i in Object.keys(dictData.toDeptIds||[])" :key="i">{{ dictData.toDeptIds[i] }}</a-select-option>
+                  </a-select>
+                </a-form-item>
+              </a-col>
+              <a-col :md="12" :sm="24" >
+                <a-form-item
+                  label="状态"
+                  :labelCol="{span: 5}"
+                  :wrapperCol="{span: 18, offset: 1}">
+                  <a-select v-model="status">
+                    <a-select-option value="0,1">全部</a-select-option>
+                    <a-select-option value="0">未分配完</a-select-option>
+                    <a-select-option value="1">已分配完</a-select-option>
+                  </a-select>
                 </a-form-item>
               </a-col>
               <a-col :md="12" :sm="24" >
@@ -48,17 +57,22 @@
                   <a-input v-model="queryParams.remark" />
                 </a-form-item>
               </a-col>
-              <!-- <a-col :md="12" :sm="24" >
+              <a-col :md="12" :sm="24" >
                 <a-form-item
-                  label="状态"
+                  label="物品编号"
                   :labelCol="{span: 5}"
                   :wrapperCol="{span: 18, offset: 1}">
-                  <a-select v-model="status">
-                    <a-select-option value="0">未分配</a-select-option>
-                    <a-select-option value="1">已分配</a-select-option>
-                  </a-select>
+                  <a-textarea auto-size v-model="queryParams.ids" />
                 </a-form-item>
-              </a-col> -->
+              </a-col>
+              <a-col :md="12" :sm="24" >
+                <a-form-item
+                  label="型号"
+                  :labelCol="{span: 5}"
+                  :wrapperCol="{span: 18, offset: 1}">
+                  <a-input v-model="queryParams.type" />
+                </a-form-item>
+              </a-col>
             </template>
           </div>
           <span style="float: right; margin: 3px auto 1em;">
@@ -239,6 +253,8 @@ export default {
       monthData: ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12'],
       mode: ['month', 'month'],
       dictData: {},
+      filteredInfo: null,
+      sortedInfo: null,
       paginationInfo: null,
       pagination: {
         pageSizeOptions: ['10', '20', '30', '40', '100'],
@@ -258,42 +274,65 @@ export default {
   },
   computed: {
     columns () {
+      let { sortedInfo } = this
+      sortedInfo = sortedInfo || {}
       return [{
         title: '物品编号',
-        dataIndex: 'id'
+        dataIndex: 'id',
+        width: '7%'
       }, {
         title: '物品名称',
         dataIndex: 'name'
       }, {
         title: '型号',
-        dataIndex: 'type'
+        dataIndex: 'type',
+        width: '8%'
       }, {
-        title: '剩余库存',
+        title: '库存',
         dataIndex: 'amountDist',
-        scopedSlots: { customRender: 'amountDist' }
+        scopedSlots: { customRender: 'amountDist' },
+        sorter: true,
+        sortOrder: sortedInfo.columnKey === 'amountDist' && sortedInfo.order,
+        width: '7%'
       }, {
         title: '单位',
         dataIndex: 'unit',
-        scopedSlots: { customRender: 'unit' }
+        scopedSlots: { customRender: 'unit' },
+        width: '6%'
       }, {
         title: '单价',
         dataIndex: 'money',
-        scopedSlots: { customRender: 'money' }
+        scopedSlots: { customRender: 'money' },
+        sorter: true,
+        sortOrder: sortedInfo.columnKey === 'money' && sortedInfo.order,
+        width: '7%'
       }, {
-        title: '物资类别',
-        dataIndex: 'typeApplication',
-        customRender: (text, row, index) => {
-          return this.dictData.typeApplication[text]
-        }
+        title: '出库日期',
+        dataIndex: 'date',
+        sorter: true,
+        sortOrder: sortedInfo.columnKey === 'date' && sortedInfo.order,
+        width: '8%'
+      // }, {
+      //   title: '物资类别',
+      //   dataIndex: 'typeApplication',
+      //   customRender: (text, row, index) => {
+      //     return this.dictData.typeApplication[text]
+      //   },
+      //   width: '6%'
+      }, {
+        title: '出库单号',
+        dataIndex: 'outNum'
       }, {
         title: '部门',
         dataIndex: 'toDeptId',
         customRender: (text, row, index) => {
           return this.dictData.toDeptIds[text]
-        }
+        },
+        width: '8%'
       }, {
         title: '备注',
-        dataIndex: 'remark'
+        dataIndex: 'remark',
+        width: '10%'
       }, {
         title: '操作',
         dataIndex: 'operation',
@@ -370,7 +409,8 @@ export default {
         sortOrder = sortedInfo.order
       }
       this.$export('storeroom/distExcel', {
-        status: this.status,
+        // status: this.status,
+        status: '0',
         sortField: sortField,
         sortOrder: sortOrder,
         pageSize: pageSize,
@@ -388,7 +428,9 @@ export default {
       this.advanced = !this.advanced
       if (!this.advanced) {
         this.queryParams.remark = ''
-        this.queryParams.name = ''
+        this.queryParams.toDeptIds = '26,27,28,29'
+        this.queryParams.ids = ''
+        this.queryParams.type = ''
       }
     },
     handleStoreroomInfoClose () {
@@ -422,10 +464,10 @@ export default {
       this.storeroomDistWc.visiable = false
     },
     handleTypeApplicationChange (value) {
-      this.queryParams.typeApplication = value || ''
+      this.queryParams.typeApplication = value || '1,4'
     },
     handleToDeptIdsChange (value) {
-      this.queryParams.toDeptIds = value || ''
+      this.queryParams.toDeptIds = value || '26,27,28,29'
     },
     showModal () {
       this.modalVisible = true
@@ -486,8 +528,18 @@ export default {
       this.dateTitle = `${value[0].format('YYYY年MM月')} ~ ${value[1].format('YYYY年MM月')}`
     },
     search () {
+      let {sortedInfo, filteredInfo} = this
+      let sortField, sortOrder
+      // 获取当前列的排序和列的过滤规则
+      if (sortedInfo) {
+        sortField = sortedInfo.field
+        sortOrder = sortedInfo.order
+      }
       this.fetch({
-        ...this.queryParams
+        sortField: sortField,
+        sortOrder: sortOrder,
+        ...this.queryParams,
+        ...filteredInfo
       })
     },
     reset () {
@@ -497,7 +549,10 @@ export default {
         this.paginationInfo.current = this.pagination.defaultCurrent
         this.paginationInfo.pageSize = this.pagination.defaultPageSize
       }
-      this.paginationInfo = null
+      // 重置列过滤器规则
+      this.filteredInfo = null
+      // 重置列排序规则
+      this.sortedInfo = null
       // 重置查询参数
       this.queryParams = {
         // typeApplication: '1,2,4',
@@ -509,8 +564,14 @@ export default {
     },
     handleTableChange (pagination, filters, sorter) {
       this.paginationInfo = pagination
+      this.filteredInfo = filters
+      this.sortedInfo = sorter
+
       this.fetch({
-        ...this.queryParams
+        sortField: sorter.field,
+        sortOrder: sorter.order,
+        ...this.queryParams,
+        ...filters
       })
     },
     loadSelect () {

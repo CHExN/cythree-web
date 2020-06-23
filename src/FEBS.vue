@@ -1,9 +1,9 @@
 <template>
-  <a-locale-provider :locale="chinese">
+  <a-config-provider :locale="chinese">
     <div id="febs">
       <router-view/>
     </div>
-  </a-locale-provider>
+  </a-config-provider>
 </template>
 
 <script>
@@ -151,6 +151,7 @@ export default {
   }
   .drawer-bootom-button {
     position: absolute;
+    z-index: 999;
     bottom: 0;
     width: 100%;
     border-top: 1px solid #e8e8e8;

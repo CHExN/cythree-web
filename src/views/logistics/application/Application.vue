@@ -338,7 +338,8 @@ export default {
     storage (record) {
       this.putingData = record
       this.$get('application/applicationPlan', {
-        applicationId: this.putingData.id
+        applicationId: this.putingData.id,
+        status: true
       }).then((r) => {
         this.$refs.putAdd.setTableValues(record.typeApplication, record.id, r.data)
       })

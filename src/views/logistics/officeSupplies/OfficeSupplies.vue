@@ -256,6 +256,7 @@ export default {
       this.putAdd.visiable = false
     },
     handlePutAddSuccess (isProcess) {
+      console.log(isProcess)
       this.putAdd.visiable = false
       this.$message.success('新增入库成功')
       if (isProcess) {

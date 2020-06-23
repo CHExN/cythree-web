@@ -33,11 +33,33 @@
           </a-form-item>
         </a-col>
         <a-col :md="12" :sm="24">
+          <a-form-item label='物资类别' v-bind="formItemLayout">
+            <a-select placeholder='物资类别' v-decorator="['typeApplication', {
+              initialValue: [dictData.typeApplication && dictData.typeApplication.length > 0 ? dictData.typeApplication[0].key : ''],
+              rules: [{ required: true, message: '请选择物资类别' }]
+            }]">
+              <a-select-option v-for="i in dictData.typeApplication" :key="i.key">{{ i.value }}</a-select-option>
+            </a-select>
+          </a-form-item>
+        </a-col>
+        <a-col :md="12" :sm="24">
+          <a-form-item label='供应商' v-bind="formItemLayout">
+            <a-select placeholder='供应商' v-decorator="['supplier', {
+              initialValue: [dictData.supplier && dictData.supplier.length > 0 ? dictData.supplier[0].key : ''],
+              rules: [{ required: true, message: '请选择供应商' }]
+            }]">
+              <a-select-option v-for="i in dictData.supplier" :key="i.key">{{ i.value }}</a-select-option>
+            </a-select>
+          </a-form-item>
+        </a-col>
+        <a-col :md="12" :sm="24">
           <a-form-item label="出库部门" v-bind="formItemLayout">
             <a-tree-select
               :dropdownStyle="{ maxHeight: '220px', overflow: 'auto' }"
               :treeData="deptTreeData"
-              v-decorator="['toDeptId']">
+              v-decorator="['toDeptId',{
+                rules: [{ required: true, message: '请选择出库部门' }]
+              }]">
             </a-tree-select>
           </a-form-item>
         </a-col>
@@ -73,8 +95,8 @@
               placeholder='物品名称'
               @select="e => onSelect(e, record.id)"
               :filterOption="filterOption">
-              <template slot="dataSource">                                          <!-- value只能为string类型  -->
-                <a-select-option v-for="item in autoData[record.id]" :key="item.id" :value="JSON.stringify(item)" >{{item.name}}</a-select-option>
+              <template slot="dataSource">                      <!-- value不转成string就会报Error: Invalid `value` of type `number`  -->
+                <a-select-option v-for="item in autoData[record.id]" :key="item.id" :value="item.money + '^' + item.name" >{{item.name}}</a-select-option>
               </template>
               <a-input @pressEnter="handleSearch(record.name, record.id)">
                 <a-icon @click="handleSearch(record.name, record.id)" slot="suffix" type="search" class="certain-category-icon" />
@@ -143,9 +165,10 @@ export default {
       loading: false,
       dataSource: [],
       autoData: {},
-      deptTreeData: [],
       open: false,
       tableIndex: 0,
+      dictData: {},
+      deptTreeData: [],
       deptId: '',
       formItemLayout,
       form: this.$form.createForm(this),
@@ -207,6 +230,7 @@ export default {
       })
       obj.toDeptId = `${out.toDeptId}`
       obj['date'] = moment(obj['date'])
+      obj['supplier'] = Number(obj['supplier'])
       this.form.setFieldsValue(obj)
     },
     reset () {
@@ -265,8 +289,9 @@ export default {
       let target = this.dataSource.filter(item => item.id === id)[0]
       target.editable = false
       target.isNew = false
-      let targetName = JSON.parse(target.name)
-      target.name = targetName.name
+      target.name = target.name.indexOf('^') === -1 ? target.name : target.name.split('^')[1]
+      // let targetName = JSON.parse(target.name)
+      // target.name = targetName.name
     },
     edit (id) {
       let target = this.dataSource.filter(item => item.id === id)[0]
@@ -275,9 +300,9 @@ export default {
     cancle (id) {
       let target = this.dataSource.filter(item => item.id === id)[0]
       target.editable = false
-      let targetName = JSON.parse(target.name)
-      target.name = targetName.name
-      // target.name = target.name.indexOf('^') === -1 ? target.name : target.name.split('^')[1]
+      // let targetName = JSON.parse(target.name)
+      // target.name = targetName.name
+      target.name = target.name.indexOf('^') === -1 ? target.name : target.name.split('^')[1]
     },
     handleStoreroomChange (value, id, column) {
       const newData = [...this.dataSource]
@@ -288,18 +313,17 @@ export default {
       }
     },
     onSelect (moneyAndName, id) {
-      moneyAndName = JSON.parse(moneyAndName)
-      // const moneyAndNameArr = moneyAndName.split('^')
+      // moneyAndName = JSON.parse(moneyAndName)
+      const moneyAndNameArr = moneyAndName.split('^')
       // 鼠标点击选中项时触发
       this.dataSource.forEach(item => {
-        if (item.id === id) { item.money = moneyAndName.money }
+        if (item.id === id) { item.money = moneyAndNameArr[0] }
       })
     },
     handleSearch (name, id) {
       if (name) {
         this.$get('price/name', {name}).then((r) => {
           if (r.data.length) {
-            console.log(this.$refs[id])
             this.autoData[id] = r.data
             this.$refs[id].showSearch = true
           }
@@ -322,6 +346,31 @@ export default {
         }).then((r) => {
           this.loading = false
           this.setTableValues(r.data)
+        })
+        this.$get('supplier/all', {
+        }).then((r) => {
+          let dictList = {}
+          r.data.forEach((item) => {
+            if (dictList.supplier) {
+              dictList.supplier.push({key: item.id, value: item.name})
+            } else {
+              dictList.supplier = [{key: item.id, value: item.name}]
+            }
+          })
+          this.dictData = {...this.dictData, ...dictList}
+        })
+        this.$get('dict/cy_storeroom', {
+        }).then((r) => {
+          let dictList = {}
+          r.data.forEach((item) => {
+            let fieldName = this.$tools.toHump(item.fieldName.toLowerCase())
+            if (dictList[fieldName]) {
+              dictList[fieldName].push({key: item.keyy, value: item.valuee})
+            } else {
+              dictList[fieldName] = [{key: item.keyy, value: item.valuee}]
+            }
+          })
+          this.dictData = {...this.dictData, ...dictList}
         })
       }
     }

@@ -460,7 +460,7 @@ export default {
         dataIndex: 'operation',
         scopedSlots: { customRender: 'operation' },
         fixed: 'right',
-        width: 100
+        width: 130
       }]
     }
   },
@@ -585,6 +585,8 @@ export default {
         this.queryParams.max = ''
         this.queryParams.createTimeFrom = ''
         this.queryParams.createTimeTo = ''
+        this.queryParams.reduceTimeFrom = ''
+        this.queryParams.reduceTimeTo = ''
       }
     },
     view (record) {
@@ -600,6 +602,7 @@ export default {
     handleAttributionOutsideAddSuccess () {
       this.attributionOutsideAdd.visiable = false
       this.$message.success('新增编外归属人员成功')
+      this.loadSelect()
       this.search()
     },
     edit (record) {
@@ -612,6 +615,7 @@ export default {
     handleAttributionOutsideEditSuccess () {
       this.attributionOutsideEdit.visiable = false
       this.$message.success('修改编外归属人员成功')
+      this.loadSelect()
       this.search()
     },
     handleAttributionOutsideInfoClose () {

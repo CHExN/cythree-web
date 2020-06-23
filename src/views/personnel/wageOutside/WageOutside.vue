@@ -33,19 +33,44 @@
                   <a-input v-model="queryParams.staffIdCard"/>
                 </a-form-item>
               </a-col>
-              <!-- <a-col :md="12" :sm="24" >
+              <a-col :md="12" :sm="24" >
                 <a-form-item
-                  label="岗位级别"
+                  label="在职与否"
+                  :labelCol="{span: 5}"
+                  :wrapperCol="{span: 18, offset: 1}">
+                  <a-select v-model="isLeave">
+                    <a-select-option value="0,1">全部</a-select-option>
+                    <a-select-option value="0">在职</a-select-option>
+                    <a-select-option value="1">非在职</a-select-option>
+                  </a-select>
+                </a-form-item>
+              </a-col>
+              <a-col :md="12" :sm="24" >
+                <a-form-item
+                  label="人员归属"
+                  :labelCol="{span: 5}"
+                  :wrapperCol="{span: 18, offset: 1}">
+                  <a-select v-model="queryParams.type">
+                    <a-select-option value="0">归属人员</a-select-option>
+                    <a-select-option value="1">北分队</a-select-option>
+                    <a-select-option value="2">南分队</a-select-option>
+                    <a-select-option value="3">保洁分队</a-select-option>
+                  </a-select>
+                </a-form-item>
+              </a-col>
+              <a-col :md="12" :sm="24" >
+                <a-form-item
+                  label="分队"
                   :labelCol="{span: 5}"
                   :wrapperCol="{span: 18, offset: 1}">
                   <a-select
                     mode="multiple"
                     :allowClear="true"
-                    @change="handlePostLevelChange">
-                    <a-select-option v-for="i in filteredPostLevelOptions" :key="i">{{ i }}</a-select-option>
+                    @change="handleTeamChange">
+                    <a-select-option v-for="i in filteredTeamOptions" :key="i">{{ i }}</a-select-option>
                   </a-select>
                 </a-form-item>
-              </a-col> -->
+              </a-col>
             </template>
           </div>
           <span style="float: right; margin: 3px auto 1em;">
@@ -61,15 +86,15 @@
     </div>
     <div>
       <div class="operator">
-        <a-button type="primary" ghost @click="add" v-hasPermission="'wage:add'">新增</a-button>
-        <a-button @click="batchDelete" v-hasPermission="'wage:delete'">删除</a-button>
-        <a-dropdown v-hasAnyPermission="'wage:export','wage:add'">
+        <a-button type="primary" ghost @click="add" v-hasPermission="'wageOutside:add'">新增</a-button>
+        <a-button @click="batchDelete" v-hasPermission="'wageOutside:delete'">删除</a-button>
+        <a-dropdown v-hasAnyPermission="'wageOutside:export','wageOutside:add'">
           <a-menu slot="overlay">
             <a-menu-item key="download-template" @click="downloadTemplate">模板下载</a-menu-item>
-            <a-menu-item key="import-data" v-hasPermission="'wage:add'">
+            <a-menu-item key="import-data" v-hasPermission="'wageOutside:add'">
               <a-upload class="upload-area" :fileList="fileList" :beforeUpload="beforeUpload">导入Excel</a-upload>
             </a-menu-item>
-            <a-menu-item v-hasPermission="'wage:export'" key="export-data" @click="exportExcel">导出Excel</a-menu-item>
+            <a-menu-item v-hasPermission="'wageOutside:export'" key="export-data" @click="exportExcel">导出Excel</a-menu-item>
             <a-menu-item v-hasPermission="'wageRemark:view'" key="wage-remark" @click="onWageRemark">工资备注</a-menu-item>
           </a-menu>
           <a-button>
@@ -116,9 +141,9 @@
           <a-tag :color="record.color==='1'?'orange':'blue'" style="font-size:100%">{{text}}</a-tag>
         </template>
         <template slot="operation" slot-scope="text, record">
-          <a-icon v-hasPermission="'wage:update'" type="setting" theme="twoTone" twoToneColor="#4a9ff5" @click="edit(record)" title="修改"></a-icon>
+          <a-icon v-hasPermission="'wageOutside:update'" type="setting" theme="twoTone" twoToneColor="#4a9ff5" @click="edit(record)" title="修改"></a-icon>
           &nbsp;
-          <a-icon v-hasPermission="'wage:view'" type="eye" theme="twoTone" twoToneColor="#42b983" @click="view(record)" title="查看"></a-icon>
+          <a-icon v-hasPermission="'wageOutside:view'" type="eye" theme="twoTone" twoToneColor="#42b983" @click="view(record)" title="查看"></a-icon>
         </template>
       </a-table>
     </div>
@@ -182,6 +207,7 @@ export default {
       errors: [],
       successColumns: [],
       importResultVisible: false,
+      isLeave: '0,1',
       advanced: false,
       wageOutsideAdd: {
         visiable: false,
@@ -202,9 +228,9 @@ export default {
       wageRemark: {
         visiable: false
       },
-      // postLevelData: [],
+      teamData: [],
       queryParams: {
-        postLevel: []
+        team: []
       },
       filteredInfo: null,
       sortedInfo: null,
@@ -223,13 +249,18 @@ export default {
     }
   },
   computed: {
-    // filteredPostLevelOptions () {
-    //   return this.postLevelData.filter(o => !this.queryParams.postLevel.includes(o))
-    // },
+    filteredTeamOptions () {
+      return this.teamData.filter(o => !this.queryParams.team.includes(o))
+    },
     columns () {
       return [{
-        title: '序号',
-        dataIndex: 'sortNum'
+        title: '总序号',
+        dataIndex: 'sortNum1',
+        width: 90
+      }, {
+        title: '分队序号',
+        dataIndex: 'sortNum2',
+        width: 90
       }, {
         title: '姓名',
         dataIndex: 'staffName'
@@ -237,11 +268,14 @@ export default {
         title: '证照号码',
         dataIndex: 'staffIdCard'
       }, {
-        title: '岗位等级',
-        dataIndex: 'postLevel'
+        title: '分队',
+        dataIndex: 'team'
       }, {
-        title: '岗位工资',
+        title: '基本工资',
         dataIndex: 'currentIncomeSum'
+      }, {
+        title: '应发工资',
+        dataIndex: 'payableSum'
       }, {
         title: '实发工资',
         dataIndex: 'realWageSum'
@@ -256,12 +290,12 @@ export default {
         dataIndex: 'operation',
         scopedSlots: { customRender: 'operation' },
         fixed: 'right',
-        width: 100
+        width: 90
       }]
     }
   },
   mounted () {
-    // this.loadSelect()
+    this.loadSelect()
     this.fetch()
   },
   methods: {
@@ -269,7 +303,7 @@ export default {
       this.importResultVisible = false
     },
     downloadTemplate () {
-      this.$download('wage/template', {}, '编外工资表_导入模板.xlsx')
+      this.$download('wageOutside/template', {}, '编外工资表_导入模板.xlsx')
     },
     beforeUpload (file) {
       this.modalVisible = true
@@ -284,10 +318,9 @@ export default {
       this.modalVisible = false
       const formData = new FormData()
       formData.append('file', this.file)
-      formData.append('insideOrOutside', '1')
-      formData.append('date', `${this.ateData.dateTo.year}-${this.dateData.dateTo.month}`)
+      formData.append('date', `${this.dateData.dateTo.year}-${this.dateData.dateTo.month}`)
       this.$message.loading('处理中', 0)
-      this.$upload('wage/import', formData).then((r) => {
+      this.$upload('wageOutside/import', formData).then((r) => {
         let data = r.data.data
         if (data.data.length) {
           this.fetch()
@@ -307,8 +340,11 @@ export default {
             return `${text}-${row.month}`
           }
         }, {
-          title: '插入日期',
-          dataIndex: 'createTime'
+          title: '插入时间',
+          dataIndex: 'createTime',
+          customRender: (text, row, index) => {
+            return this.$tools.getDateTime(text)
+          }
         }]
         this.importResultVisible = true
       }).catch((r) => {
@@ -335,7 +371,8 @@ export default {
       // 每次展开，把隐藏的内容清空
       if (!this.advanced) {
         this.queryParams.staffIdCard = ''
-        this.queryParams.postLevel = ''
+        this.queryParams.type = ''
+        this.queryParams.team = []
       }
     },
     add () {
@@ -369,8 +406,8 @@ export default {
     handlewageOutsideInfoClose () {
       this.wageOutsideInfo.visiable = false
     },
-    handlePostLevelChange (value) {
-      this.queryParams.postLevel = value || ''
+    handleTeamChange (value) {
+      this.queryParams.team = value || ''
     },
     onWageRemark () {
       this.wageRemark.visiable = true
@@ -389,7 +426,7 @@ export default {
         content: '当您点击确定按钮后，这些记录将会被彻底删除',
         centered: true,
         onOk () {
-          that.$delete('wage/' + that.selectedRowKeys.join(',')).then(() => {
+          that.$delete('wageOutside/' + that.selectedRowKeys.join(',')).then(() => {
             that.$message.success('删除成功')
             that.selectedRowKeys = []
             that.search()
@@ -416,12 +453,12 @@ export default {
         sortOrder = sortedInfo.order
       }
       if (this.nowMonth) {
-        params.insideOrOutside = '1'
         params.year = this.nowMonth.format('YYYY')
         params.month = this.nowMonth.format('MM')
         params.monthArr = this.monthData.slice(0, this.monthData.indexOf(params.month) + 1).join()
       }
-      this.$export('wage/excel', {
+      this.$export('wageOutside/excel', {
+        isLeave: this.isLeave,
         sortField: sortField,
         sortOrder: sortOrder,
         pageSize: pageSize,
@@ -459,10 +496,12 @@ export default {
       this.sortedInfo = null
       // 重置查询参数
       this.queryParams = {
-        postLevel: []
+        team: []
       }
       // 重置月份
       this.nowMonth = moment()
+      // 重置在职
+      this.isLeave = '0,1'
       this.fetch()
     },
     handleTableChange (pagination, filters, sorter) {
@@ -478,11 +517,12 @@ export default {
         ...filters
       })
     },
-    // loadSelect () {
-    //   this.$get('staffInside/getPostLevel', {}).then((r) => {
-    //     this.postLevelData = r.data.filter(d => d)
-    //   })
-    // },
+    loadSelect () {
+      this.$get('staffOutside/getTeam', {
+      }).then((r) => {
+        this.teamData = r.data.filter(d => d)
+      })
+    },
     fetch (params = {}) {
       // 显示loading
       this.loading = true
@@ -502,8 +542,8 @@ export default {
         params.month = this.nowMonth.format('MM')
         params.monthArr = this.monthData.slice(0, this.monthData.indexOf(params.month) + 1).join()
       }
-      this.$get('wage', {
-        insideOrOutside: '1',
+      this.$get('wageOutside', {
+        isLeave: this.isLeave,
         ...params
       }).then((r) => {
         let data = r.data

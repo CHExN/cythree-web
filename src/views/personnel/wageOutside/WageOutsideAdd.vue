@@ -1,12 +1,12 @@
 <template>
   <a-drawer
-    title="新增工资信息"
+    title="新增编外工资信息"
     :maskClosable="false"
     width=650
     placement="right"
     :closable="false"
     @close="onClose"
-    :visible="wageAddVisiable"
+    :visible="wageOutsideAddVisiable"
     style="height: calc(100% - 55px);overflow: auto;padding-bottom: 53px;">
     <a-form :form="form">
       <a-form-item label='选择人员' v-bind="formItemLayout">
@@ -28,25 +28,11 @@
           ]"
         />
       </a-form-item>
-      <a-form-item label='岗位工资' v-bind="formItemLayout">
+      <a-form-item label='基本工资' v-bind="formItemLayout">
         <a-input-number
           style="width: 100%;"
-          placeholder='岗位工资'
-          v-decorator="['currentIncome',{
-            rules: [{ required: true, message: '岗位工资不能为空'}]
-          }]"/>
-      </a-form-item>
-      <a-form-item label='补发薪级' v-bind="formItemLayout">
-        <a-input-number
-          style="width: 100%;"
-          placeholder='补发薪级'
-          v-decorator="['reissueSalaryScale']"/>
-      </a-form-item>
-      <a-form-item label='薪级工资' v-bind="formItemLayout">
-        <a-input-number
-          style="width: 100%;"
-          placeholder='薪级工资'
-          v-decorator="['salarySalary']"/>
+          placeholder='基本工资'
+          v-decorator="['currentIncome']"/>
       </a-form-item>
       <a-form-item label='岗位津贴' v-bind="formItemLayout">
         <a-input-number
@@ -54,11 +40,23 @@
           placeholder='岗位津贴'
           v-decorator="['postAllowance']"/>
       </a-form-item>
-      <a-form-item label='财政负担' v-bind="formItemLayout">
+      <a-form-item label='环卫津贴' v-bind="formItemLayout">
         <a-input-number
           style="width: 100%;"
-          placeholder='财政负担'
-          v-decorator="['financialBurdenPerformancePay']"/>
+          placeholder='环卫津贴'
+          v-decorator="['sanitationAllowance']"/>
+      </a-form-item>
+      <a-form-item label='危岗补助' v-bind="formItemLayout">
+        <a-input-number
+          style="width: 100%;"
+          placeholder='危岗补助'
+          v-decorator="['dangerousSubsidy']"/>
+      </a-form-item>
+      <a-form-item label='绩效奖金' v-bind="formItemLayout">
+        <a-input-number
+          style="width: 100%;"
+          placeholder='绩效奖金'
+          v-decorator="['performanceBonus']"/>
       </a-form-item>
       <a-form-item label='加班费' v-bind="formItemLayout">
         <a-input-number
@@ -66,65 +64,50 @@
           placeholder='加班费'
           v-decorator="['overtimePay']"/>
       </a-form-item>
-      <a-form-item label='环卫危害岗位补助' v-bind="formItemLayout">
-        <a-input-number
-          style="width: 100%;"
-          placeholder='环卫危害岗位补助'
-          v-decorator="['environmentalSanitationDutyAllowance']"/>
-      </a-form-item>
-      <a-form-item label='住房补贴' v-bind="formItemLayout">
-        <a-input-number
-          style="width: 100%;"
-          placeholder='住房补贴'
-          v-decorator="['housingSubsidy']"/>
-      </a-form-item>
-      <a-form-item label='独生子女费' v-bind="formItemLayout">
-        <a-input-number
-          style="width: 100%;"
-          placeholder='独生子女费'
-          v-decorator="['onlyChildFee']"/>
-      </a-form-item>
-      <a-form-item label='临时性补贴' v-bind="formItemLayout">
-        <a-input-number
-          style="width: 100%;"
-          placeholder='临时性补贴'
-          v-decorator="['temporarySubsidy']"/>
-      </a-form-item>
-      <a-form-item label='岗位绩效' v-bind="formItemLayout">
-        <a-input-number
-          style="width: 100%;"
-          placeholder='岗位绩效'
-          v-decorator="['jobPerformance']"/>
-      </a-form-item>
       <a-form-item label='过节费' v-bind="formItemLayout">
         <a-input-number
           style="width: 100%;"
           placeholder='过节费'
           v-decorator="['holidayCosts']"/>
       </a-form-item>
-      <a-form-item label='年休假工资报酬' v-bind="formItemLayout">
+
+      <a-form-item label='空列1' v-bind="formItemLayout">
         <a-input-number
           style="width: 100%;"
-          placeholder='年休假工资报酬'
-          v-decorator="['annualLeavePay']"/>
+          placeholder='空列1'
+          v-decorator="['emptyColumn01']"/>
       </a-form-item>
-      <a-form-item label='综合补助' v-bind="formItemLayout">
+      <a-form-item label='空列2' v-bind="formItemLayout">
         <a-input-number
           style="width: 100%;"
-          placeholder='综合补助'
-          v-decorator="['comprehensiveSubsidy']"/>
+          placeholder='空列2'
+          v-decorator="['emptyColumn02']"/>
       </a-form-item>
+      <a-form-item label='空列3' v-bind="formItemLayout">
+        <a-input-number
+          style="width: 100%;"
+          placeholder='空列3'
+          v-decorator="['emptyColumn03']"/>
+      </a-form-item>
+      <a-form-item label='空列4' v-bind="formItemLayout">
+        <a-input-number
+          style="width: 100%;"
+          placeholder='空列4'
+          v-decorator="['emptyColumn04']"/>
+      </a-form-item>
+      <a-form-item label='空列5' v-bind="formItemLayout">
+        <a-input-number
+          style="width: 100%;"
+          placeholder='空列5'
+          v-decorator="['emptyColumn05']"/>
+      </a-form-item>
+
       <a-form-item label='应发工资' v-bind="formItemLayout">
         <a-input-number
+          disabled
           style="width: 100%;"
           placeholder='应发工资'
           v-decorator="['payable']"/>
-      </a-form-item>
-      <a-form-item label='住房公积金' v-bind="formItemLayout">
-        <a-input-number
-          style="width: 100%;"
-          placeholder='住房公积金'
-          v-decorator="['housingFund']"/>
       </a-form-item>
       <a-form-item label='养老保险' v-bind="formItemLayout">
         <a-input-number
@@ -141,61 +124,68 @@
       <a-form-item label='医疗保险' v-bind="formItemLayout">
         <a-input-number
           style="width: 100%;"
-          placeholder='基本医疗保险'
+          placeholder='医疗保险'
           v-decorator="['basicMedicalIp']"/>
       </a-form-item>
-      <a-form-item label='医疗互助' v-bind="formItemLayout">
+      <a-form-item label='税金' v-bind="formItemLayout">
         <a-input-number
           style="width: 100%;"
-          placeholder='医疗互助'
-          v-decorator="['medicalMutualAid']"/>
-      </a-form-item>
-      <a-form-item label='职业年金' v-bind="formItemLayout">
-        <a-input-number
-          style="width: 100%;"
-          placeholder='职业年金'
-          v-decorator="['corporateAnnuity']"/>
-      </a-form-item>
-      <a-form-item label='扣税' v-bind="formItemLayout">
-        <a-input-number
-          style="width: 100%;"
-          placeholder='扣税'
+          placeholder='税金'
           v-decorator="['taxDeduction']"/>
       </a-form-item>
+      <a-form-item label='会费' v-bind="formItemLayout">
+        <a-input-number
+          style="width: 100%;"
+          placeholder='会费'
+          v-decorator="['membership']"/>
+      </a-form-item>
+      <a-form-item label='住房公积金' v-bind="formItemLayout">
+        <a-input-number
+          style="width: 100%;"
+          placeholder='住房公积金'
+          v-decorator="['housingFund']"/>
+      </a-form-item>
+      <a-form-item label='病事假' v-bind="formItemLayout">
+        <a-input-number
+          style="width: 100%;"
+          placeholder='病事假'
+          v-decorator="['sickLeave']"/>
+      </a-form-item>
 
-      <a-form-item label='空列01' v-bind="formItemLayout">
+      <a-form-item label='空列6' v-bind="formItemLayout">
         <a-input-number
           style="width: 100%;"
-          placeholder='空列01'
-          v-decorator="['emptyColumn01']"/>
+          placeholder='空列6'
+          v-decorator="['emptyColumn06']"/>
       </a-form-item>
-      <a-form-item label='空列02' v-bind="formItemLayout">
+      <a-form-item label='空列7' v-bind="formItemLayout">
         <a-input-number
           style="width: 100%;"
-          placeholder='空列02'
-          v-decorator="['emptyColumn02']"/>
+          placeholder='空列7'
+          v-decorator="['emptyColumn07']"/>
       </a-form-item>
-      <a-form-item label='空列03' v-bind="formItemLayout">
+      <a-form-item label='空列8' v-bind="formItemLayout">
         <a-input-number
           style="width: 100%;"
-          placeholder='空列03'
-          v-decorator="['emptyColumn03']"/>
+          placeholder='空列8'
+          v-decorator="['emptyColumn08']"/>
       </a-form-item>
-      <a-form-item label='空列04' v-bind="formItemLayout">
+      <a-form-item label='空列9' v-bind="formItemLayout">
         <a-input-number
           style="width: 100%;"
-          placeholder='空列04'
-          v-decorator="['emptyColumn04']"/>
+          placeholder='空列9'
+          v-decorator="['emptyColumn09']"/>
       </a-form-item>
-      <a-form-item label='空列05' v-bind="formItemLayout">
+      <a-form-item label='空列10' v-bind="formItemLayout">
         <a-input-number
           style="width: 100%;"
-          placeholder='空列05'
-          v-decorator="['emptyColumn05']"/>
+          placeholder='空列10'
+          v-decorator="['emptyColumn10']"/>
       </a-form-item>
 
       <a-form-item label='实发工资' v-bind="formItemLayout">
         <a-input-number
+          disabled
           style="width: 100%;"
           placeholder='实发工资'
           v-decorator="['realWage']"/>
@@ -207,12 +197,6 @@
       </a-popconfirm>
       <a-button @click="handleSubmit" type="primary" :loading="loading">提交</a-button>
     </div>
-    <!-- <staff-outside-list
-      :staffOutsideListVisiable="staffOutsideList.visiable"
-      @change="handleStaffOutsideListChange"
-      @close="handleStaffOutsideListClose"
-    >
-    </staff-outside-list> -->
     <staff-outside-list
       :staffOutsideListVisiable="staffOutsideList.visiable"
       @change="handleStaffOutsideListChange"
@@ -228,10 +212,10 @@ const formItemLayout = {
   wrapperCol: { span: 17 }
 }
 export default {
-  name: 'WageAdd',
+  name: 'WageOutsideAdd',
   components: { StaffOutsideList },
   props: {
-    wageAddVisiable: {
+    wageOutsideAddVisiable: {
       default: false
     }
   },
@@ -277,36 +261,33 @@ export default {
           values.year = yearMonth.format('YYYY')
           values.month = yearMonth.format('MM')
           values.currentIncome = values.currentIncome || 0
-          values.reissueSalaryScale = values.reissueSalaryScale || 0
-          values.salarySalary = values.salarySalary || 0
           values.postAllowance = values.postAllowance || 0
-          values.financialBurdenPerformancePay = values.financialBurdenPerformancePay || 0
+          values.sanitationAllowance = values.sanitationAllowance || 0
+          values.dangerousSubsidy = values.dangerousSubsidy || 0
+          values.performanceBonus = values.performanceBonus || 0
           values.overtimePay = values.overtimePay || 0
-          values.environmentalSanitationDutyAllowance = values.environmentalSanitationDutyAllowance || 0
-          values.housingSubsidy = values.housingSubsidy || 0
-          values.onlyChildFee = values.onlyChildFee || 0
-          values.temporarySubsidy = values.temporarySubsidy || 0
-          values.jobPerformance = values.jobPerformance || 0
           values.holidayCosts = values.holidayCosts || 0
-          values.annualLeavePay = values.annualLeavePay || 0
-          values.comprehensiveSubsidy = values.comprehensiveSubsidy || 0
-          values.payable = values.payable || 0
-          values.housingFund = values.housingFund || 0
-          values.basicPensionIp = values.basicPensionIp || 0
-          values.unemploymentIp = values.unemploymentIp || 0
-          values.basicMedicalIp = values.basicMedicalIp || 0
-          values.medicalMutualAid = values.medicalMutualAid || 0
-          values.corporateAnnuity = values.corporateAnnuity || 0
-          values.taxDeduction = values.taxDeduction || 0
-          values.realWage = values.realWage || 0
           values.emptyColumn01 = values.emptyColumn01 || 0
           values.emptyColumn02 = values.emptyColumn02 || 0
           values.emptyColumn03 = values.emptyColumn03 || 0
           values.emptyColumn04 = values.emptyColumn04 || 0
           values.emptyColumn05 = values.emptyColumn05 || 0
-          this.$post('wage', {
+          // values.payable = values.payable || 0
+          values.basicPensionIp = values.basicPensionIp || 0
+          values.unemploymentIp = values.unemploymentIp || 0
+          values.basicMedicalIp = values.basicMedicalIp || 0
+          values.taxDeduction = values.taxDeduction || 0
+          values.membership = values.membership || 0
+          values.housingFund = values.housingFund || 0
+          values.sickLeave = values.sickLeave || 0
+          values.emptyColumn06 = values.emptyColumn06 || 0
+          values.emptyColumn07 = values.emptyColumn07 || 0
+          values.emptyColumn08 = values.emptyColumn08 || 0
+          values.emptyColumn09 = values.emptyColumn09 || 0
+          values.emptyColumn10 = values.emptyColumn10 || 0
+          // values.realWage = values.realWage || 0
+          this.$post('wageOutside', {
             ...values,
-            insideOrOutside: '1',
             staffId: this.staffId
           }).then((r) => {
             this.reset()

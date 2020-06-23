@@ -50,6 +50,7 @@
       </a-form-item>
       <a-form-item label='地址' v-bind="formItemLayout">
         <a-textarea
+          auto-size
           placeholder='地址'
           autocomplete="off"
           v-decorator="['address',
@@ -58,6 +59,7 @@
       </a-form-item>
       <a-form-item label='情况说明' v-bind="formItemLayout">
         <a-textarea
+          auto-size
           placeholder='疾病名称、病发时间、是否手术等'
           autocomplete="off"
           v-decorator="['text',

@@ -658,6 +658,10 @@ export default {
         this.queryParams.postLevel = ''
         this.queryParams.mini = ''
         this.queryParams.max = ''
+        this.queryParams.createTimeFrom = ''
+        this.queryParams.createTimeTo = ''
+        this.queryParams.reduceTimeFrom = ''
+        this.queryParams.reduceTimeTo = ''
       }
     },
     view (record) {
@@ -673,6 +677,7 @@ export default {
     handleStaffInsideAddSuccess () {
       this.staffInsideAdd.visiable = false
       this.$message.success('新增编内人员成功')
+      this.loadSelect()
       this.search()
     },
     edit (record) {
@@ -685,6 +690,7 @@ export default {
     handleStaffInsideEditSuccess () {
       this.staffInsideEdit.visiable = false
       this.$message.success('修改编内人员成功')
+      this.loadSelect()
       this.search()
     },
     handleStaffInsideInfoClose () {

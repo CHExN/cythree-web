@@ -181,10 +181,10 @@ export default {
         },
         error => {
           console.log(error)
-          this.$notification.error({
-            message: '系统提醒',
-            description: '检测到浏览器残余内存垃圾超过 500Mb, 建议按 Ctrl+R 自动清理并刷新页面'
-          })
+          // this.$notification.error({
+          //   message: '系统提醒',
+          //   description: '检测到浏览器残余内存垃圾超过 500Mb, 建议按 Ctrl+R 自动清理并刷新页面'
+          // })
         }
       )
     },

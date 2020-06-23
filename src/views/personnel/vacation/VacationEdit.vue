@@ -15,6 +15,7 @@
         ]">
           <a-radio-button value="0">编内</a-radio-button>
           <a-radio-button value="1">编外</a-radio-button>
+          <a-radio-button value="2">派遣</a-radio-button>
         </a-radio-group>
       </a-form-item>
       <a-form-item label='选择人员' v-bind="formItemLayout">
@@ -38,13 +39,6 @@
           ]"
         />
       </a-form-item>
-      <!-- <a-form-item label='天数' v-bind="formItemLayout">
-        <a-input-number
-          autocomplete="off"
-          placeholder='天数'
-          style="width: 100%;"
-          v-decorator="['day']"/>
-      </a-form-item> -->
       <a-form-item
         v-for="(k, index) in form.getFieldValue('keys')"
         :key="k"
@@ -54,12 +48,20 @@
       >
         <a-range-picker
           :allowClear="false"
-          style="width: 90%; margin-right: 8px"
+          style="width: 80%; margin-right: 8px"
           v-decorator="[`names[${k}]`,
             {rules: [{ required: true, message: '日期选择不能为空'}]}
           ]"
         />
         <a-icon
+          title="排除周六周日+排序"
+          class="dynamic-delete-button"
+          type="funnel-plot"
+          @click="() => exclude(k)"
+        />
+        <a-divider v-if="form.getFieldValue('keys').length > 1" type="vertical" />
+        <a-icon
+          title="删除"
           v-if="form.getFieldValue('keys').length > 1"
           class="dynamic-delete-button"
           type="minus-circle-o"
@@ -149,6 +151,53 @@ export default {
     this.form.getFieldDecorator('keys', { initialValue: [], preserve: true })
   },
   methods: {
+    ascend (x, y) {
+      return x[0] - y[0] // 按照数组的第1个值升序排列
+    },
+    descend (x, y) {
+      return y[0] - x[0] // 按照数组的第1个值升序排列
+    },
+    exclude (k) {
+      // console.log(`点击的下标为 ${k}`)
+      const { form } = this
+      let names = form.getFieldValue('names')
+      if (!names[k]) return this.$message.warning('请先选填写日期')
+      const day = names[k][1].diff(names[k][0], 'days')
+      const strtDate = moment(names[k][0])
+      let dateArr = []
+      let cycle = []
+      for (let i = 0; i <= day; i++) {
+        let date = moment(strtDate).add(i, 'days')
+        const weekday = date.get('weekday')
+        if (weekday !== 5 && weekday !== 6) {
+          cycle[cycle[0] ? 1 : 0] = moment(date)
+        } else if (weekday === 5 && cycle[0] && cycle[1]) {
+          dateArr.push(cycle)
+          cycle = []
+        }
+        if (day === i && cycle[0]) {
+          if (!cycle[1]) {
+            cycle[1] = moment(cycle[0])
+          }
+          dateArr.push(cycle)
+        }
+      }
+      names.splice(k, 1)
+      dateArr.forEach((item, index) => {
+        names.splice(k + index, 0, item)
+      })
+      names.sort(this.ascend)
+      // console.log(Object.keys(names))
+      // console.log(names.map(e => e.map(ee => ee.format('YYYY-MM-DD'))))
+      id = id + dateArr.length
+      names.forEach((item, index) => {
+        this.form.getFieldDecorator(`names[${index}]`)
+      })
+      form.setFieldsValue({
+        keys: Object.keys(names),
+        names
+      })
+    },
     remove (k) {
       const { form } = this
       const keys = form.getFieldValue('keys')
@@ -174,10 +223,13 @@ export default {
     },
     setFormValues ({...vacation}) {
       this.id = vacation.id
+      let forbids = ['createTime', 'modifyTime']
       let obj = {}
       Object.keys(vacation).forEach((key) => {
-        this.form.getFieldDecorator(key)
-        obj[key] = vacation[key]
+        if (forbids.indexOf(key) === -1) {
+          this.form.getFieldDecorator(key)
+          obj[key] = vacation[key]
+        }
       })
       let dateArr = vacation.date.split(',')
       id = 0

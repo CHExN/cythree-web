@@ -207,11 +207,14 @@ export default {
       }
     },
     handleRemove (file) {
-      if (file.error) {
-        this.fileList = this.fileList.filter(item => item.uid !== file.uid)
-      } else if (file.status === 'removed') {
+      if (file.uid) {
         this.$delete('application/deleteFile/' + file.uid)
       }
+      // if (file.error) {
+      //   this.fileList = this.fileList.filter(item => item.uid !== file.uid)
+      // } else if (file.status === 'removed') {
+      //   this.$delete('application/deleteFile/' + file.uid)
+      // }
     },
     handleBeforeUpload (file) {
       const isJPG = file.type === 'image/jpeg'

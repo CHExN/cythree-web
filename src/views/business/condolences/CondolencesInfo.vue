@@ -7,16 +7,16 @@
     :keyboard="false"
     :footer="null"
     @cancel="handleCancleClick">
-      <a-card :bordered="false">
-        <detail-list title="基础信息">
-          <detail-list-item term="职工姓名">{{condolencesInfoData.name}}</detail-list-item>
-          <detail-list-item term="性别">{{getSexx(condolencesInfoData.sexx)}}</detail-list-item>
-          <detail-list-item term="年龄">{{condolencesInfoData.age}}</detail-list-item>
-          <detail-list-item term="联系电话">{{condolencesInfoData.phone}}</detail-list-item>
-          <detail-list-item term="地址">{{condolencesInfoData.address}}</detail-list-item>
-          <detail-list-item term="情况说明">{{condolencesInfoData.text}}</detail-list-item>
-        </detail-list>
-      </a-card>
+    <a-card :bordered="false">
+      <detail-list title="基础信息">
+        <detail-list-item term="职工姓名">{{condolencesInfoData.name}}</detail-list-item>
+        <detail-list-item term="性别">{{getSexx(condolencesInfoData.sexx)}}</detail-list-item>
+        <detail-list-item term="年龄">{{condolencesInfoData.age}}</detail-list-item>
+        <detail-list-item term="联系电话">{{condolencesInfoData.phone}}</detail-list-item>
+        <detail-list-item term="地址">{{condolencesInfoData.address}}</detail-list-item>
+        <detail-list-item term="情况说明">{{condolencesInfoData.text}}</detail-list-item>
+      </detail-list>
+    </a-card>
   </a-modal>
 </template>
 <script>

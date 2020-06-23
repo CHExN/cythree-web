@@ -10,21 +10,21 @@
       <a-form layout="horizontal">
         <a-row>
           <div :class="advanced ? null: 'fold'">
-            <a-col :md="24">
+            <a-col :md="24" >
               <a-form-item
-                label="公厕名称"
+                label="编号"
                 :labelCol="{span: 4}"
                 :wrapperCol="{span: 18, offset: 1}">
-                <a-input v-model="queryParams.wcName"/>
+                <a-input v-model="queryParams.wcNum"/>
               </a-form-item>
             </a-col>
             <template v-if="advanced">
-              <a-col :md="24" >
+              <a-col :md="24">
                 <a-form-item
-                  label="公厕编号"
+                  label="名称"
                   :labelCol="{span: 4}"
                   :wrapperCol="{span: 18, offset: 1}">
-                  <a-input v-model="queryParams.wcNum"/>
+                  <a-input v-model="queryParams.wcName"/>
                 </a-form-item>
               </a-col>
               <a-col :md="24" >
@@ -135,7 +135,7 @@ export default {
     toggleAdvanced () {
       this.advanced = !this.advanced
       if (!this.advanced) {
-        this.queryParams.wcNum = ''
+        this.queryParams.wcName = ''
         this.queryParams.wcOwn = []
       }
     },

@@ -12,30 +12,33 @@
                 <a-select v-model="insOut">
                   <!-- 这里不能加 ‘全部’ 选项 因为后台不支持 -->
                   <a-select-option value="0">编内</a-select-option>
-                  <a-select-option value="1">编外</a-select-option>
+                  <a-select-option value="1">编外归属</a-select-option>
+                  <a-select-option value="2">编外分队</a-select-option>
+                  <a-select-option value="3">派遣</a-select-option>
                 </a-select>
               </a-form-item>
             </a-col>
-            <!-- <a-col :md="12" :sm="24" >
-              <a-form-item
-                label="日期"
-                :labelCol="{span: 5}"
-                :wrapperCol="{span: 18, offset: 1}">
-                <range-date
-                  @change="handleDateChange"
-                  ref="createTime">
-                </range-date>
-              </a-form-item>
-            </a-col> -->
             <a-col :md="12" :sm="24" >
               <a-form-item
-                label="姓名"
+                label="月份"
                 :labelCol="{span: 5}"
                 :wrapperCol="{span: 18, offset: 1}">
-                <a-input v-model="queryParams.name"/>
+                <a-month-picker
+                  style="width: 100%;"
+                  :allowClear="false"
+                  @change="handleMonthChange"
+                />
               </a-form-item>
             </a-col>
             <template v-if="advanced">
+              <a-col :md="12" :sm="24" >
+                <a-form-item
+                  label="姓名"
+                  :labelCol="{span: 5}"
+                  :wrapperCol="{span: 18, offset: 1}">
+                  <a-textarea auto-size v-model="queryParams.name"/>
+                </a-form-item>
+              </a-col>
               <a-col :md="12" :sm="24" >
                 <a-form-item
                   label="休假类型"
@@ -60,6 +63,18 @@
                   </a-select>
                 </a-form-item>
               </a-col>
+              <a-col :md="12" :sm="24" >
+                <a-form-item
+                  label="在职与否"
+                  :labelCol="{span: 5}"
+                  :wrapperCol="{span: 18, offset: 1}">
+                  <a-select v-model="isLeave">
+                    <a-select-option value="0,1">全部</a-select-option>
+                    <a-select-option value="0">在职</a-select-option>
+                    <a-select-option value="1">非在职</a-select-option>
+                  </a-select>
+                </a-form-item>
+              </a-col>
             </template>
           </div>
           <span style="float: right; margin: 3px auto 1em;">
@@ -79,9 +94,8 @@
         <a-button @click="batchDelete" v-hasPermission="'vacation:delete'">删除</a-button>
         <a-dropdown>
           <a-menu slot="overlay">
-            <a-menu-item key="inside-annual-leave" @click="showModal(2)">编内年假统计</a-menu-item>
-            <a-menu-item key="inside-vacation" @click="showModal(0)">编内休假统计</a-menu-item>
-            <a-menu-item key="outside-vacation" @click="showModal(1)">编外休假统计</a-menu-item>
+            <a-menu-item key="inside-annual-leave" @click="showModal(0)">编内年假统计</a-menu-item>
+            <a-menu-item key="vacation" @click="showModal(1)">休假统计</a-menu-item>
           </a-menu>
           <a-button>
             更多操作 <a-icon type="down" />
@@ -144,7 +158,7 @@
     </vacation-edit>
     <!-- 人员休假统计详情 -->
     <vacation-info
-      :viewType="viewType"
+      :insOut="insOut"
       :yearValue="yearValue"
       :vacationInfoVisiable="vacationInfo.visiable"
       @close="handleVacationInfoClose">
@@ -173,6 +187,7 @@ export default {
       modalVisible: false,
       yearValue: new Date().getFullYear(),
       insOut: '0',
+      isLeave: '0,1',
       advanced: false,
       vacationAdd: {
         visiable: false,
@@ -215,7 +230,8 @@ export default {
     columns () {
       return [{
         title: '姓名',
-        dataIndex: 'name'
+        dataIndex: 'name',
+        width: '10%'
       }, {
         title: '编制类别',
         dataIndex: 'insOut',
@@ -224,26 +240,31 @@ export default {
             case '0':
               return '编内'
             case '1':
-              return '编外'
+              return '编外归属'
+            case '2':
+              return '编外分队'
+            case '3':
+              return '派遣'
             default:
               return text
           }
-        }
+        },
+        width: '7%'
       }, {
         title: '休假类型',
-        dataIndex: 'type'
+        dataIndex: 'type',
+        width: '7%'
       }, {
         title: '日期',
         dataIndex: 'date'
       }, {
         title: '天数',
-        dataIndex: 'day'
-      // }, {
-      //   title: '休假日期',
-      //   dataIndex: 'date'
+        dataIndex: 'day',
+        width: '7%'
       }, {
         title: '备注',
-        dataIndex: 'remark'
+        dataIndex: 'remark',
+        width: '12%'
       }, {
         title: '操作',
         dataIndex: 'operation',
@@ -259,9 +280,9 @@ export default {
   methods: {
     view () {
       this.modalVisible = false
-      if (this.viewType === 2) {
+      if (this.viewType === 0) {
         this.insideAnnualLeave.visiable = true
-      } else if (this.viewType === 0 || this.viewType === 1) {
+      } else {
         this.vacationInfo.visiable = true
       }
     },
@@ -276,9 +297,9 @@ export default {
       this.advanced = !this.advanced
       // 每次展开，把隐藏的内容清空
       if (!this.advanced) {
+        this.queryParams.name = ''
         this.queryParams.type = ''
-        // this.queryParams.createTimeFrom = ''
-        // this.queryParams.createTimeTo = ''
+        this.queryParams.isVacation = ''
       }
     },
     add () {
@@ -313,12 +334,9 @@ export default {
     handleTypeChange (value) {
       this.queryParams.type = value || ''
     },
-    // handleDateChange (value) {
-    //   if (value) {
-    //     this.queryParams.createTimeFrom = value[0]
-    //     this.queryParams.createTimeTo = value[1]
-    //   }
-    // },
+    handleMonthChange (date, dateString) {
+      this.queryParams.date = dateString || ''
+    },
     batchDelete () {
       if (!this.selectedRowKeys.length) {
         this.$message.warning('请选择需要删除的记录')
@@ -373,6 +391,7 @@ export default {
       this.queryParams = {
         type: []
       }
+      this.isLeave = '0,1'
       this.fetch()
     },
     handleTableChange (pagination, filters, sorter) {
@@ -411,6 +430,7 @@ export default {
       }
       this.$get('vacation', {
         insOut: this.insOut,
+        isLeave: this.isLeave,
         ...params
       }).then((r) => {
         let data = r.data

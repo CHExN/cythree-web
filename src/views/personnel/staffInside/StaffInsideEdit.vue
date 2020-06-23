@@ -28,6 +28,16 @@
           }]"
         />
       </a-form-item>
+       <a-form-item label='增加日期' v-bind="formItemLayout">
+        <a-date-picker
+          placeholder='增加日期，【增加人员报表】就是根据此项进行查询'
+          format='YYYY-MM-DD'
+          style="width: 100%;"
+          v-decorator="['addDate',{
+            rules: [{required: true, message: '增加日期不能为空'}]
+          }]"
+        />
+      </a-form-item>
       <a-form-item label='姓名' v-bind="formItemLayout">
         <a-input
           placeholder='姓名'
@@ -185,14 +195,6 @@
           placeholder='伤残鉴定等级'
           autocomplete="off"
           v-decorator="['disabilityIdentificationLevel']"/>
-      </a-form-item>
-       <a-form-item label='增加日期' v-bind="formItemLayout">
-        <a-date-picker
-          placeholder='增加日期，【增加人员报表】就是根据此项进行查询'
-          format='YYYY-MM-DD'
-          style="width: 100%;"
-          v-decorator="['addDate']"
-        />
       </a-form-item>
       <a-form-item label='调入日期' v-bind="formItemLayout">
         <a-date-picker

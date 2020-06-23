@@ -51,11 +51,16 @@
             {rules: [{ required: true, message: '日期选择不能为空'}]}
           ]"
         />
-        <a-icon
+        <!-- <a-icon
           v-if="form.getFieldValue('contractPeriodKeys').length > 1"
           class="dynamic-delete-button"
           type="minus-circle-o"
           :disabled="form.getFieldValue('contractPeriodKeys').length === 1"
+          @click="() => contractPeriodRemove(k)"
+        /> -->
+        <a-icon
+          class="dynamic-delete-button"
+          type="minus-circle-o"
           @click="() => contractPeriodRemove(k)"
         />
       </a-form-item>
@@ -83,11 +88,16 @@
           style="width: 90%; margin-right: 8px"
           v-decorator="[`jobAgreementDate[${k}]`]"
         />
-        <a-icon
+        <!-- <a-icon
           v-if="form.getFieldValue('jobAgreementKeys').length > 1"
           class="dynamic-delete-button"
           type="minus-circle-o"
           :disabled="form.getFieldValue('jobAgreementKeys').length === 1"
+          @click="() => jobAgreementRemove(k)"
+        /> -->
+        <a-icon
+          class="dynamic-delete-button"
+          type="minus-circle-o"
           @click="() => jobAgreementRemove(k)"
         />
       </a-form-item>
@@ -213,9 +223,7 @@ export default {
     contractPeriodRemove (k) {
       const { form } = this
       const contractPeriodKeys = form.getFieldValue('contractPeriodKeys')
-      if (contractPeriodKeys.length === 1) {
-        return
-      }
+      // if (contractPeriodKeys.length === 1) return
       form.setFieldsValue({
         contractPeriodKeys: contractPeriodKeys.filter(key => key !== k)
       })
@@ -231,9 +239,7 @@ export default {
     jobAgreementRemove (k) {
       const { form } = this
       const jobAgreementKeys = form.getFieldValue('jobAgreementKeys')
-      if (jobAgreementKeys.length === 1) {
-        return
-      }
+      // if (jobAgreementKeys.length === 1) return
       form.setFieldsValue({
         jobAgreementKeys: jobAgreementKeys.filter(key => key !== k)
       })
@@ -289,7 +295,8 @@ export default {
     // },
     setFormValues ({...contractOutside}) {
       this.id = contractOutside.id
-      let fields = ['contractPeriod', 'contractPeriodDate', 'jobAgreement', 'jobAgreementDate']
+      const fields = ['contractPeriod', 'contractPeriodDate', 'jobAgreement', 'jobAgreementDate']
+      const { contractPeriod, contractPeriodDate, jobAgreement, jobAgreementDate } = contractOutside
       let obj = {}
       Object.keys(contractOutside).forEach((key) => {
         if (fields.indexOf(key) === -1) {
@@ -297,46 +304,64 @@ export default {
           obj[key] = contractOutside[key]
         }
       })
-      let contractPeriodArr = contractOutside.contractPeriod.split(',')
-      let contractPeriodDateArr = contractOutside.contractPeriodDate.split(',')
-      obj['contractPeriodKeys'] = []
-      obj['contractPeriod'] = []
-      obj['contractPeriodDate'] = []
-      contractPeriodDateArr.forEach((element, index) => {
-        this.form.getFieldDecorator(`contractPeriod[${index}]`)
-        this.form.getFieldDecorator(`contractPeriodDate[${index}]`)
-        obj['contractPeriodKeys'] = obj['contractPeriodKeys'].concat(contractPeriodIndex++)
-        obj['contractPeriod'].push(contractPeriodArr[index])
-        obj['contractPeriodDate'].push(element.split('~').map(e => moment(e)))
-      })
-      let jobAgreementArr = contractOutside.jobAgreement ? contractOutside.jobAgreement.split(',') : []
-      let jobAgreementDateArr = contractOutside.jobAgreementDate ? contractOutside.jobAgreementDate.split(',') : []
-      obj['jobAgreementKeys'] = []
-      obj['jobAgreement'] = []
-      obj['jobAgreementDate'] = []
-      jobAgreementDateArr.forEach((element, index) => {
-        this.form.getFieldDecorator(`jobAgreement[${index}]`)
-        this.form.getFieldDecorator(`jobAgreementDate[${index}]`)
-        obj['jobAgreementKeys'] = obj['jobAgreementKeys'].concat(jobAgreementIndex++)
-        obj['jobAgreement'].push(jobAgreementArr[index])
-        obj['jobAgreementDate'].push(element.split('~').map(e => moment(e)))
-      })
+      if (contractPeriod && contractPeriodDate) {
+        const contractPeriodArr = contractPeriod.split(',')
+        const contractPeriodDateArr = contractPeriodDate.split(',')
+        obj['contractPeriodKeys'] = []
+        obj['contractPeriod'] = []
+        obj['contractPeriodDate'] = []
+        contractPeriodDateArr.forEach((element, index) => {
+          this.form.getFieldDecorator(`contractPeriod[${index}]`)
+          this.form.getFieldDecorator(`contractPeriodDate[${index}]`)
+          obj['contractPeriodKeys'] = obj['contractPeriodKeys'].concat(contractPeriodIndex++)
+          obj['contractPeriod'].push(contractPeriodArr[index])
+          obj['contractPeriodDate'].push(element.split('~').map(e => moment(e)))
+        })
+      }
+      if (jobAgreement && jobAgreementDate) {
+        const jobAgreementArr = jobAgreement.split(',')
+        const jobAgreementDateArr = jobAgreementDate.split(',')
+        obj['jobAgreementKeys'] = []
+        obj['jobAgreement'] = []
+        obj['jobAgreementDate'] = []
+        jobAgreementDateArr.forEach((element, index) => {
+          this.form.getFieldDecorator(`jobAgreement[${index}]`)
+          this.form.getFieldDecorator(`jobAgreementDate[${index}]`)
+          obj['jobAgreementKeys'] = obj['jobAgreementKeys'].concat(jobAgreementIndex++)
+          obj['jobAgreement'].push(jobAgreementArr[index])
+          obj['jobAgreementDate'].push(element.split('~').map(e => moment(e)))
+        })
+      }
       this.form.setFieldsValue(obj)
     },
     handleSubmit () {
       this.form.validateFields((err, values) => {
         if (!err) {
-          let contractPeriodArr = this.form.getFieldValue('contractPeriod').filter(d => d)
+          // let contractPeriodArr = this.form.getFieldValue('contractPeriod').filter(d => d)
+          // let contractPeriodDateArr = []
+          // this.form.getFieldValue('contractPeriodDate').forEach(element => {
+          //   contractPeriodDateArr.push(`${element[0].format('YYYY-MM-DD')}~${element[1].format('YYYY-MM-DD')}`)
+          // })
+          // let jobAgreementFieldValue = this.form.getFieldValue('jobAgreement') || []
+          // let jobAgreementDateFieldValue = this.form.getFieldValue('jobAgreementDate') || []
+          // let jobAgreementArr = jobAgreementFieldValue.filter(d => d)
+          // let jobAgreementDateArr = []
+          // jobAgreementDateFieldValue.forEach(element => {
+          //   if (!element) return
+          //   jobAgreementDateArr.push(`${element[0].format('YYYY-MM-DD')}~${element[1].format('YYYY-MM-DD')}`)
+          // })
+          let contractPeriodArr = this.form.getFieldValue('contractPeriod') || []
+          contractPeriodArr = contractPeriodArr.filter(d => d)
           let contractPeriodDateArr = []
-          this.form.getFieldValue('contractPeriodDate').forEach(element => {
+          const contractPeriodDate = this.form.getFieldValue('contractPeriodDate') || []
+          contractPeriodDate.forEach(element => {
             contractPeriodDateArr.push(`${element[0].format('YYYY-MM-DD')}~${element[1].format('YYYY-MM-DD')}`)
           })
-          let jobAgreementFieldValue = this.form.getFieldValue('jobAgreement') || []
-          let jobAgreementDateFieldValue = this.form.getFieldValue('jobAgreementDate') || []
-          let jobAgreementArr = jobAgreementFieldValue.filter(d => d)
+          let jobAgreementArr = this.form.getFieldValue('jobAgreement') || []
+          jobAgreementArr = jobAgreementArr.filter(d => d)
           let jobAgreementDateArr = []
-          jobAgreementDateFieldValue.forEach(element => {
-            if (!element) return
+          const jobAgreementDate = this.form.getFieldValue('jobAgreementDate') || []
+          jobAgreementDate.forEach(element => {
             jobAgreementDateArr.push(`${element[0].format('YYYY-MM-DD')}~${element[1].format('YYYY-MM-DD')}`)
           })
           this.loading = true

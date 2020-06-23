@@ -81,7 +81,7 @@
             <template slot="content">
               <div>{{text}}</div>
             </template>
-            <p style="width: 150px;margin-bottom: 0">{{text}}</p>
+            <p style="margin-bottom: 0">{{text}}</p>
           </a-popover>
         </template>
         <template slot="operation" slot-scope="text, record">
@@ -178,7 +178,8 @@ export default {
       filteredInfo = filteredInfo || {}
       return [{
         title: '职工姓名',
-        dataIndex: 'name'
+        dataIndex: 'name',
+        width: '8%'
       }, {
         title: '性别',
         dataIndex: 'sexx',
@@ -198,21 +199,20 @@ export default {
         ],
         filterMultiple: false,
         filteredValue: filteredInfo.sexx || null,
-        onFilter: (value, record) => record.sexx.includes(value)
+        onFilter: (value, record) => record.sexx.includes(value),
+        width: '7%'
       }, {
         title: '年龄',
-        dataIndex: 'age'
+        dataIndex: 'age',
+        width: '7%'
       }, {
         title: '部门',
-        dataIndex: 'deptName'
+        dataIndex: 'deptName',
+        width: '7%'
       }, {
         title: '电话',
-        dataIndex: 'phone'
-      }, {
-        title: '情况说明',
-        dataIndex: 'text',
-        scopedSlots: { customRender: 'text' },
-        width: 150
+        dataIndex: 'phone',
+        width: '11%'
       }, {
         title: '状态',
         dataIndex: 'status',
@@ -235,7 +235,12 @@ export default {
         ],
         filterMultiple: true,
         filteredValue: filteredInfo.status || null,
-        onFilter: (value, record) => record.status.includes(value)
+        onFilter: (value, record) => record.status.includes(value),
+        width: '7%'
+      }, {
+        title: '情况说明',
+        dataIndex: 'text',
+        scopedSlots: { customRender: 'text' }
       }, {
         title: '操作',
         dataIndex: 'operation',

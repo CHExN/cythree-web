@@ -88,16 +88,6 @@
             {rules: [{ required: true, message: '金额合计不能为空'}]}
           ]"/>
       </a-form-item>
-      <a-form-item label='登记日期' v-bind="formItemLayout">
-        <a-date-picker
-          placeholder='登记日期'
-          format='YYYY-MM-DD'
-          style="width: 100%;"
-          v-decorator="['createDate',
-            {rules: [{ required: true, message: '登记日期不能为空'}]}
-          ]"
-        />
-      </a-form-item>
     </a-form>
     <div class="drawer-bootom-button">
       <a-popconfirm title="确定放弃编辑？" @confirm="onClose" okText="确定" cancelText="取消">
@@ -114,7 +104,7 @@
   </a-drawer>
 </template>
 <script>
-import WcList from '../wc/WCListByElectricityNum'
+import WcList from '../wc/WCList'
 import moment from 'moment'
 moment.locale('zh-cn')
 const formItemLayout = {
@@ -173,7 +163,7 @@ export default {
         this.form.setFieldsValue({ 'unitPrice': this.totalAmount / this.actualAmount })
       }
     },
-    handleWcListChange (wcName, wcId) {
+    handleWcListChange (wcName, wcNum, wcId) {
       this.form.getFieldDecorator('wcName')
       this.form.setFieldsValue({ 'wcName': wcName })
       this.wcId = wcId
@@ -187,19 +177,18 @@ export default {
     handleSubmit () {
       this.form.validateFields((err, values) => {
         if (!err) {
-          const date = values['date']
-          const createDate = values['createDate']
+          const date = values['date'].format('YYYY-MM').split('-')
           const recDate = values['recDate']
           const electricityData = {
             ...values,
-            'date': date ? date.format('YYYY-MM-DD') : date,
-            'createDate': createDate ? new Date(createDate) : createDate,
-            'recDate': recDate ? new Date(recDate) : recDate
+            wcId: this.wcId,
+            year: date[0],
+            month: date[1],
+            recDate: recDate ? new Date(recDate) : recDate
           }
           this.loading = true
           this.$post('electricity', {
-            ...electricityData,
-            wcId: this.wcId
+            ...electricityData
           }).then((r) => {
             this.reset()
             this.$emit('success')
@@ -216,7 +205,7 @@ export default {
     electricityAddVisiable () {
       if (this.electricityAddVisiable) {
         let obj = {}
-        const fields = ['date', 'createDate', 'recDate']
+        const fields = ['date', 'recDate']
         fields.forEach((item) => {
           this.form.getFieldDecorator(item)
           obj[item] = moment()

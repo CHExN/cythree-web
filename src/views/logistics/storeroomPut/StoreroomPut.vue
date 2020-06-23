@@ -78,7 +78,8 @@
     </div>
     <div>
       <div class="operator">
-        <a-button type="primary" ghost @click="add" v-hasPermission="'storeroomPut:add'">食堂用品入库</a-button>
+        <a-button type="primary" ghost @click="canteenPutAddOpen" v-hasPermission="'storeroomPut:add','canteenPut:add'">食堂用品入库</a-button>
+        <a-button type="primary" ghost @click="unionPutAddOpen" v-hasPermission="'storeroomPut:add','unionPut:add'">工会用品入库</a-button>
         <a-button @click="batchDelete" v-hasPermission="'storeroomPut:delete'">删除</a-button>
         <a-dropdown v-hasAnyPermission="'storeroomPut:export','canteen:view','canteen:export','supplier:view'">
           <a-menu slot="overlay">
@@ -158,12 +159,18 @@
       :putInfoVisiable="putInfo.visiable"
       @close="handlePutInfoClose">
     </put-info>
-    <!-- 新增 -->
-    <put-add
-      :putAddVisiable="putAdd.visiable"
-      @close="handlePutAddClose"
-      @success="handlePutAddSuccess">
-    </put-add>
+    <!-- 新增工会用品 -->
+    <union-put-add
+      :putAddVisiable="unionPutAdd.visiable"
+      @close="handleUnionPutAddClose"
+      @success="handleUnionPutAddSuccess">
+    </union-put-add>
+    <!-- 新增食堂用品 -->
+    <canteen-put-add
+      :putAddVisiable="canteenPutAdd.visiable"
+      @close="handleCanteenPutAddClose"
+      @success="handleCanteenPutAddSuccess">
+    </canteen-put-add>
     <!-- 修改 -->
     <put-edit
       ref="putEdit"
@@ -186,7 +193,8 @@
 <script>
 import RangeDate from '@/components/datetime/RangeDate'
 import PutInfo from './StoreroomPutInfo'
-import PutAdd from './CanteenPutAdd'
+import UnionPutAdd from './UnionPutAdd'
+import CanteenPutAdd from './CanteenPutAdd'
 import PutEdit from './StoreroomPutEdit'
 import CanteenTypeManage from './CanteenTypeManage'
 import SupplierManage from './SupplierManage'
@@ -196,7 +204,7 @@ moment.locale('zh-cn')
 
 export default {
   name: 'StoreroomPut',
-  components: { PutInfo, PutAdd, PutEdit, RangeDate, CanteenTypeManage, SupplierManage },
+  components: { PutInfo, UnionPutAdd, CanteenPutAdd, PutEdit, RangeDate, CanteenTypeManage, SupplierManage },
   data () {
     return {
       radioValue: true,
@@ -210,7 +218,10 @@ export default {
         visiable: false,
         data: {}
       },
-      putAdd: {
+      unionPutAdd: {
+        visiable: false
+      },
+      canteenPutAdd: {
         visiable: false
       },
       putEdit: {
@@ -336,7 +347,7 @@ export default {
           if (!r.data) {
             this.$refs[`popconfirm${record.id}`].visible = true
           } else if (r.data.process === '0') {
-            this.$message.warning('您已提交修改申请，请耐心等待审核成功通知')
+            this.$message.warning('您已提交修改申请，请耐心等待审核结果通知')
           } else if (r.data.process === '1') {
             this.edit(record, {
               tableName: 'storeroomPut',
@@ -350,8 +361,7 @@ export default {
             } else {
               this.$message.error('您的修改申请未通过，请24小时后再重新尝试')
             }
-          // } else if (r.data.process === '3') {
-          } else {
+          } else { // r.data.process === '3'
             this.$message.warning('您已修改过此条数据，如想再次修改请再次提交申请')
             this.$refs[`popconfirm${record.id}`].visible = true
           }
@@ -382,14 +392,25 @@ export default {
     handlePutInfoClose () {
       this.putInfo.visiable = false
     },
-    add () {
-      this.putAdd.visiable = true
+    unionPutAddOpen () {
+      this.unionPutAdd.visiable = true
     },
-    handlePutAddClose () {
-      this.putAdd.visiable = false
+    handleUnionPutAddClose () {
+      this.unionPutAdd.visiable = false
     },
-    handlePutAddSuccess () {
-      this.putAdd.visiable = false
+    handleUnionPutAddSuccess () {
+      this.unionPutAdd.visiable = false
+      this.$message.success('新增入库单成功')
+      this.search()
+    },
+    canteenPutAddOpen () {
+      this.canteenPutAdd.visiable = true
+    },
+    handleCanteenPutAddClose () {
+      this.canteenPutAdd.visiable = false
+    },
+    handleCanteenPutAddSuccess () {
+      this.canteenPutAdd.visiable = false
       this.$message.success('新增入库单成功')
       this.search()
     },
@@ -409,6 +430,8 @@ export default {
       this.supplierManage.visiable = true
     },
     handleSupplierManageClose () {
+      console.log('这里')
+      this.loadSelect()
       this.supplierManage.visiable = false
     },
     onCanteenTypeManage () {
@@ -485,7 +508,8 @@ export default {
             let spread = newSpread('CanteenSupplier')
             spread = fixedForm(spread, 'CanteenSupplier', { title: `${key}结账日（${dateRangeFrom}~${dateRangeTo}）` })
             spread = floatForm(spread, 'CanteenSupplier', newData)
-            saveExcel(spread, `食堂材料供应商结账表_${dateRangeFrom}至${dateRangeTo}_${key}.xlsx`)
+            let fileName = `食堂材料供应商结账表_${dateRangeFrom}至${dateRangeTo}_${key}.xlsx`
+            saveExcel(spread, fileName)
             floatReset(spread, 'CanteenSupplier', newData.length)
           })
           this.onRadioChange()

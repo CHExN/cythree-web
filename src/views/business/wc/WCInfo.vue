@@ -10,7 +10,7 @@
       <a-card :bordered="false">
         <detail-list title="基础信息">
           <detail-list-item term="公厕名称">{{wcInfoData.wcName}}</detail-list-item>
-          <detail-list-item term="厕所编号">{{wcInfoData.wcNum}}</detail-list-item>
+          <detail-list-item term="公厕编号">{{wcInfoData.wcNum}}</detail-list-item>
           <detail-list-item term="所属分队">{{wcInfoData.wcOwn}}</detail-list-item>
           <detail-list-item term="管理单位">{{wcInfoData.manageUnitToDict}}</detail-list-item>
           <detail-list-item term="种类">{{wcInfoData.wcKindToDict}}</detail-list-item>
@@ -30,7 +30,7 @@
           <detail-list-item term="接管日期">{{wcInfoData.replaceDate}}</detail-list-item>
           <detail-list-item term="开放时间">{{wcInfoData.openHour}}</detail-list-item>
           <detail-list-item term="所在区县">{{wcInfoData.DictrictToDict}}</detail-list-item>
-          <detail-list-item term="所在街乡">{{wcInfoData.streetTown}}</detail-list-item>
+          <detail-list-item term="所属街乡">{{wcInfoData.streetTown}}</detail-list-item>
           <detail-list-item term="建设方式">{{wcInfoData.buildingMethodToDict}}</detail-list-item>
           <detail-list-item term="男坑位数">{{wcInfoData.pitMale}}</detail-list-item>
           <detail-list-item term="女坑位数">{{wcInfoData.pitFemale}}</detail-list-item>
@@ -50,9 +50,6 @@
           <detail-list-item term="五环内外">{{wcInfoData.is5thRing}}</detail-list-item>
           <detail-list-item term="有无无障碍设施">{{wcInfoData.isAccessibility}}</detail-list-item>
           <detail-list-item term="有无残疾间">{{wcInfoData.isDisabledRoom}}</detail-list-item>
-          <detail-list-item term="水表编号">{{wcInfoData.waterNum}}</detail-list-item>
-          <detail-list-item term="电表编号">{{wcInfoData.electricityNum}}</detail-list-item>
-          <detail-list-item term="缴费号">{{wcInfoData.paymentNum}}</detail-list-item>
           <detail-list-item term="公厕详细地址">{{wcInfoData.wcAddress}}</detail-list-item>
         </detail-list>
         <a-divider style="margin-bottom: 32px"/>
@@ -125,11 +122,14 @@ export default {
       }
     },
     handleRemove (file) {
-      if (file.error) {
-        this.fileList = this.fileList.filter(item => item.uid !== file.uid)
-      } else if (file.status === 'removed') {
+      if (file.uid) {
         this.$delete('wc/deleteFile/' + file.uid)
       }
+      // if (file.error) {
+      //   this.fileList = this.fileList.filter(item => item.uid !== file.uid)
+      // } else if (file.status === 'removed') {
+      //   this.$delete('wc/deleteFile/' + file.uid)
+      // }
     },
     handleBeforeUpload (file) {
       const isJPG = file.type === 'image/jpeg'

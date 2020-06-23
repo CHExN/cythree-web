@@ -108,9 +108,9 @@
           v-decorator="['indicatorStatus']"
         />
       </a-form-item>
-      <a-form-item label='所在街乡' v-bind="formItemLayout">
+      <a-form-item label='所属街乡' v-bind="formItemLayout">
         <a-input
-          placeholder='所在街乡'
+          placeholder='所属街乡'
           autocomplete="off"
           v-decorator="['streetTown']"
         />
@@ -286,26 +286,6 @@
           autocomplete="off"
           v-decorator="['wcNowStatus']"
         />
-      </a-form-item>
-      <a-form-item label='水表编号' v-bind="formItemLayout">
-        <a-input
-          placeholder='水表编号'
-          autocomplete="off"
-          v-decorator="['waterNum']"
-        />
-      </a-form-item>
-      <a-form-item label='电表编号' v-bind="formItemLayout">
-        <a-input
-          placeholder='电表编号'
-          autocomplete="off"
-          v-decorator="['electricityNum']"
-        />
-      </a-form-item>
-      <a-form-item label='缴费号' v-bind="formItemLayout">
-        <a-input
-          placeholder='缴费号'
-          autocomplete="off"
-          v-decorator="['paymentNum']"/>
       </a-form-item>
     </a-form>
     <div class="drawer-bootom-button">

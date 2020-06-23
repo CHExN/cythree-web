@@ -8,10 +8,10 @@
         </a-input>
       </a-form-item>
       <a-form-item>
-        <a-input size="large" type="password" placeholder="Password" autocomplete="off"
+        <a-input-password size="large" placeholder="Password" autocomplete="off"
           v-decorator="['password',{rules: [{ required: true, message: '请输入密码', whitespace: true}]}]">
           <a-icon slot="prefix" type="lock"></a-icon>
-        </a-input>
+        </a-input-password>
       </a-form-item>
       <!-- <a-tabs size="large" :tabBarStyle="{textAlign: 'center'}" style="padding: 0 2px;" :activeKey="activeKey"
               @change="handleTabsChange">

@@ -9,40 +9,94 @@
     :visible="wcStatusAddVisiable"
     style="height: calc(100% - 55px);overflow: auto;padding-bottom: 53px;">
     <a-form :form="form">
-      <a-form-item label='选择公厕' v-bind="formItemLayout">
+      <a-form-item label='公厕名称' v-bind="formItemLayout">
         <a-input
-          @click="selectWc"
-          readOnly
-          autoFocus
-          placeholder='公厕'
+          disabled
           autocomplete="off"
           v-decorator="['wcName',
-            {rules: [{ required: true, message: '请选择公厕'}]}
+            {rules: [{ required: true, message: '请填写正确的公厕编号，已此验证公厕信息'}]}
           ]"/>
       </a-form-item>
-      <a-form-item label='公厕状态' v-bind="formItemLayout">
+      <a-form-item label='编号后四' v-bind="formItemLayout">
+        <a-input-search
+          autoFocus
+          @search="selectIdNum"
+          @change="handleIdNumChange"
+          placeholder='公厕编号后四位'
+          autocomplete="off"
+          v-decorator="['wcNum',
+            {rules: [{ required: true, message: '请填写公厕编号后四位'}]}
+          ]"
+        />
+      </a-form-item>
+      <a-form-item label='是否重点位置' v-bind="formItemLayout">
+        <a-radio-group v-decorator="['isFocus', {initialValue: '1'}]">
+          <a-radio-button value="1">
+            是重点位置
+          </a-radio-button>
+          <a-radio-button value="0">
+            非重点位置
+          </a-radio-button>
+        </a-radio-group>
+      </a-form-item>
+      <a-form-item label='关门日期' v-bind="formItemLayout">
+        <a-date-picker
+          placeholder='粪井满冒/关门日期'
+          format='YYYY-MM-DD'
+          style="width: 100%;"
+          v-decorator="['startDate',
+            {rules: [{ required: true, message: '请选择粪井满冒/关门日期'}]}
+          ]"
+        />
+      </a-form-item>
+      <a-form-item label='是否关门' v-bind="formItemLayout">
+        <a-radio-group v-decorator="['isOpen', {initialValue: '0'}]">
+          <a-radio-button value="1">
+            开门
+          </a-radio-button>
+          <a-radio-button value="0">
+            关门
+          </a-radio-button>
+        </a-radio-group>
+      </a-form-item>
+      <a-form-item label='关门原因' v-bind="formItemLayout">
         <a-input
-          placeholder='公厕状态（不填，默认“维修中”）'
+          placeholder='关门原因（不填，默认“井满”）'
           autocomplete="off"
           v-decorator="['status']"
         />
       </a-form-item>
-      <a-form-item label='开始日期' v-bind="formItemLayout">
+      <a-form-item label='是否通知三场' v-bind="formItemLayout">
+        <a-radio-group v-decorator="['isNotice', {initialValue: '0'}]">
+          <a-radio-button value="1">
+            通知
+          </a-radio-button>
+          <a-radio-button value="0">
+            不通知
+          </a-radio-button>
+        </a-radio-group>
+      </a-form-item>
+      <a-form-item label='通知日期' v-bind="formItemLayout">
         <a-date-picker
-          placeholder='开始日期'
+          placeholder='通知日期'
           format='YYYY-MM-DD'
           style="width: 100%;"
-          v-decorator="['startDate',
-            {rules: [{ required: true, message: '请选择开始日期'}]}
-          ]"
+          v-decorator="['noticeDate']"
         />
       </a-form-item>
-      <a-form-item label='结束日期' v-bind="formItemLayout">
+      <a-form-item label='开门日期' v-bind="formItemLayout">
         <a-date-picker
-          placeholder='结束日期（不填就是永远）'
+          placeholder='三场抽运/开门日期'
           format='YYYY-MM-DD'
           style="width: 100%;"
           v-decorator="['endDate']"
+        />
+      </a-form-item>
+      <a-form-item label='备注' v-bind="formItemLayout">
+        <a-textarea
+          placeholder='备注'
+          autocomplete="off"
+          v-decorator="['remark']"
         />
       </a-form-item>
     </a-form>
@@ -52,17 +106,10 @@
       </a-popconfirm>
       <a-button @click="handleSubmit" type="primary" :loading="loading">提交</a-button>
     </div>
-    <wc-list
-      :wcListVisiable="wcList.visiable"
-      @change="handleWcListChange"
-      @close="handleWcListClose"
-    >
-    </wc-list>
   </a-drawer>
 </template>
 <script>
 import moment from 'moment'
-import WcList from '../wc/WCList'
 moment.locale('zh-cn')
 const formItemLayout = {
   labelCol: { span: 4 },
@@ -70,7 +117,6 @@ const formItemLayout = {
 }
 export default {
   name: 'WcStatusAdd',
-  components: { WcList },
   props: {
     wcStatusAddVisiable: {
       default: false
@@ -81,9 +127,6 @@ export default {
       loading: false,
       formItemLayout,
       form: this.$form.createForm(this),
-      wcList: {
-        visiable: false
-      },
       wcId: ''
     }
   },
@@ -98,25 +141,38 @@ export default {
       this.reset()
       this.$emit('close')
     },
-    handleWcListChange (wcName, wcNum, wcId) {
+    selectIdNum (value) {
+      if (!value) return this.$message.warning('请填写公厕编号')
+      this.$message.loading('查询此公厕编号中...', 0)
+      this.$get('wc/getWcByWcNum', {
+        wcNum: value,
+        isLastFour: true
+      }).then((r) => {
+        this.$message.destroy()
+        if (r.data) {
+          this.$message.success(`查询成功，公厕名为 [${r.data.wcName}]`)
+          this.form.getFieldDecorator('wcName')
+          this.form.setFieldsValue({ wcName: r.data.wcName })
+          this.wcId = r.data.wcId
+        } else {
+          this.$message.warning('查询失败，未查找到此后四位公厕编号信息')
+        }
+      })
+    },
+    handleIdNumChange () {
       this.form.getFieldDecorator('wcName')
-      this.form.setFieldsValue({ 'wcName': wcName })
-      this.wcId = wcId
-    },
-    handleWcListClose () {
-      this.wcList.visiable = false
-    },
-    selectWc () {
-      this.wcList.visiable = true
+      this.form.setFieldsValue({ wcName: '' })
     },
     handleSubmit () {
       this.form.validateFields((err, values) => {
         if (!err) {
           const startDate = values['startDate'].format('YYYY-MM-DD')
-          const endDate = values['endDate'].format('YYYY-MM-DD')
+          const noticeDate = values['noticeDate'] ? values['noticeDate'].format('YYYY-MM-DD') : null
+          const endDate = values['endDate'] ? values['endDate'].format('YYYY-MM-DD') : null
           const wcStatusData = {
             ...values,
             startDate,
+            noticeDate,
             endDate,
             wcId: this.wcId
           }

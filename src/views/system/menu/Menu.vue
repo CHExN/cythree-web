@@ -152,13 +152,14 @@ export default {
       return [{
         title: '名称',
         dataIndex: 'text',
-        width: 200,
+        width: 260,
         scopedSlots: { customRender: 'text' },
         fixed: 'left'
       }, {
         title: '图标',
         dataIndex: 'icon',
-        scopedSlots: { customRender: 'icon' }
+        scopedSlots: { customRender: 'icon' },
+        width: '5%'
       }, {
         title: '类型',
         dataIndex: 'type',
@@ -178,7 +179,8 @@ export default {
         ],
         filterMultiple: false,
         filteredValue: filteredInfo.type || null,
-        onFilter: (value, record) => record.type.includes(value)
+        onFilter: (value, record) => record.type.includes(value),
+        width: '5%'
       }, {
         title: '地址',
         dataIndex: 'path'
@@ -190,7 +192,8 @@ export default {
         dataIndex: 'permission'
       }, {
         title: '排序',
-        dataIndex: 'order'
+        dataIndex: 'order',
+        width: '5%'
       }, {
       //   title: '创建时间',
       //   dataIndex: 'createTime',
@@ -204,7 +207,7 @@ export default {
       // }, {
         title: '操作',
         dataIndex: 'operation',
-        width: 120,
+        width: 100,
         scopedSlots: {customRender: 'operation'},
         fixed: 'right'
       }]

@@ -263,6 +263,7 @@ export default {
     setTableValues (typeApplication, applicationId, storeroom) {
       this.applicationId = applicationId
       this.storeroomCount = storeroom.length
+      console.log(storeroom)
       this.form.getFieldDecorator('typeApplication')
       this.form.setFieldsValue({ typeApplication: typeApplication })
       for (const item in storeroom) {
@@ -424,11 +425,11 @@ export default {
                 toDeptId: this.deptId
               }).then((r) => {
                 // 清空部门树选择
-                this.$refs.deptTree.reset()
-                this.reset()
                 console.log(`planCount: ${planCount}`)
                 console.log(`storeroomCount: ${this.storeroomCount}`)
                 this.$emit('success', planCount === this.storeroomCount)
+                this.$refs.deptTree.reset()
+                this.reset()
               }).catch(() => {
                 this.putOutLoading = false
               })

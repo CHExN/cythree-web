@@ -31,6 +31,13 @@ let tools = {
     return value
   },
 
+  zero (number) {
+    if (number < 10 && number > 0) {
+      return `0${number}`
+    }
+    return `${number}`
+  },
+
   // 深复制
   deepClone (data) {
     let type = typeof data
@@ -249,6 +256,15 @@ let tools = {
     }).then((r) => {
       callback(r)
     })
+  },
+
+  // 这是比较函数
+  compare (p) {
+    return function (m, n) {
+      let a = m[p]
+      let b = n[p]
+      return a - b // 升序
+    }
   }
 }
 

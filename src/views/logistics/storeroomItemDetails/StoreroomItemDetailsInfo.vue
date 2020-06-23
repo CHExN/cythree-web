@@ -1,6 +1,6 @@
 <template>
   <a-modal
-    title="出入库物品明细信息"
+    :title="`「${storeroomItemDetailsInfoData.name}」明细信息`"
     :centered="true"
     :width="1100"
     :visible="storeroomItemDetailsInfoVisiable"
@@ -9,10 +9,10 @@
     @cancel="handleCancleClick">
     <a-card :bordered="false">
       <detail-list>
-        <detail-list-item term="物品名称">{{storeroomItemDetailsInfoData.name}}</detail-list-item>
-        <detail-list-item term="型号">{{storeroomItemDetailsInfoData.unit}}</detail-list-item>
-        <detail-list-item term="入库数量">{{storeroomItemDetailsInfoData.amount}}</detail-list-item>
-        <detail-list-item term="单位">{{storeroomItemDetailsInfoData.unit}}</detail-list-item>
+        <!-- <detail-list-item term="物品名称">{{storeroomItemDetailsInfoData.name}}</detail-list-item> -->
+        <detail-list-item term="型号">{{storeroomItemDetailsInfoData.type}}</detail-list-item>
+        <detail-list-item term="入库数量">{{`${storeroomItemDetailsInfoData.amount}${storeroomItemDetailsInfoData.unit}`}}</detail-list-item>
+        <!-- <detail-list-item term="单位">{{storeroomItemDetailsInfoData.unit}}</detail-list-item> -->
         <detail-list-item term="单价">{{$tools.addZero($tools.toNumFormant(storeroomItemDetailsInfoData.money))}}</detail-list-item>
         <detail-list-item term="物资类别">{{storeroomItemDetailsInfoData.typeApplicationToDict}}</detail-list-item>
         <detail-list-item term="供应商">{{storeroomItemDetailsInfoData.supplierToDict}}</detail-list-item>

@@ -1,7 +1,6 @@
 <template>
   <a-drawer
-    :title="yearValue + '年 编' + (viewType === 0 ? '内' : '外') + '休假统计'"
-    :maskClosable="false"
+    :title="`${yearValue}年 ${insOutName}人员休假统计`"
     width=1300
     placement="right"
     @close="onClose"
@@ -10,21 +9,60 @@
     <div :class="advanced ? 'search' : null">
       <a-form layout="horizontal">
         <a-row>
-          <div :class="advanced ? null: 'fold'">
+          <div :class="advanced ? null: 'fold'" :style="advanced ? {}: { width: '70%' }">
             <a-col :md="12" :sm="24" >
               <a-form-item
                 label="姓名"
                 :labelCol="{span: 5}"
                 :wrapperCol="{span: 18, offset: 1}">
-                <a-input v-model="queryParams.name"/>
+                <a-textarea auto-size v-model="queryParams.name"/>
               </a-form-item>
             </a-col>
+            <a-col :md="12" :sm="24" >
+              <a-form-item
+                label="编制类别"
+                :labelCol="{span: 5}"
+                :wrapperCol="{span: 18, offset: 1}">
+                <a-select v-model="insOutCopy">
+                  <!-- 这里不能加 ‘全部’ 选项 因为后台不支持 -->
+                  <a-select-option value="0">编内</a-select-option>
+                  <a-select-option value="1">编外归属</a-select-option>
+                  <a-select-option value="2">编外分队</a-select-option>
+                  <a-select-option value="3">派遣</a-select-option>
+                </a-select>
+              </a-form-item>
+            </a-col>
+            <template v-if="advanced">
+              <a-col :md="12" :sm="24" >
+                <a-form-item
+                  label="身份证号码"
+                  :labelCol="{span: 5}"
+                  :wrapperCol="{span: 18, offset: 1}">
+                  <a-input v-model="queryParams.idNum"/>
+                </a-form-item>
+              </a-col>
+              <a-col :md="12" :sm="24" >
+                <a-form-item
+                  label="在职与否"
+                  :labelCol="{span: 5}"
+                  :wrapperCol="{span: 18, offset: 1}">
+                  <a-select v-model="isLeave">
+                    <a-select-option value="0,1">全部</a-select-option>
+                    <a-select-option value="0">在职</a-select-option>
+                    <a-select-option value="1">非在职</a-select-option>
+                  </a-select>
+                </a-form-item>
+              </a-col>
+            </template>
           </div>
           <span style="float: right; margin: 3px auto 1em;">
             <a-button type="primary" @click="search">查询</a-button>
             <a-button style="margin-left: 8px" @click="reset">重置</a-button>
-            &nbsp;
-            <a-button type="primary" ghost @click="exportExcel">导出</a-button>
+            <a-button style="margin-left: 8px" type="primary" ghost @click="exportExcel">导出</a-button>
+            <a @click="toggleAdvanced" style="margin-left: 8px">
+              {{advanced ? '收起' : '展开'}}
+              <a-icon :type="advanced ? 'up' : 'down'" />
+            </a>
           </span>
         </a-row>
       </a-form>
@@ -36,8 +74,19 @@
                :dataSource="dataSource"
                :pagination="pagination"
                :loading="loading"
+               size="small"
                rowKey="staffId"
                @change="handleTableChange">
+        <template v-for="month in 12" :slot="`month${month}`" slot-scope="text, record">
+          <a-popover v-if="record[`month${month}Remark`]" placement="topLeft" :key="month">
+            <div slot="content">
+              <div v-for="i in record[`month${month}Remark`].split(',')" :key="i">
+                <span>{{i}}</span><br/>
+              </div>
+            </div>
+            {{text}}
+          </a-popover>
+        </template>
       </a-table>
     </div>
   </a-drawer>
@@ -54,7 +103,7 @@ export default {
     yearValue: {
       require: true
     },
-    viewType: {
+    insOut: {
       require: true
     }
   },
@@ -72,63 +121,105 @@ export default {
         showSizeChanger: true,
         showTotal: total => `共 ${total} 条`
       },
-      loading: false
+      loading: false,
+      isLeave: '0',
+      insOutCopy: this.insOut
     }
   },
   computed: {
+    insOutName () {
+      if (this.insOutCopy === '0') {
+        return '编内'
+      } else if (this.insOutCopy === '1') {
+        return '编外归属'
+      } else if (this.insOutCopy === '2') {
+        return '编外分队'
+      } else if (this.insOutCopy === '3') {
+        return '劳务派遣'
+      }
+    },
     columns () {
       return [{
+        title: '序号',
+        align: 'center',
+        dataIndex: 'sortNum',
+        width: '5%'
+      }, {
         title: '姓名',
         align: 'center',
         dataIndex: 'name'
       }, {
         title: '1月',
         align: 'center',
-        dataIndex: 'january'
+        dataIndex: 'month1',
+        scopedSlots: { customRender: 'month1' },
+        width: '7%'
       }, {
         title: '2月',
         align: 'center',
-        dataIndex: 'february'
+        dataIndex: 'month2',
+        scopedSlots: { customRender: 'month2' },
+        width: '7%'
       }, {
         title: '3月',
         align: 'center',
-        dataIndex: 'march'
+        dataIndex: 'month3',
+        scopedSlots: { customRender: 'month3' },
+        width: '7%'
       }, {
         title: '4月',
         align: 'center',
-        dataIndex: 'april'
+        dataIndex: 'month4',
+        scopedSlots: { customRender: 'month4' },
+        width: '7%'
       }, {
         title: '5月',
         align: 'center',
-        dataIndex: 'may'
+        dataIndex: 'month5',
+        scopedSlots: { customRender: 'month5' },
+        width: '7%'
       }, {
         title: '6月',
         align: 'center',
-        dataIndex: 'june'
+        dataIndex: 'month6',
+        scopedSlots: { customRender: 'month6' },
+        width: '7%'
       }, {
         title: '7月',
         align: 'center',
-        dataIndex: 'july'
+        dataIndex: 'month7',
+        scopedSlots: { customRender: 'month7' },
+        width: '7%'
       }, {
         title: '8月',
         align: 'center',
-        dataIndex: 'august'
+        dataIndex: 'month8',
+        scopedSlots: { customRender: 'month8' },
+        width: '7%'
       }, {
         title: '9月',
         align: 'center',
-        dataIndex: 'september'
+        dataIndex: 'month9',
+        scopedSlots: { customRender: 'month9' },
+        width: '7%'
       }, {
         title: '10月',
         align: 'center',
-        dataIndex: 'october'
+        dataIndex: 'month10',
+        scopedSlots: { customRender: 'month10' },
+        width: '7%'
       }, {
         title: '11月',
         align: 'center',
-        dataIndex: 'november'
+        dataIndex: 'month11',
+        scopedSlots: { customRender: 'month11' },
+        width: '7%'
       }, {
         title: '12月',
         align: 'center',
-        dataIndex: 'december'
+        dataIndex: 'month12',
+        scopedSlots: { customRender: 'month12' },
+        width: '7%'
       }]
     }
   },
@@ -136,6 +227,13 @@ export default {
     onClose () {
       this.$emit('close')
       this.dataSource = []
+    },
+    toggleAdvanced () {
+      this.advanced = !this.advanced
+      // 每次展开，把隐藏的内容清空
+      if (!this.advanced) {
+        this.queryParams.idNum = ''
+      }
     },
     exportExcel () {
       let pageSize
@@ -146,32 +244,33 @@ export default {
       this.$get('vacation/insOutVacation', {
         ...this.queryParams,
         pageSize: pageSize,
-        day: this.yearValue,
-        insOut: this.viewType
+        date: this.yearValue,
+        insOut: this.insOutCopy,
+        isLeave: this.isLeave
       }).then((r) => {
         let newData = []
         r.data.rows.forEach(element => {
           newData.push([
             element.name,
-            element.january,
-            element.february,
-            element.march,
-            element.april,
-            element.may,
-            element.june,
-            element.july,
-            element.august,
-            element.september,
-            element.october,
-            element.november,
-            element.december
+            element.month1,
+            element.month2,
+            element.month3,
+            element.month4,
+            element.month5,
+            element.month6,
+            element.month7,
+            element.month8,
+            element.month9,
+            element.month10,
+            element.month11,
+            element.month12
           ])
         })
         this.$message.loading('正在生成', 3, () => { // 3s后关闭执行关闭回调函数
           let spread = newSpread('Vacation')
-          spread = fixedForm(spread, 'Vacation', {title: `${this.yearValue}年 编${this.viewType === 0 ? '内' : '外'}休假统计`})
+          spread = fixedForm(spread, 'Vacation', {title: `${this.yearValue}年 ${this.insOutName}人员休假统计`})
           spread = floatForm(spread, 'Vacation', newData)
-          let fileName = `编${this.viewType === 0 ? '内' : '外'}休假统计_${this.yearValue}.xlsx`
+          let fileName = `休假统计_${this.insOutName}人员_${this.yearValue}.xlsx`
           saveExcel(spread, fileName)
           floatReset(spread, 'Vacation', newData.length)
         })
@@ -192,6 +291,7 @@ export default {
       this.paginationInfo = null
       // 重置查询参数
       this.queryParams = {}
+      this.isLeave = '0'
       this.fetch()
     },
     handleTableChange (pagination, filters, sorter) {
@@ -215,8 +315,9 @@ export default {
       }
       this.$get('vacation/insOutVacation', {
         ...params,
-        day: this.yearValue,
-        insOut: this.viewType
+        date: this.yearValue,
+        insOut: this.insOutCopy,
+        isLeave: this.isLeave
       }).then((r) => {
         let data = r.data
         const pagination = { ...this.pagination }
