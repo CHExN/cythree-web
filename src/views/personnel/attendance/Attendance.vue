@@ -14,13 +14,13 @@
             </a-col>
             <a-col :md="12" :sm="24" >
               <a-form-item
-                label="起始月份"
+                label="月份"
                 :labelCol="{span: 5}"
                 :wrapperCol="{span: 18, offset: 1}">
                 <a-month-picker
+                  v-model="queryParams.nowDate"
                   style="width: 100%;"
                   :allowClear="false"
-                  @change="handleMonthChange"
                 />
               </a-form-item>
             </a-col>
@@ -66,7 +66,7 @@
       <div class="operator">
         <a-button type="primary" ghost @click="add" v-hasPermission="'attendance:add'">新增</a-button>
         <a-button @click="batchDelete" v-hasPermission="'attendance:delete'">删除</a-button>
-        <a-dropdown v-hasAnyPermission="'attendance:export','attendance:add'">
+        <a-dropdown>
           <a-menu slot="overlay">
             <a-menu-item key="download-template" @click="downloadTemplate">模板下载</a-menu-item>
             <a-menu-item key="import-data" v-hasPermission="'attendance:add'">
@@ -128,9 +128,48 @@
           <a-icon v-hasPermission="'attendance:update'" type="setting" theme="twoTone" twoToneColor="#4a9ff5" @click="edit(record)" title="修改"></a-icon>
           &nbsp;
           <a-icon v-hasPermission="'attendance:view'" type="eye" theme="twoTone" twoToneColor="#42b983" @click="view(record)" title="查看"></a-icon>
-          <a-badge v-hasNoPermission="'attendance:update','attendance:view'" status="warning" text="无权限"></a-badge>
+          <!-- <a-badge v-hasNoPermission="'attendance:update'" status="warning" text="无权限"></a-badge> -->
         </template>
       </a-table>
+      <!-- 图片区域 -->
+      <a-card :bordered="false" style="margin: 12px -24px -54px -24px;">
+        <!-- <span v-hasPermission="'attendance:addDeleteImage'"> -->
+        <a-spin :delay="500" :spinning="loadingImage">
+          <a-upload
+            accept="image/jpg,image/png,image/jpeg,image/bmp"
+            listType="picture-card"
+            :fileList="imageList"
+            :remove="handleRemove"
+            :customRequest="customRequest"
+            :beforeUpload="handleBeforeUpload"
+            @preview="handlePreview"
+            @change="handleChange">
+            <div v-if="imageList.length < 8">
+              <a-icon type="plus" />
+              <div class="ant-upload-text">Upload</div>
+            </div>
+          </a-upload>
+          <a-modal :visible="previewVisible" :footer="null" @cancel="handleCancel">
+            <img alt="example" style="width: 100%;" :src="previewImage" />
+          </a-modal>
+        </a-spin>
+        <!-- </span> -->
+        <!-- <span v-hasNoPermission="'attendance:addDeleteImage'">
+          <a-upload
+            accept="image/jpg,image/png,image/jpeg,image/bmp"
+            listType="picture-card"
+            :fileList="imageList"
+            :showUploadList="{ showPreviewIcon: true, showRemoveIcon: false }"
+            :customRequest="customRequest"
+            :beforeUpload="handleBeforeUpload"
+            @preview="handlePreview"
+            @change="handleChange">
+          </a-upload>
+          <a-modal :visible="previewVisible" :footer="null" @cancel="handleCancel">
+            <image alt="example" style="width: 100%;" :src="previewImage" />
+          </a-modal>
+        </span> -->
+      </a-card>
     </div>
     <!-- 新增考勤信息 -->
     <attendance-add
@@ -169,12 +208,17 @@ import AttendanceImportResult from './AttendanceImportResult'
 import DeptInputTree from '../../system/dept/DeptInputTree'
 import RangeDate from '@/components/datetime/RangeDate'
 import { newSpread, floatForm, floatReset, saveExcel } from '@/utils/spreadJS'
+import moment from 'moment'
+moment.locale('zh-cn')
 
 export default {
   name: 'Attendance',
   components: { AttendanceAdd, AttendanceEdit, AttendanceInfo, AttendanceImportResult, DeptInputTree, RangeDate },
   data () {
     return {
+      previewVisible: false,
+      previewImage: '',
+      imageList: [],
       fileList: [],
       file: '',
       importData: [],
@@ -200,13 +244,16 @@ export default {
         dateForm: {},
         dateTo: {}
       },
-      queryParams: {},
+      queryParams: {
+        nowDate: moment()
+      },
       filteredInfo: null,
       sortedInfo: null,
       paginationInfo: null,
       dataSource: [],
       selectedRowKeys: [],
       loading: false,
+      loadingImage: false,
       pagination: {
         pageSizeOptions: ['10', '20', '30', '40', '100'],
         defaultCurrent: 1,
@@ -309,9 +356,85 @@ export default {
     }
   },
   mounted () {
-    this.fetch()
+    this.fetch({...this.queryParams})
+    this.loadImage(this.queryParams.nowDate.format('YYYY'), this.queryParams.nowDate.format('MM'))
   },
   methods: {
+    loadImage (year, month) {
+      this.loadingImage = true
+      this.$get('attendance/attendanceImage', { year, month }).then((r) => {
+        this.imageList = r.data.data
+        this.loadingImage = false
+      })
+    },
+    handleCancleClick () {
+      this.imageList = []
+      this.$emit('close')
+    },
+    handleCancel () {
+      this.previewVisible = false
+    },
+    handlePreview (file) {
+      this.previewImage = file.url
+      this.previewVisible = true
+    },
+    handleChange ({ file, fileList, event }) {
+      if (file.status === 'error') {
+        this.$message.error(`${file.name} 上传失败`)
+      } else if (file.status === 'removed') {
+        this.imageList = fileList.map(item => item.response || item)
+      } else if (file.status === 'done') {
+        this.$message.success(`${file.name} 上传成功`)
+        this.imageList = fileList.map(item => item.response || item)
+      } else if (file.status === 'uploading') {
+        this.imageList = fileList.map(item => item.response || item)
+      }
+    },
+    handleRemove (file) {
+      if (file.uid) {
+        this.$delete('attendance/deleteFile/' + file.uid)
+      }
+      // if (file.error) {
+      //   this.imageList = this.imageList.filter(item => item.uid !== file.uid)
+      // } else if (file.status === 'removed') {
+      //   this.$delete('attendance/deleteFile/' + file.uid)
+      // }
+    },
+    handleBeforeUpload (file) {
+      const isJPG = file.type === 'image/jpeg'
+      const isPNG = file.type === 'image/png'
+      if (!(isJPG || isPNG)) {
+        this.$message.error('You can only upload JPG or PNG file!')
+      }
+      const isLt8M = file.size / 1024 / 1024 < 8
+      if (!isLt8M) {
+        this.$message.error('Image must smaller than 8MB!')
+      }
+      return (isJPG || isPNG) && isLt8M
+    },
+    customRequest ({data, file, filename, onError, onProgress, onSuccess}) {
+      const formData = new FormData()
+      if (data) {
+        Object.keys(data).map(key => {
+          formData.append(key, data[key])
+        })
+      }
+      formData.append(filename, file)
+      formData.append('year', this.queryParams.nowDate.format('YYYY'))
+      formData.append('month', this.queryParams.nowDate.format('MM'))
+      this.$upload('attendance/uploadAttendanceImage', formData, {
+        onUploadProgress: ({ total, loaded }) => {
+          onProgress({ percent: Math.round(loaded / total * 100) }, file)
+        }
+      }).then((response) => {
+        onSuccess(response.data.data, file)
+      }).catch(onError)
+      return {
+        abort () {
+          this.$message.warning('upload progress is aborted.')
+        }
+      }
+    },
     handleClose () {
       this.attendanceImportResultVisible = false
     },
@@ -340,7 +463,7 @@ export default {
       this.$upload('attendance/import', formData).then((r) => {
         let data = r.data.data
         if (data.data.length) {
-          this.fetch()
+          this.search()
         }
         this.file = ''
         // 清空时间选择
@@ -417,10 +540,6 @@ export default {
         this.dateData.dateTo.startDate = value[0]
         this.dateData.dateTo.endDate = value[1]
       }
-    },
-    handleMonthChange (value) {
-      this.queryParams.year = value.format('YYYY') || ''
-      this.queryParams.month = value.format('MM') || ''
     },
     handleDeptChange (value) {
       this.queryParams.deptId = value || ''
@@ -508,6 +627,7 @@ export default {
         ...this.queryParams,
         ...filteredInfo
       })
+      this.loadImage(this.queryParams.nowDate.format('YYYY'), this.queryParams.nowDate.format('MM'))
     },
     reset () {
       // 取消选中
@@ -523,13 +643,16 @@ export default {
       // 重置列排序规则
       this.sortedInfo = null
       // 重置查询参数
-      this.queryParams = {}
+      this.queryParams = {
+        nowDate: moment()
+      }
       // 重置日期选择data
       this.dateData = {
         dateForm: {},
         dateTo: {}
       }
-      this.fetch()
+      this.fetch({...this.queryParams})
+      this.loadImage(this.queryParams.nowDate.format('YYYY'), this.queryParams.nowDate.format('MM'))
     },
     handleTableChange (pagination, filters, sorter) {
       // 将这三个参数赋值给Vue data，用于后续使用
@@ -557,6 +680,11 @@ export default {
         // 如果分页信息为空，则设置为默认值
         params.pageSize = this.pagination.defaultPageSize
         params.pageNum = this.pagination.defaultCurrent
+      }
+      if (params.nowDate) {
+        params.year = params.nowDate.format('YYYY')
+        params.month = params.nowDate.format('MM')
+        delete params.nowDate
       }
       this.$get('attendance', {
         ...params

@@ -33,10 +33,11 @@
           placeholder='增加日期，【增加人员报表】就是根据此项进行查询'
           format='YYYY-MM-DD'
           style="width: 100%;"
-          v-decorator="['addDate',{
-            rules: [{required: true, message: '增加日期不能为空'}]
-          }]"
+          v-decorator="['addDate']"
         />
+        <!-- ,{
+            rules: [{required: true, message: '增加日期不能为空'}]
+          } -->
       </a-form-item>
       <a-form-item label='姓名' v-bind="formItemLayout">
         <a-input

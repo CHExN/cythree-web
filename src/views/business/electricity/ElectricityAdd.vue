@@ -128,9 +128,7 @@ export default {
       wcList: {
         visiable: false
       },
-      wcId: '',
-      actualAmount: 0,
-      totalAmount: 0
+      wcId: ''
     }
   },
   methods: {
@@ -140,8 +138,6 @@ export default {
     reset () {
       this.loading = false
       this.wcId = ''
-      this.actualAmount = 0
-      this.totalAmount = 0
       // 清空表单
       this.form.resetFields()
     },
@@ -150,17 +146,17 @@ export default {
       this.$emit('close')
     },
     onActualAmountChange (value) {
-      this.actualAmount = value
-      if (typeof this.totalAmount === 'number' && typeof this.actualAmount === 'number') {
+      const totalAmount = this.form.getFieldValue('totalAmount')
+      if (typeof totalAmount === 'number' && typeof value === 'number') {
         this.form.getFieldDecorator('unitPrice')
-        this.form.setFieldsValue({ 'unitPrice': this.totalAmount / this.actualAmount })
+        this.form.setFieldsValue({ 'unitPrice': this.$tools.rounding(this.$tools.accDivide(totalAmount, value), 4) })
       }
     },
     onTotalAmountChange (value) {
-      this.totalAmount = value
-      if (typeof this.totalAmount === 'number' && typeof this.actualAmount === 'number') {
+      const actualAmount = this.form.getFieldValue('actualAmount')
+      if (typeof value === 'number' && typeof actualAmount === 'number') {
         this.form.getFieldDecorator('unitPrice')
-        this.form.setFieldsValue({ 'unitPrice': this.totalAmount / this.actualAmount })
+        this.form.setFieldsValue({ 'unitPrice': this.$tools.rounding(this.$tools.accDivide(value, actualAmount), 4) })
       }
     },
     handleWcListChange (wcName, wcNum, wcId) {

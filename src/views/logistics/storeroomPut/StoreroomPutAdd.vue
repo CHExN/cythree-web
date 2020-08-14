@@ -424,10 +424,10 @@ export default {
                 storeroomList: storeroomList,
                 toDeptId: this.deptId
               }).then((r) => {
-                // 清空部门树选择
                 console.log(`planCount: ${planCount}`)
                 console.log(`storeroomCount: ${this.storeroomCount}`)
                 this.$emit('success', planCount === this.storeroomCount)
+                // 清空部门树选择
                 this.$refs.deptTree.reset()
                 this.reset()
               }).catch(() => {

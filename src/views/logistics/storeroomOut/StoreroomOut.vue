@@ -314,7 +314,7 @@ export default {
     bell (record) {
       const message = `您有 ${this.dictData.typeApplication[record.typeApplication]} 已于${record.date}出库`
       let usernames = []
-      this.$get('user/usernames', {
+      this.$get('user/username', {
         'deptIds': record.toDeptId
       }).then((r) => {
         usernames = r.data
@@ -400,6 +400,7 @@ export default {
       }
       this.$message.loading('正在生成', 0)
       this.selectedRows.forEach(item => {
+        console.log(item)
         let dateArr = `${item.date}`.split('-')
         let exportData = {
           num: item.num,
@@ -449,18 +450,18 @@ export default {
           })
 
           // 测试
-          let money = Object.values(everyEightBatchesTotalAmount).reduce((prev, current, index, arr) => {
-            return this.$tools.accAdd(prev, current)
-          })
-          if (item.money === money) {
-            console.log('true')
-          } else {
-            console.log('========')
-            console.log(item.money)
-            console.log(money)
-            console.log(everyEightBatchesTotalAmount)
-            console.log('========')
-          }
+          // let money = Object.values(everyEightBatchesTotalAmount).reduce((prev, current, index, arr) => {
+          //   return this.$tools.accAdd(prev, current)
+          // })
+          // if (item.money === money) {
+          //   console.log('true')
+          // } else {
+          //   console.log('========')
+          //   console.log(item.money)
+          //   console.log(money)
+          //   console.log(everyEightBatchesTotalAmount)
+          //   console.log('========')
+          // }
 
           Object.keys(everyEightBatches).forEach(key => {
             let everyEightBatchesTotalAmountArr = `${this.$tools.addZero(everyEightBatchesTotalAmount[key])}`.replace(/[.]/g, '').split('').reverse()
@@ -485,9 +486,9 @@ export default {
             saveExcel(spread, fileName)
             floatReset(spread, 'StoreroomOut', exportData.everyEightBatches.length)
           })
+          this.$message.destroy() // 等全部执行完后，再把message全局销毁
         })
       })
-      this.$message.destroy() // 等全部执行完后，再把message全局销毁
     },
     search () {
       let {sortedInfo, filteredInfo} = this

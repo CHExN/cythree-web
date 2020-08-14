@@ -71,7 +71,7 @@
                :loading="loading"
                :rowSelection="{selectedRowKeys: selectedRowKeys, onChange: onSelectChange}"
                @change="handleTableChange" :scroll="{ x: 1210 }">
-        <template slot="method" slot-scope="text, record">
+        <template slot="method" slot-scope="text">
           <a-popover placement="topLeft">
             <template slot="content">
               <div>{{text}}</div>
@@ -79,7 +79,7 @@
             <p style="width: 200px;margin-bottom: 0">{{text}}</p>
           </a-popover>
         </template>
-        <template slot="params" slot-scope="text, record">
+        <template slot="params" slot-scope="text">
           <a-popover placement="topLeft">
             <template slot="content">
               <div style="max-width: 300px;">{{text}}</div>
@@ -90,7 +90,7 @@
         <template slot="operations" slot-scope="text, record">
           <a-icon v-hasPermission="'job:update'" type="setting" theme="twoTone" twoToneColor="#4a9ff5" @click="edit(record)" title="修改"></a-icon>
           &nbsp;
-          <a-dropdown v-hasAnyPermission="'job:run','job:pause','job:resume'">
+          <a-dropdown v-hasAnyPermission="'job:run,job:pause,job:resume'">
             <a class="ant-dropdown-link">
               <a-icon type="down-circle" style="font-size: 1.1rem"/>
             </a>
@@ -106,7 +106,7 @@
               </a-menu-item>
             </a-menu>
           </a-dropdown>
-          <a-badge v-hasNoPermission="'job:update','job:run','job:pause','job:resume'" status="warning" text="无权限"></a-badge>
+          <a-badge v-hasNoPermission="'job:update,job:run,job:pause,job:resume'" status="warning" text="无权限"></a-badge>
         </template>
       </a-table>
     </div>

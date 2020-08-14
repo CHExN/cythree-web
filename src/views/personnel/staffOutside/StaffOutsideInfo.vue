@@ -2,7 +2,7 @@
   <a-modal
     title="编外人员信息"
     :centered="true"
-    :width="1200"
+    :width="1100"
     :visible="staffOutsideInfoVisiable"
     :keyboard="false"
     :footer="null"
@@ -33,26 +33,22 @@
         <detail-list-item term="岗位类别">{{staffOutsideInfoData.technicalType}}</detail-list-item>
         <detail-list-item term="备注">{{staffOutsideInfoData.remark}}</detail-list-item>
       </detail-list>
-    </a-card>
-    <a-divider v-hasPermission="'contractOutside:view'" v-if="contractPeriod.length > 0" style="margin-bottom: 32px"/>
-    <a-card v-hasPermission="'contractOutside:view'" v-if="contractPeriod.length > 0" :loading='loading' :bordered="false">
-      <detail-list title="合同信息">
+      <a-divider v-hasPermission="'contractOutside:view'" v-if="contractPeriod.length > 0"/>
+      <detail-list title="合同信息" v-hasPermission="'contractOutside:view'" v-if="contractPeriod.length > 0" :loading='loading'>
         <template v-for="(k, index) in contractPeriod">
           <detail-list-item :key="index" :term="k">{{contractPeriodDate[index]}}</detail-list-item>
         </template>
         <detail-list-item term="续签备注">{{contractOutsideData.remarkRenew}}</detail-list-item>
         <detail-list-item term="备注">{{contractOutsideData.remark}}</detail-list-item>
       </detail-list>
-    </a-card>
-    <a-divider v-hasPermission="'contractOutside:view'" v-if="jobAgreement.length > 0" style="margin-bottom: 32px"/>
-    <a-card v-hasPermission="'contractOutside:view'" v-if="jobAgreement.length > 0" :loading='loading' :bordered="false">
-      <detail-list title="岗位协议信息">
+      <a-divider v-hasPermission="'contractOutside:view'" v-if="jobAgreement.length > 0"/>
+      <detail-list title="岗位协议信息" v-hasPermission="'contractOutside:view'" v-if="jobAgreement.length > 0" :loading='loading'>
         <template v-for="(k, index) in jobAgreement">
           <detail-list-item :key="index" :term="k">{{jobAgreementDate[index]}}</detail-list-item>
         </template>
       </detail-list>
+      <a-divider v-hasPermission="'staffOutside:addDeletePhoto'"/>
     </a-card>
-    <a-divider v-hasPermission="'staffOutside:addDeletePhoto'" style="margin-bottom: 32px"/>
     <div>
       <div v-hasPermission="'staffOutside:addDeletePhoto'">
         <a-upload

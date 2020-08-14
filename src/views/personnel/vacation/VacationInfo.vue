@@ -57,8 +57,8 @@
           </div>
           <span style="float: right; margin: 3px auto 1em;">
             <a-button type="primary" @click="search">查询</a-button>
+            <a-button type="primary" ghost style="margin-left: 8px" @click="exportExcel">导出</a-button>
             <a-button style="margin-left: 8px" @click="reset">重置</a-button>
-            <a-button style="margin-left: 8px" type="primary" ghost @click="exportExcel">导出</a-button>
             <a @click="toggleAdvanced" style="margin-left: 8px">
               {{advanced ? '收起' : '展开'}}
               <a-icon :type="advanced ? 'up' : 'down'" />

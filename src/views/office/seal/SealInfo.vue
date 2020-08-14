@@ -2,7 +2,7 @@
   <a-modal
     title="印章信息"
     :centered="true"
-    :width="1000"
+    :width="800"
     :visible="sealInfoVisiable"
     :keyboard="false"
     :footer="null"
@@ -40,10 +40,8 @@
         </template>
         <a-step title="完成"></a-step>
       </a-steps>
-      <a-divider style="margin-bottom: 32px"/>
-    </a-card>
-    <a-card :bordered="false">
-      <detail-list title="基本信息">
+      <a-divider/>
+      <detail-list :col="2">
         <detail-list-item term="部门">{{sealInfoData.deptName}}</detail-list-item>
         <detail-list-item term="使用人">{{sealInfoData.sealUser}}</detail-list-item>
         <detail-list-item term="使用事由">{{sealInfoData.remark}}</detail-list-item>

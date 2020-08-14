@@ -82,7 +82,6 @@
       <div class="operator">
         <a-button type="primary" ghost @click="add" v-hasPermission="'wcStatus:add'">新增</a-button>
         <a-button @click="batchDelete" v-hasPermission="'wcStatus:delete'">删除</a-button>
-        <!-- <a-dropdown v-hasAnyPermission=""> -->
         <a-dropdown>
           <a-menu slot="overlay">
             <a-menu-item key="export-day-report" @click="() => modalDayVisible = true">导出日报表</a-menu-item>

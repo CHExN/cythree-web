@@ -1,8 +1,5 @@
 import axios from 'axios'
 import {message, Modal, notification} from 'ant-design-vue'
-// import message from 'ant-design-vue/es/message'
-// import Modal from 'ant-design-vue/es/Modal'
-// import notification from 'ant-design-vue/es/notification'
 import moment from 'moment'
 import store from '../store'
 import db from '@/utils/localstorage'
@@ -12,21 +9,13 @@ moment.locale('zh-cn')
 let CYTHREE_REQUEST = axios.create({
   baseURL: 'http://127.0.0.1:9527/',
   // baseURL: 'https://wc.ncsll.com/api',
-  // baseURL: 'http://114.115.154.244:9527/',
+  // baseURL: 'http://114.115.154.244:9527/', // 废弃
   responseType: 'json',
   validateStatus (status) {
     // 200 外的状态码都认定为失败
     return status === 200
   }
 })
-
-// docker run \
-// -p 6379:6379 \
-// -v /home/cythree/redis/data:/data:rw \
-// -v /home/cythree/redis/conf/redis.conf:/etc/redis/redis.conf:ro \
-// --privileged=true \
-// --name myredis \
-// -d redis redis-server /etc/redis/redis.conf --appendonly yes --bind 0.0.0.0
 
 // 拦截请求
 CYTHREE_REQUEST.interceptors.request.use((config) => {
@@ -61,7 +50,7 @@ CYTHREE_REQUEST.interceptors.response.use((config) => {
   return config
 }, (error) => {
   if (error.response) {
-    let errorMessage = error.response.data === null ? '系统内部异常，请联系网站管理员' : error.response.data.message
+    let errorMessage = error.response.data === null ? '系统内部异常，请联系管理员' : error.response.data.message
     switch (error.response.status) {
       case 404:
         notification.error({
@@ -128,7 +117,7 @@ const request = {
     } else {
       _params = '?'
       for (let key in params) {
-        if (params.hasOwnProperty(key) && params[key] !== null) {
+        if (params.hasOwnProperty(key) && !Object.is(params[key], undefined) && !Object.is(params[key], null)) {
           _params += `${key}=${params[key]}&`
         }
       }

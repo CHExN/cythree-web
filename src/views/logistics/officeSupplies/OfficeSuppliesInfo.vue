@@ -56,9 +56,7 @@
         </a-step>
         <a-step title="完成"></a-step>
       </a-steps>
-      <a-divider style="margin-bottom: 32px"/>
-    </a-card>
-    <a-card :bordered="false">
+      <a-divider/>
       <detail-list>
         <a-table ref="TableInfo"
                  :columns="columns"
@@ -68,43 +66,41 @@
                  rowKey="id">
         </a-table>
       </detail-list>
-      <div style="margin-top: 32px;">
-        <div v-hasPermission="'application:addDeletePhoto'">
-          <a-upload
-            accept="image/jpg,image/png,image/jpeg,image/bmp"
-            listType="picture-card"
-            :fileList="fileList"
-            :remove="handleRemove"
-            :customRequest="customRequest"
-            :beforeUpload="handleBeforeUpload"
-            @preview="handlePreview"
-            @change="handleChange">
-            <div v-if="fileList.length < 8">
-              <a-icon type="plus" />
-              <div class="ant-upload-text">Upload</div>
-            </div>
-          </a-upload>
-          <a-modal :visible="previewVisible" :footer="null" @cancel="handleCancel">
-            <img alt="example" style="width: 100%;" :src="previewImage" />
-          </a-modal>
-        </div>
-        <div v-hasNoPermission="'application:addDeletePhoto'">
-          <a-upload
-            accept="image/jpg,image/png,image/jpeg,image/bmp"
-            listType="picture-card"
-            :fileList="fileList"
-            :showUploadList="{ showPreviewIcon: true, showRemoveIcon: false }"
-            :customRequest="customRequest"
-            :beforeUpload="handleBeforeUpload"
-            @preview="handlePreview"
-            @change="handleChange">
-          </a-upload>
-          <a-modal :visible="previewVisible" :footer="null" @cancel="handleCancel">
-            <img alt="example" style="width: 100%;" :src="previewImage" />
-          </a-modal>
-        </div>
-      </div>
     </a-card>
+    <div v-hasPermission="'application:addDeletePhoto'">
+      <a-upload
+        accept="image/jpg,image/png,image/jpeg,image/bmp"
+        listType="picture-card"
+        :fileList="fileList"
+        :remove="handleRemove"
+        :customRequest="customRequest"
+        :beforeUpload="handleBeforeUpload"
+        @preview="handlePreview"
+        @change="handleChange">
+        <div v-if="fileList.length < 8">
+          <a-icon type="plus" />
+          <div class="ant-upload-text">Upload</div>
+        </div>
+      </a-upload>
+      <a-modal :visible="previewVisible" :footer="null" @cancel="handleCancel">
+        <img alt="example" style="width: 100%;" :src="previewImage" />
+      </a-modal>
+    </div>
+    <div v-hasNoPermission="'application:addDeletePhoto'">
+      <a-upload
+        accept="image/jpg,image/png,image/jpeg,image/bmp"
+        listType="picture-card"
+        :fileList="fileList"
+        :showUploadList="{ showPreviewIcon: true, showRemoveIcon: false }"
+        :customRequest="customRequest"
+        :beforeUpload="handleBeforeUpload"
+        @preview="handlePreview"
+        @change="handleChange">
+      </a-upload>
+      <a-modal :visible="previewVisible" :footer="null" @cancel="handleCancel">
+        <img alt="example" style="width: 100%;" :src="previewImage" />
+      </a-modal>
+    </div>
   </a-modal>
 </template>
 <script>

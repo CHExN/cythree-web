@@ -30,7 +30,7 @@
                 :labelCol="{span: 5}"
                 :wrapperCol="{span: 18, offset: 1}">
                 <a-month-picker
-                  v-model="nowMonth"
+                  v-model="queryParams.nowMonth"
                   style="width: 100%;"
                   :allowClear="false"
                 />
@@ -50,7 +50,7 @@
                   label="在职与否"
                   :labelCol="{span: 5}"
                   :wrapperCol="{span: 18, offset: 1}">
-                  <a-select v-model="isLeave">
+                  <a-select v-model="queryParams.isLeave">
                     <a-select-option value="0,1">全部</a-select-option>
                     <a-select-option value="0">在职</a-select-option>
                     <a-select-option value="1">非在职</a-select-option>
@@ -87,7 +87,7 @@
       <div class="operator">
         <a-button type="primary" ghost @click="add" v-hasPermission="'wage:add'">新增</a-button>
         <a-button @click="batchDelete" v-hasPermission="'wage:delete'">删除</a-button>
-        <a-dropdown v-hasAnyPermission="'wage:export','wage:add'">
+        <a-dropdown>
           <a-menu slot="overlay">
             <a-menu-item key="download-template" @click="downloadTemplate">模板下载</a-menu-item>
             <a-menu-item key="import-data" v-hasPermission="'wage:add'">
@@ -95,6 +95,7 @@
             </a-menu-item>
             <a-menu-item v-hasPermission="'wage:export'" key="export-data" @click="exportExcel">导出Excel</a-menu-item>
             <a-menu-item v-hasPermission="'wageRemark:view'" key="wage-remark" @click="onWageRemark">工资备注</a-menu-item>
+            <a-menu-item v-hasPermission="'wage:delete'" key="delete-all-wage" @click="deleteAll">删除本月全部</a-menu-item>
           </a-menu>
           <a-button>
             更多操作 <a-icon type="down" />
@@ -197,7 +198,6 @@ export default {
   data () {
     return {
       // insOut: '0',
-      nowMonth: moment(),
       monthData: ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12'],
       modalVisible: false,
       fileList: [],
@@ -207,7 +207,6 @@ export default {
       errors: [],
       successColumns: [],
       importResultVisible: false,
-      isLeave: '0,1',
       advanced: false,
       wageAdd: {
         visiable: false,
@@ -230,7 +229,9 @@ export default {
       },
       postLevelData: [],
       queryParams: {
-        postLevel: []
+        postLevel: [],
+        nowMonth: moment(),
+        isLeave: '0,1'
       },
       filteredInfo: null,
       sortedInfo: null,
@@ -291,7 +292,7 @@ export default {
   },
   mounted () {
     this.loadSelect()
-    this.fetch()
+    this.fetch({...this.queryParams})
   },
   methods: {
     handleClose () {
@@ -318,7 +319,7 @@ export default {
       this.$upload('wage/import', formData).then((r) => {
         let data = r.data.data
         if (data.data.length) {
-          this.fetch()
+          this.search()
         }
         this.file = ''
         this.$message.destroy()
@@ -432,10 +433,26 @@ export default {
         }
       })
     },
+    deleteAll () {
+      let that = this
+      const year = that.queryParams.nowMonth.format('YYYY')
+      const month = that.queryParams.nowMonth.format('MM')
+      this.$confirm({
+        title: `确定删除${year}年${month}月的全部记录?`,
+        content: '当您点击确定按钮后，这些记录将会被彻底删除',
+        centered: true,
+        onOk () {
+          that.$delete('wage/deleteAll', { year, month }).then(() => {
+            that.$message.success('删除成功')
+            that.search()
+          })
+        }
+      })
+    },
     exportExcel () {
       let { sortedInfo, filteredInfo } = this
       let sortField, sortOrder, pageSize, params
-      params = this.queryParams
+      params = {...this.queryParams}
       // 设置导出的数据为总数据条数
       if (this.pagination) {
         pageSize = this.pagination.total
@@ -447,13 +464,13 @@ export default {
         // 排序方式 ascend正序 descend倒序
         sortOrder = sortedInfo.order
       }
-      if (this.nowMonth) {
-        params.year = this.nowMonth.format('YYYY')
-        params.month = this.nowMonth.format('MM')
+      if (params.nowMonth) {
+        params.year = params.nowMonth.format('YYYY')
+        params.month = params.nowMonth.format('MM')
         params.monthArr = this.monthData.slice(0, this.monthData.indexOf(params.month) + 1).join()
+        delete params.nowMonth
       }
       this.$export('wage/excel', {
-        isLeave: this.isLeave,
         sortField: sortField,
         sortOrder: sortOrder,
         pageSize: pageSize,
@@ -491,13 +508,11 @@ export default {
       this.sortedInfo = null
       // 重置查询参数
       this.queryParams = {
-        postLevel: []
+        postLevel: [],
+        nowMonth: moment(),
+        isLeave: '0,1'
       }
-      // 重置月份
-      this.nowMonth = moment()
-      // 重置在职
-      this.isLeave = '0,1'
-      this.fetch()
+      this.fetch({...this.queryParams})
     },
     handleTableChange (pagination, filters, sorter) {
       // 将这三个参数赋值给Vue data，用于后续使用
@@ -531,13 +546,13 @@ export default {
         params.pageSize = this.pagination.defaultPageSize
         params.pageNum = this.pagination.defaultCurrent
       }
-      if (this.nowMonth) {
-        params.year = this.nowMonth.format('YYYY')
-        params.month = this.nowMonth.format('MM')
+      if (params.nowMonth) {
+        params.year = params.nowMonth.format('YYYY')
+        params.month = params.nowMonth.format('MM')
         params.monthArr = this.monthData.slice(0, this.monthData.indexOf(params.month) + 1).join()
+        delete params.nowMonth
       }
       this.$get('wage', {
-        isLeave: this.isLeave,
         ...params
       }).then((r) => {
         let data = r.data

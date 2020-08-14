@@ -66,7 +66,7 @@
       <div class="operator">
         <a-button type="primary" ghost @click="add" v-hasPermission="'insuranceInside:add'">新增</a-button>
         <a-button @click="batchDelete" v-hasPermission="'insuranceInside:delete'">删除</a-button>
-        <a-dropdown v-hasAnyPermission="'insuranceInside:export','insuranceInside:add'">
+        <a-dropdown>
           <a-menu slot="overlay">
             <a-menu-item key="download-template" @click="downloadTemplate">模板下载</a-menu-item>
             <a-menu-item key="import-data" v-hasPermission="'insuranceInside:add'">
@@ -273,7 +273,7 @@ export default {
     }
   },
   mounted () {
-    this.fetch()
+    this.fetch({...this.queryParams})
   },
   methods: {
     handleClose () {
@@ -289,7 +289,7 @@ export default {
       this.$upload('insuranceInside/import', formData).then((r) => {
         let data = r.data.data
         if (data.data.length) {
-          this.fetch()
+          this.search()
         }
         this.$message.destroy()
         this.importData = data.data
@@ -444,7 +444,7 @@ export default {
       this.queryParams = {
         isLeave: '0'
       }
-      this.fetch()
+      this.fetch({...this.queryParams})
     },
     handleTableChange (pagination, filters, sorter) {
       // 将这三个参数赋值给Vue data，用于后续使用
@@ -475,8 +475,7 @@ export default {
         params.pageNum = this.pagination.defaultCurrent
       }
       this.$get('insuranceInside', {
-        ...params,
-        isLeave: this.queryParams.isLeave
+        ...params
       }).then((r) => {
         let data = r.data
         const pagination = { ...this.pagination }

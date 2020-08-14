@@ -7,7 +7,7 @@
           <a-row>
             <a-col :md="12" :sm="24" >
               <a-form-item
-                label="创建时间"
+                label="申请日期"
                 :labelCol="{span: 5}"
                 :wrapperCol="{span: 18, offset: 1}">
                 <range-date @change="handleDateChange" ref="createTime"></range-date>
@@ -45,14 +45,6 @@
                :scroll="{ x: 900 }"
                rowKey="id"
                @change="handleTableChange">
-        <template slot="bilateralMeeting" slot-scope="text">
-          <a-popover placement="topLeft">
-            <template slot="content">
-              <div>{{text}}</div>
-            </template>
-            <p style="width: 200px;margin-bottom: 0">{{text}}</p>
-          </a-popover>
-        </template>
         <template slot="operation" slot-scope="text, record">
           <a-icon v-hasPermission="'bilateralMeeting:update'" type="setting" theme="twoTone" twoToneColor="#4a9ff5" @click="edit(record)" title="修改"></a-icon>
           &nbsp;
@@ -68,10 +60,10 @@
             <a-icon v-hasPermission="'bilateralMeeting:review'" type="check-circle" theme="twoTone" twoToneColor="#9451ff" title="确认"
               v-if="record.process===0 && record.review.split(',')[record.step-1]===user.username"></a-icon>
           </a-popconfirm>
-          <a-icon v-hasPermission="'bilateralMeeting:determineTime'" v-if="record.process===1 && !record.meetingTime" type="clock-circle" @click="showModal(record)" title="确认上会时间" />
+          <!-- <a-icon v-hasPermission="'bilateralMeeting:determineTime'" v-if="record.process===1 && !record.meetingTime" type="clock-circle" @click="showModal(record)" title="确认上会时间" /> -->
         </template>
       </a-table>
-      <a-modal
+      <!-- <a-modal
         title="确认上会时间"
         v-model="modalVisible"
         centered
@@ -79,7 +71,7 @@
         @ok="viewDist"
         okText="确认">
         <a-date-picker style="width: 100%;" showTime @change="onDataTimeChange" placeholder="选择上会时间"/>
-      </a-modal>
+      </a-modal> -->
     </div>
     <!-- 信息查看 -->
     <bilateralMeeting-info
@@ -134,8 +126,8 @@ export default {
       filteredInfo: null,
       sortedInfo: null,
       paginationInfo: null,
-      meetingTimeById: null,
-      meetingTime: null,
+      // meetingTimeById: null,
+      // meetingTime: null,
       dataSource: [],
       selectedRowKeys: [],
       selectedRows: [],
@@ -155,14 +147,17 @@ export default {
       user: state => state.account.user
     }),
     columns () {
-      let { filteredInfo } = this
+      let { sortedInfo, filteredInfo } = this
+      sortedInfo = sortedInfo || {}
       filteredInfo = filteredInfo || {}
       return [{
         title: '部门',
-        dataIndex: 'deptName'
+        dataIndex: 'deptName',
+        width: '9%'
       }, {
         title: '申请人',
-        dataIndex: 'applicant'
+        dataIndex: 'applicant',
+        width: '9%'
       }, {
         title: '流程状态',
         dataIndex: 'process',
@@ -184,23 +179,33 @@ export default {
           { text: '已通过', value: '1' }
         ],
         filterMultiple: false,
-        filteredValue: filteredInfo.process || null
+        filteredValue: filteredInfo.process || null,
+        width: '9%'
       }, {
         title: '拟上会议题',
         dataIndex: 'bilateralMeeting',
-        scopedSlots: { customRender: 'bilateralMeeting' },
-        width: 200
-      }, {
-        title: '上会时间',
-        dataIndex: 'meetingTime',
+        ellipsis: true,
         customRender: (text, row, index) => {
-          return text ? this.$tools.getDateTime(text) : '未定'
+          return <a-tooltip placement="topLeft" title={text}>{text}</a-tooltip>
         }
+      // }, {
+      //   title: '上会时间',
+      //   dataIndex: 'meetingTime',
+      //   customRender: (text, row, index) => {
+      //     return text ? this.$tools.getDateTime(text) : '未定'
+      //   },
+      //   width: '13%'
+      }, {
+        title: '申请日期',
+        dataIndex: 'applicationDate',
+        sorter: true,
+        sortOrder: sortedInfo.columnKey === 'applicationDate' && sortedInfo.order,
+        width: '13%'
       }, {
         title: '操作',
         dataIndex: 'operation',
         scopedSlots: { customRender: 'operation' },
-        width: 150
+        width: 100
       }]
     }
   },
@@ -208,21 +213,21 @@ export default {
     this.fetch()
   },
   methods: {
-    onDataTimeChange (value, dateString) {
-      this.meetingTime = dateString
-    },
-    viewDist () {
-      this.$put('bilateralMeeting', {
-        id: this.meetingTimeById,
-        meetingTime: this.meetingTime
-      }).then((r) => {
-        this.meetingTimeById = null
-        this.meetingTime = null
-        this.modalVisible = false
-        this.search()
-        this.$message.success('上会时间确认成功')
-      })
-    },
+    // onDataTimeChange (value, dateString) {
+    //   this.meetingTime = dateString
+    // },
+    // viewDist () {
+    //   this.$put('bilateralMeeting', {
+    //     id: this.meetingTimeById,
+    //     meetingTime: this.meetingTime
+    //   }).then((r) => {
+    //     this.meetingTimeById = null
+    //     this.meetingTime = null
+    //     this.modalVisible = false
+    //     this.search()
+    //     this.$message.success('上会时间确认成功')
+    //   })
+    // },
     onSelectChange (selectedRowKeys, selectedRows) {
       this.selectedRowKeys = selectedRowKeys
       this.selectedRows = selectedRows
@@ -335,10 +340,10 @@ export default {
         floatReset(spread, 'BilateralMeeting', newData.length)
       })
     },
-    showModal (record) {
-      this.meetingTimeById = record.id
-      this.modalVisible = true
-    },
+    // showModal (record) {
+    //   this.meetingTimeById = record.id
+    //   this.modalVisible = true
+    // },
     search () {
       let {sortedInfo, filteredInfo} = this
       let sortField, sortOrder

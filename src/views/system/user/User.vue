@@ -47,7 +47,7 @@
       <div class="operator">
         <a-button type="primary" ghost @click="add" v-hasPermission="'user:add'">新增</a-button>
         <a-button @click="batchDelete" v-hasPermission="'user:delete'">删除</a-button>
-        <a-dropdown v-hasAnyPermission="'user:reset','user:export'">
+        <a-dropdown v-hasAnyPermission="'user:reset,user:export'">
           <a-menu slot="overlay">
             <a-menu-item v-hasPermission="'user:reset'" key="password-reset" @click="resetPassword">密码重置</a-menu-item>
             <a-menu-item v-hasPermission="'user:export'" key="export-data" @click="exportExcel">导出Excel</a-menu-item>
@@ -79,7 +79,7 @@
           <a-icon v-hasPermission="'user:update'" type="setting" theme="twoTone" twoToneColor="#4a9ff5" @click="edit(record)" title="修改"></a-icon>
           &nbsp;
           <a-icon v-hasPermission="'user:view'" type="eye" theme="twoTone" twoToneColor="#42b983" @click="view(record)" title="查看"></a-icon>
-          <a-badge v-hasNoPermission="'user:update','user:view'" status="warning" text="无权限"></a-badge>
+          <!-- <a-badge v-hasNoPermission="'user:update'" status="warning" text="无权限"></a-badge> -->
         </template>
       </a-table>
     </div>
@@ -155,29 +155,29 @@ export default {
         dataIndex: 'username',
         sorter: true,
         sortOrder: sortedInfo.columnKey === 'username' && sortedInfo.order
-      }, {
-        title: '性别',
-        dataIndex: 'ssex',
-        customRender: (text, row, index) => {
-          switch (text) {
-            case '0':
-              return '男'
-            case '1':
-              return '女'
-            case '2':
-              return '保密'
-            default:
-              return text
-          }
-        },
-        filters: [
-          { text: '男', value: '0' },
-          { text: '女', value: '1' },
-          { text: '保密', value: '2' }
-        ],
-        filterMultiple: false,
-        filteredValue: filteredInfo.ssex || null,
-        onFilter: (value, record) => record.ssex.includes(value)
+      // }, {
+      //   title: '性别',
+      //   dataIndex: 'ssex',
+      //   customRender: (text, row, index) => {
+      //     switch (text) {
+      //       case '0':
+      //         return '男'
+      //       case '1':
+      //         return '女'
+      //       case '2':
+      //         return '保密'
+      //       default:
+      //         return text
+      //     }
+      //   },
+      //   filters: [
+      //     { text: '男', value: '0' },
+      //     { text: '女', value: '1' },
+      //     { text: '保密', value: '2' }
+      //   ],
+      //   filterMultiple: false,
+      //   filteredValue: filteredInfo.ssex || null,
+      //   onFilter: (value, record) => record.ssex.includes(value)
       }, {
         title: '部门',
         dataIndex: 'deptName'
@@ -201,6 +201,31 @@ export default {
         filterMultiple: false,
         filteredValue: filteredInfo.status || null,
         onFilter: (value, record) => record.status.includes(value)
+      }, {
+        title: '账号类型',
+        dataIndex: 'type',
+        customRender: (text, row, index) => {
+          switch (text) {
+            case '0':
+              return <a-tag color="green">通用</a-tag>
+            case '1':
+              return <a-tag color="blue">成本核算</a-tag>
+            case '2':
+              return <a-tag color="orange">小程序</a-tag>
+            default:
+              return text
+          }
+        },
+        filters: [
+          { text: '通用', value: '0' },
+          { text: '成本核算', value: '1' },
+          { text: '小程序', value: '2' }
+        ],
+        filterMultiple: false,
+        filteredValue: filteredInfo.status || null,
+        onFilter: (value, record) => record.status.includes(value),
+        sorter: true,
+        sortOrder: sortedInfo.columnKey === 'type' && sortedInfo.order
       }, {
         title: '创建时间',
         dataIndex: 'createTime',

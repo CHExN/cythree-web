@@ -318,8 +318,8 @@ export default {
     },
     tableDiagramDataProcessing (allMonthWcConsumptionByYear, allOwnWcConsumptionByYear) {
       let newData = {
-        barData: {},
-        rankList: {}
+        barData: [],
+        rankList: []
       }
       // 以下数据处理
       allMonthWcConsumptionByYear.forEach((item) => {

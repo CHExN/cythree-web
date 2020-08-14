@@ -87,7 +87,7 @@
         </template>
       </a-table>
     </div>
-    <!-- 修改申请信息查看 -->
+    <!-- 申请信息查看 -->
     <reviewModify-info
       :reviewModifyInfoData="reviewModifyInfo.data"
       :reviewModifyInfoVisiable="reviewModifyInfo.visiable"

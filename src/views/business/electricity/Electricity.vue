@@ -23,6 +23,22 @@
             <template v-if="advanced">
               <a-col :md="12" :sm="24" >
                 <a-form-item
+                  label="创建日期"
+                  :labelCol="{span: 5}"
+                  :wrapperCol="{span: 18, offset: 1}">
+                  <range-date @change="handleCreateDateChange" ref="createTime"></range-date>
+                </a-form-item>
+              </a-col>
+              <a-col :md="12" :sm="24" >
+                <a-form-item
+                  label="修改日期"
+                  :labelCol="{span: 5}"
+                  :wrapperCol="{span: 18, offset: 1}">
+                  <range-date @change="handleModifyDateChange" ref="modifyTime"></range-date>
+                </a-form-item>
+              </a-col>
+              <a-col :md="12" :sm="24" >
+                <a-form-item
                   label="月份选择"
                   :labelCol="{span: 5}"
                   :wrapperCol="{span: 18, offset: 1}">
@@ -33,14 +49,6 @@
                   />
                 </a-form-item>
               </a-col>
-              <!-- <a-col :md="12" :sm="24" >
-                <a-form-item
-                  label="创建日期"
-                  :labelCol="{span: 5}"
-                  :wrapperCol="{span: 18, offset: 1}">
-                  <range-date @change="handleDateChange" ref="createTime"></range-date>
-                </a-form-item>
-              </a-col> -->
             </template>
           </div>
           <span style="float: right; margin: 3px auto 1em;">
@@ -58,7 +66,7 @@
       <div class="operator">
         <a-button type="primary" ghost @click="add" v-hasPermission="'electricity:add'">新增</a-button>
         <a-button @click="batchDelete" v-hasPermission="'electricity:delete'">删除</a-button>
-        <a-dropdown v-hasAnyPermission="'electricity:export','electricity:add'">
+        <a-dropdown>
           <a-menu slot="overlay">
             <a-menu-item key="download-template" @click="downloadTemplate">模板下载</a-menu-item>
             <a-menu-item key="import-data" v-hasPermission="'electricity:add'">
@@ -82,11 +90,21 @@
                rowKey="electricityId"
                @change="handleTableChange">
         <template slot="operation" slot-scope="text, record">
-          <a-icon v-hasPermission="'electricity:update'" type="setting" theme="twoTone" twoToneColor="#4a9ff5" @click="edit(record)" title="修改"></a-icon>
-          <a-badge v-hasNoPermission="'electricity:update'" status="warning" text="无权限"></a-badge>
+          <a-icon v-hasPermission="'electricity:update'" type="setting" theme="twoTone" twoToneColor="#4a9ff5" @click="edit(record)" title="修改"/>
+          &nbsp;
+          <a-icon v-hasPermission="'electricity:view'" type="eye" theme="twoTone" twoToneColor="#42b983" @click="view(record)" title="查看"/>
         </template>
       </a-table>
+      <div v-if="barData.length > 0" style="margin: 0px 0px -54px -24px">
+        <bar :data="barData" position="date*实际用量"/>
+      </div>
     </div>
+    <!-- 电费信息 -->
+    <electricity-info
+      :electricityInfoData="electricityInfo.data"
+      :electricityInfoVisiable="electricityInfo.visiable"
+      @close="handleElectricityInfoClose">
+    </electricity-info>
     <!-- 新增电费信息 -->
     <electricity-add
       :electricityAddVisiable="electricityAdd.visiable"
@@ -115,13 +133,16 @@
 import RangeDate from '@/components/datetime/RangeDate'
 import ElectricityAdd from './ElectricityAdd'
 import ElectricityEdit from './ElectricityEdit'
+import ElectricityInfo from './ElectricityInfo'
 import ImportResult from '@/components/view/ImportResult'
+import { Bar } from '@/components'
 
 export default {
   name: 'Electricity',
-  components: { RangeDate, ElectricityAdd, ElectricityEdit, ImportResult },
+  components: { RangeDate, ElectricityAdd, ElectricityEdit, ElectricityInfo, ImportResult, Bar },
   data () {
     return {
+      barData: [],
       fileList: [],
       importData: [],
       times: '',
@@ -134,6 +155,10 @@ export default {
         data: {}
       },
       electricityEdit: {
+        visiable: false,
+        data: {}
+      },
+      electricityInfo: {
         visiable: false,
         data: {}
       },
@@ -161,7 +186,11 @@ export default {
       sortedInfo = sortedInfo || {}
       return [{
         title: '公厕名',
-        dataIndex: 'wcName'
+        dataIndex: 'wcName',
+        ellipsis: true,
+        customRender: (text, row, index) => {
+          return <a-tooltip placement="topLeft" title={text}>{text}</a-tooltip>
+        }
       }, {
         title: '公厕编号',
         dataIndex: 'wcNum',
@@ -173,23 +202,23 @@ export default {
         customRender: (text, row, index) => {
           return `${row.year}-${row.month}`
         },
-        width: '9%'
+        width: '10%'
       }, {
         title: '实际用量',
         dataIndex: 'actualAmount',
         sorter: true,
         sortOrder: sortedInfo.columnKey === 'actualAmount' && sortedInfo.order,
-        width: '9%'
+        width: '10%'
       }, {
-        title: '单价(元/度)',
+        title: '单价',
         dataIndex: 'unitPrice',
         sorter: true,
         sortOrder: sortedInfo.columnKey === 'unitPrice' && sortedInfo.order,
-        width: '9%'
+        width: '10%'
       }, {
         title: '购电方式',
         dataIndex: 'type',
-        width: '9%'
+        width: '10%'
       }, {
         title: '缴费日期',
         dataIndex: 'recDate',
@@ -198,13 +227,13 @@ export default {
         },
         sorter: true,
         sortOrder: sortedInfo.columnKey === 'recDate' && sortedInfo.order,
-        width: '9%'
+        width: '10%'
       }, {
         title: '金额合计',
         dataIndex: 'totalAmount',
         sorter: true,
         sortOrder: sortedInfo.columnKey === 'totalAmount' && sortedInfo.order,
-        width: '9%'
+        width: '10%'
       }, {
         title: '操作',
         dataIndex: 'operation',
@@ -231,7 +260,7 @@ export default {
       this.$upload('electricity/import', formData).then((r) => {
         let data = r.data.data
         if (data.data.length) {
-          this.fetch()
+          this.search()
         }
         this.$message.destroy()
         this.importData = data.data
@@ -256,8 +285,20 @@ export default {
         console.error(r)
       })
     },
-    onSelectChange (selectedRowKeys) {
+    onSelectChange (selectedRowKeys, selectedRows) {
       this.selectedRowKeys = selectedRowKeys
+      this.tableDiagramDataProcessing(selectedRows)
+    },
+    tableDiagramDataProcessing (selectedRows) {
+      if (selectedRows === []) {
+        this.barData = []
+        return
+      }
+      let data = []
+      selectedRows.slice(0, 20).forEach((item) => {
+        data.push({date: `${item.wcNum.substr(9)}_${item.year.substr(2)}年${item.month}月`, 实际用量: item.actualAmount})
+      })
+      this.barData = data
     },
     toggleAdvanced () {
       this.advanced = !this.advanced
@@ -267,6 +308,8 @@ export default {
         this.queryParams.month = ''
         this.queryParams.createTimeFrom = ''
         this.queryParams.createTimeTo = ''
+        this.queryParams.modifyTimeFrom = ''
+        this.queryParams.modifyTimeTo = ''
       }
     },
     add () {
@@ -292,14 +335,27 @@ export default {
       this.$message.success('修改电费信息成功')
       this.search()
     },
+    view (record) {
+      this.electricityInfo.data = record
+      this.electricityInfo.visiable = true
+    },
+    handleElectricityInfoClose () {
+      this.electricityInfo.visiable = false
+    },
     handleMonthChange (value) {
       this.queryParams.year = value.format('YYYY') || ''
       this.queryParams.month = value.format('MM') || ''
     },
-    handleDateChange (value) {
+    handleCreateDateChange (value) {
       if (value) {
         this.queryParams.createTimeFrom = value[0]
         this.queryParams.createTimeTo = value[1]
+      }
+    },
+    handleModifyDateChange (value) {
+      if (value) {
+        this.queryParams.modifyTimeFrom = value[0]
+        this.queryParams.modifyTimeTo = value[1]
       }
     },
     batchDelete () {
@@ -378,8 +434,12 @@ export default {
       this.queryParams = {}
       if (this.advanced) {
         // 清空时间选择
-        // this.$refs.createTime.reset()
+        this.$refs.createTime.reset()
+        // 清空时间选择
+        this.$refs.modifyTime.reset()
       }
+      // 重置条形图
+      this.barData = []
       this.fetch()
     },
     handleTableChange (pagination, filters, sorter) {

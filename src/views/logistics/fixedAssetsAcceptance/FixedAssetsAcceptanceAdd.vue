@@ -31,13 +31,9 @@
           v-decorator="['manager']"/>
       </a-form-item>
       <a-form-item label='合同金额' v-bind="formItemLayout">
-        <a-input-number
-          :min="0.01"
-          :max="10000000"
-          :precision="2"
-          :formatter="value => value"
-          style="width: 100%;"
+        <a-input
           placeholder='合同金额'
+          autocomplete="off"
           v-decorator="['money']"/>
       </a-form-item>
       <a-form-item label='实际金额' v-bind="formItemLayout">

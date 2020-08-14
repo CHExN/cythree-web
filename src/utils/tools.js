@@ -55,9 +55,7 @@ let tools = {
         obj.push(tools.deepClone(data[i]))
       }
     } else if (type === 'object') {
-      for (let key in data) {
-        obj[key] = tools.deepClone(data[key])
-      }
+      obj = JSON.parse(JSON.stringify(data))
     }
     return obj
   },

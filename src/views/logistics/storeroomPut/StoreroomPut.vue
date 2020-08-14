@@ -78,10 +78,9 @@
     </div>
     <div>
       <div class="operator">
-        <a-button type="primary" ghost @click="canteenPutAddOpen" v-hasPermission="'storeroomPut:add','canteenPut:add'">食堂用品入库</a-button>
-        <a-button type="primary" ghost @click="unionPutAddOpen" v-hasPermission="'storeroomPut:add','unionPut:add'">工会用品入库</a-button>
+        <a-button type="primary" ghost @click="canteenPutAddOpen" v-hasPermission="'storeroomPut:add,canteenPut:add'">入库</a-button>
         <a-button @click="batchDelete" v-hasPermission="'storeroomPut:delete'">删除</a-button>
-        <a-dropdown v-hasAnyPermission="'storeroomPut:export','canteen:view','canteen:export','supplier:view'">
+        <a-dropdown v-hasAnyPermission="'storeroomPut:export,canteen:view,canteen:export,supplier:view'">
           <a-menu slot="overlay">
             <a-menu-item v-hasPermission="'supplier:view'" key="supplier-manage" @click="onSupplierManage">供应商管理</a-menu-item>
             <a-menu-item v-hasPermission="'canteen:view'" key="canteen-type-manage" @click="onCanteenTypeManage">食品类管理</a-menu-item> <!-- 食堂用品类别管理 -->
@@ -159,12 +158,6 @@
       :putInfoVisiable="putInfo.visiable"
       @close="handlePutInfoClose">
     </put-info>
-    <!-- 新增工会用品 -->
-    <union-put-add
-      :putAddVisiable="unionPutAdd.visiable"
-      @close="handleUnionPutAddClose"
-      @success="handleUnionPutAddSuccess">
-    </union-put-add>
     <!-- 新增食堂用品 -->
     <canteen-put-add
       :putAddVisiable="canteenPutAdd.visiable"
@@ -193,7 +186,6 @@
 <script>
 import RangeDate from '@/components/datetime/RangeDate'
 import PutInfo from './StoreroomPutInfo'
-import UnionPutAdd from './UnionPutAdd'
 import CanteenPutAdd from './CanteenPutAdd'
 import PutEdit from './StoreroomPutEdit'
 import CanteenTypeManage from './CanteenTypeManage'
@@ -204,7 +196,7 @@ moment.locale('zh-cn')
 
 export default {
   name: 'StoreroomPut',
-  components: { PutInfo, UnionPutAdd, CanteenPutAdd, PutEdit, RangeDate, CanteenTypeManage, SupplierManage },
+  components: { PutInfo, CanteenPutAdd, PutEdit, RangeDate, CanteenTypeManage, SupplierManage },
   data () {
     return {
       radioValue: true,
@@ -217,9 +209,6 @@ export default {
       putInfo: {
         visiable: false,
         data: {}
-      },
-      unionPutAdd: {
-        visiable: false
       },
       canteenPutAdd: {
         visiable: false
@@ -322,8 +311,9 @@ export default {
       this.$refs[`popconfirm${record.id}`].visible = false
     },
     handlePopconfirmVisibleChange (record) {
-      if (this.$refs[`popconfirm${record.id}`].visible) {
-        this.$refs[`popconfirm${record.id}`].visible = false
+      const refsName = 'popconfirm' + record.id
+      if (this.$refs[refsName].visible) {
+        this.$refs[refsName].visible = false
         return
       }
       // let now = new Date()
@@ -345,7 +335,7 @@ export default {
         }).then((r) => {
           this.$message.destroy()
           if (!r.data) {
-            this.$refs[`popconfirm${record.id}`].visible = true
+            this.$refs[refsName].visible = true
           } else if (r.data.process === '0') {
             this.$message.warning('您已提交修改申请，请耐心等待审核结果通知')
           } else if (r.data.process === '1') {
@@ -357,13 +347,13 @@ export default {
           } else if (r.data.process === '2') {
             if (new Date(r.data.createTime).getTime() + (24 * 60 * 60 * 1000) < new Date().getTime()) {
               this.$message.warning('您上次修改申请未通过')
-              this.$refs[`popconfirm${record.id}`].visible = true
+              this.$refs[refsName].visible = true
             } else {
               this.$message.error('您的修改申请未通过，请24小时后再重新尝试')
             }
           } else { // r.data.process === '3'
             this.$message.warning('您已修改过此条数据，如想再次修改请再次提交申请')
-            this.$refs[`popconfirm${record.id}`].visible = true
+            this.$refs[refsName].visible = true
           }
         })
       }
@@ -392,17 +382,6 @@ export default {
     handlePutInfoClose () {
       this.putInfo.visiable = false
     },
-    unionPutAddOpen () {
-      this.unionPutAdd.visiable = true
-    },
-    handleUnionPutAddClose () {
-      this.unionPutAdd.visiable = false
-    },
-    handleUnionPutAddSuccess () {
-      this.unionPutAdd.visiable = false
-      this.$message.success('新增入库单成功')
-      this.search()
-    },
     canteenPutAddOpen () {
       this.canteenPutAdd.visiable = true
     },
@@ -410,6 +389,7 @@ export default {
       this.canteenPutAdd.visiable = false
     },
     handleCanteenPutAddSuccess () {
+      console.log('handleCanteenPutAddSuccess')
       this.canteenPutAdd.visiable = false
       this.$message.success('新增入库单成功')
       this.search()
@@ -517,6 +497,7 @@ export default {
           this.$message.destroy() // 等全部执行完后，再把message全局销毁
         })
       } else {
+        this.$message.destroy() // 等全部执行完后，再把message全局销毁
         return this.$message.warning('请选择查看时间')
       }
     },
@@ -611,8 +592,8 @@ export default {
           r.data.forEach((storeroom, index) => { // 这里四舍五入后两位小数
             // let storeroomMoney = Math.round(this.$tools.accMultiply(storeroom.money, storeroom.amount) * 100) / 100
             let storeroomMoney = this.$tools.rounding(this.$tools.accMultiply(storeroom.money, storeroom.amount), 2)
-            console.log(this.$tools.accMultiply(storeroom.money, storeroom.amount))
-            console.log(storeroomMoney)
+            // console.log(this.$tools.accMultiply(storeroom.money, storeroom.amount))
+            // console.log(storeroomMoney)
             let storeroomMoneyArr = `${this.$tools.addZero(storeroomMoney)}`.replace(/[.]/g, '').split('').reverse()
             let storeroomExportItem = [
               '', // 货号 (index + 1)
@@ -643,18 +624,18 @@ export default {
           })
 
           // 测试
-          let money = Object.values(everyEightBatchesTotalAmount).reduce((prev, current, index, arr) => {
-            return this.$tools.accAdd(prev, current)
-          })
-          if (item.money === money) {
-            console.log('true')
-          } else {
-            console.log('========')
-            console.log(item.money)
-            console.log(money)
-            console.log(everyEightBatchesTotalAmount)
-            console.log('========')
-          }
+          // let money = Object.values(everyEightBatchesTotalAmount).reduce((prev, current, index, arr) => {
+          //   return this.$tools.accAdd(prev, current)
+          // })
+          // if (item.money === money) {
+          //   console.log('true')
+          // } else {
+          //   console.log('========')
+          //   console.log(item.money)
+          //   console.log(money)
+          //   console.log(everyEightBatchesTotalAmount)
+          //   console.log('========')
+          // }
 
           Object.keys(everyEightBatches).forEach(key => {
             let everyEightBatchesTotalAmountArr = `${this.$tools.addZero(everyEightBatchesTotalAmount[key])}`.replace(/[.]/g, '').split('').reverse()
@@ -679,9 +660,9 @@ export default {
             saveExcel(spread, fileName)
             floatReset(spread, 'StoreroomPut', exportData.everyEightBatches.length)
           })
+          this.$message.destroy() // 等全部执行完后，再把message全局销毁
         })
       })
-      this.$message.destroy() // 等全部执行完后，再把message全局销毁
     },
     search () {
       let {sortedInfo, filteredInfo} = this
@@ -763,7 +744,6 @@ export default {
       })
     },
     fetch (params = {}) {
-      // console.log(this.$tools.rounding(999.99959, 3))
       // 显示loading
       this.loading = true
       if (this.paginationInfo) {

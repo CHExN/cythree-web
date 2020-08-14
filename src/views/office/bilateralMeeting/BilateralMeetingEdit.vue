@@ -17,9 +17,20 @@
             {rules: [{required: true, message: '申请人不能为空'}]}
           ]"/>
       </a-form-item>
+      <a-form-item label='申请日期' v-bind="formItemLayout">
+        <a-date-picker
+          placeholder='申请日期'
+          format='YYYY-MM-DD'
+          style="width: 100%;"
+          v-decorator="['applicationDate',
+            {rules: [{ required: true, message: '申请日期不能为空'}]}
+          ]"
+        />
+      </a-form-item>
       <a-form-item label='议题' v-bind="formItemLayout">
-        <a-input
+        <a-textarea
           placeholder='拟上会议题'
+          :auto-size="{ minRows: 5, maxRows: 500 }"
           autocomplete="off"
           v-decorator="['bilateralMeeting',
             {rules: [{required: true, message: '拟上会议题不能为空'}]}
@@ -28,13 +39,14 @@
       <a-form-item label='梗概' v-bind="formItemLayout">
         <a-textarea
           placeholder='提议事由梗概'
+          :auto-size="{ minRows: 10, maxRows: 500 }"
           autocomplete="off"
           v-decorator="['proposedCauseSummary',
             {rules: [{required: true, message: '提议事由梗概不能为空'}]}
           ]"
         />
       </a-form-item>
-      <a-form-item v-hasPermission="'bilateralMeeting:determineTime'" v-if="process===1" label='上会时间' v-bind="formItemLayout">
+      <!-- <a-form-item v-hasPermission="'bilateralMeeting:determineTime'" v-if="process===1" label='上会时间' v-bind="formItemLayout">
         <a-date-picker
           style="width: 100%;"
           showTime
@@ -43,7 +55,7 @@
           v-decorator="['meetingTime',
             {rules: [{required: true, message: '上会时间不能为空'}]}
           ]"/>
-      </a-form-item>
+      </a-form-item> -->
       <a-form-item label='附件' v-bind="formItemLayout">
         <a-upload-dragger
           :fileList="fileList"
@@ -114,7 +126,8 @@ export default {
         }
       })
       // 把时间类型插件的数据用moment包装一下
-      if (obj['meetingTime']) obj['meetingTime'] = moment(obj['meetingTime'])
+      // if (obj['meetingTime']) obj['meetingTime'] = moment(obj['meetingTime'])
+      if (obj['applicationDate']) obj['applicationDate'] = moment(obj['applicationDate'])
       this.form.setFieldsValue(obj)
       // 获取上传附件
       this.$get('bilateralMeeting/bilateralMeetingFiles', {
@@ -178,9 +191,10 @@ export default {
       this.form.validateFields((err, values) => {
         if (!err) {
           this.loading = true
-          if (values['meetingTime']) {
-            values.meetingTime = values.meetingTime.format('YYYY-MM-DD HH:mm:ss')
-          }
+          // if (values['meetingTime']) {
+          //   values.meetingTime = values.meetingTime.format('YYYY-MM-DD HH:mm:ss')
+          // }
+          values.applicationDate = values.applicationDate.format('YYYY-MM-DD')
           this.$put('bilateralMeeting', {
             ...values,
             id: this.id

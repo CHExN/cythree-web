@@ -83,7 +83,7 @@
           <a-icon v-hasPermission="'car:update'" type="setting" theme="twoTone" twoToneColor="#4a9ff5" @click="edit(record)" title="修改"></a-icon>
           &nbsp;
           <a-icon v-hasPermission="'car:view'" type="eye" theme="twoTone" twoToneColor="#42b983" @click="view(record)" title="查看"></a-icon>
-          <a-badge v-hasNoPermission="'car:update','car:view'" status="warning" text="无权限"></a-badge>
+          <!-- <a-badge v-hasNoPermission="'car:update,car:view'" status="warning" text="无权限"></a-badge> -->
         </template>
       </a-table>
     </div>

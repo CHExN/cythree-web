@@ -1,6 +1,6 @@
 <template>
   <a-drawer
-    title="新增水费信息"
+    title="修改水费信息"
     :maskClosable="false"
     width=650
     placement="right"
@@ -44,13 +44,12 @@
       </a-form-item>
       <a-form-item label='单价' v-bind="formItemLayout">
         <a-input-number
-          @change="onUnitPriceChange"
           :min="0.01"
-          :max="100"
+          :max="100000"
           :precision="4"
           :formatter="value => value"
           style="width: 100%;"
-          placeholder='单价(元/吨)'
+          placeholder='单价(金额合计/实际用量)'
           v-decorator="['unitPrice',
             {rules: [{ required: true, message: '单价不能为空'}]}
           ]"/>
@@ -93,12 +92,13 @@
       </a-form-item>
       <a-form-item label='金额合计' v-bind="formItemLayout">
         <a-input-number
+          @change="onTotalAmountChange"
           :min="0.01"
           :max="100000"
           :precision="2"
           :formatter="value => value"
           style="width: 100%;"
-          placeholder='金额合计（实际用量*单价）'
+          placeholder='金额合计'
           v-decorator="['totalAmount',
             {rules: [{ required: true, message: '金额合计不能为空'}]}
           ]"/>
@@ -143,23 +143,26 @@ export default {
         visiable: false
       },
       wcId: '',
-      waterId: '',
-      actualAmount: 0,
-      unitPrice: 0
+      waterId: ''
     }
   },
   methods: {
     reset () {
       this.loading = false
+      this.wcId = ''
+      this.waterId = ''
       // 清空表单
       this.form.resetFields()
     },
     setFormValues ({...water}) {
       this.waterId = water.waterId
+      let fields = ['createTime', 'modifyTime']
       let obj = {}
       Object.keys(water).forEach((key) => {
-        this.form.getFieldDecorator(key)
-        obj[key] = water[key]
+        if (fields.indexOf(key) === -1) {
+          this.form.getFieldDecorator(key)
+          obj[key] = water[key]
+        }
       })
       this.form.getFieldDecorator('date')
       const date = water.year + '-' + water.month
@@ -171,17 +174,17 @@ export default {
       this.$emit('close')
     },
     onActualAmountChange (value) {
-      this.actualAmount = value
-      if (typeof this.unitPrice === 'number' && typeof this.actualAmount === 'number') {
-        this.form.getFieldDecorator('totalAmount')
-        this.form.setFieldsValue({ 'totalAmount': this.unitPrice * this.actualAmount })
+      const totalAmount = this.form.getFieldValue('totalAmount')
+      if (typeof totalAmount === 'number' && typeof value === 'number') {
+        this.form.getFieldDecorator('unitPrice')
+        this.form.setFieldsValue({ 'unitPrice': this.$tools.rounding(this.$tools.accDivide(totalAmount, value), 4) })
       }
     },
-    onUnitPriceChange (value) {
-      this.unitPrice = value
-      if (typeof this.unitPrice === 'number' && typeof this.actualAmount === 'number') {
-        this.form.getFieldDecorator('totalAmount')
-        this.form.setFieldsValue({ 'totalAmount': this.unitPrice * this.actualAmount })
+    onTotalAmountChange (value) {
+      const actualAmount = this.form.getFieldValue('actualAmount')
+      if (typeof value === 'number' && typeof actualAmount === 'number') {
+        this.form.getFieldDecorator('unitPrice')
+        this.form.setFieldsValue({ 'unitPrice': this.$tools.rounding(this.$tools.accDivide(value, actualAmount), 4) })
       }
     },
     handleWcListChange (wcName, wcNum, wcId) {

@@ -2,31 +2,27 @@
   <a-modal
     title="编内合同信息"
     :centered="true"
-    :width="1200"
+    :width="1100"
     :visible="contractInsideInfoVisiable"
     :keyboard="false"
     :footer="null"
     @cancel="handleCancleClick">
-    <a-card :bordered="false" v-if="contractPeriod.length > 0">
-      <detail-list title="合同信息">
+    <a-card :bordered="false">
+      <detail-list title="合同信息" v-if="contractPeriod.length > 0">
         <template v-for="(k, index) in contractPeriod">
           <detail-list-item :key="index" :term="k">{{contractPeriodDate[index]}}</detail-list-item>
         </template>
         <detail-list-item term="续签备注">{{contractInsideInfoData.remarkRenew}}</detail-list-item>
         <detail-list-item term="备注">{{contractInsideInfoData.remark}}</detail-list-item>
       </detail-list>
-    </a-card>
-    <a-divider style="margin-bottom: 32px" v-if="contractPeriod.length > 0 && jobAgreement.length > 0"/>
-    <a-card :bordered="false" v-if="jobAgreement.length > 0">
-      <detail-list title="岗位协议信息">
+      <a-divider v-if="contractPeriod.length > 0 && jobAgreement.length > 0"/>
+      <detail-list title="岗位协议信息" v-if="jobAgreement.length > 0">
         <template v-for="(k, index) in jobAgreement">
           <detail-list-item :key="index" :term="k">{{jobAgreementDate[index]}}</detail-list-item>
         </template>
       </detail-list>
-    </a-card>
-    <a-divider v-hasPermission="'staffInside:view'" v-if="contractPeriod.length > 0 || jobAgreement.length > 0" style="margin-bottom: 32px"/>
-    <a-card v-hasPermission="'staffInside:view'" :loading='loading' :bordered="false">
-      <detail-list title="人员信息">
+      <a-divider v-hasPermission="'staffInside:view'" v-if="contractPeriod.length > 0 || jobAgreement.length > 0"/>
+      <detail-list title="人员信息" v-hasPermission="'staffInside:view'" :loading='loading'>
         <detail-list-item term="姓名">{{staffInsideData.name}}</detail-list-item>
         <detail-list-item term="部门">{{staffInsideData.deptName}}</detail-list-item>
         <detail-list-item term="人员类型">{{getType(staffInsideData.type)}}</detail-list-item>
@@ -64,8 +60,8 @@
         <detail-list-item term="证书编号">{{staffInsideData.certificateNum}}</detail-list-item>
         <detail-list-item term="入职状态">{{staffInsideData.entryStatus}}</detail-list-item>
       </detail-list>
+      <a-divider v-hasPermission="'staffInside:addDeletePhoto'"/>
     </a-card>
-    <a-divider v-hasPermission="'staffInside:addDeletePhoto'" style="margin-bottom: 32px"/>
     <div>
       <div v-hasPermission="'staffInside:addDeletePhoto'">
         <a-upload

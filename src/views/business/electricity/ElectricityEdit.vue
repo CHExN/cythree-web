@@ -1,6 +1,6 @@
 <template>
   <a-drawer
-    title="新增电费信息"
+    title="修改电费信息"
     :maskClosable="false"
     width=650
     placement="right"
@@ -129,9 +129,7 @@ export default {
         visiable: false
       },
       wcId: '',
-      electricityId: '',
-      actualAmount: 0,
-      totalAmount: 0
+      electricityId: ''
     }
   },
   methods: {
@@ -141,17 +139,18 @@ export default {
     reset () {
       this.loading = false
       this.wcId = ''
-      this.actualAmount = 0
-      this.totalAmount = 0
       // 清空表单
       this.form.resetFields()
     },
     setFormValues ({...electricity}) {
       this.electricityId = electricity.electricityId
+      let fields = ['createTime', 'modifyTime']
       let obj = {}
       Object.keys(electricity).forEach((key) => {
-        this.form.getFieldDecorator(key)
-        obj[key] = electricity[key]
+        if (fields.indexOf(key) === -1) {
+          this.form.getFieldDecorator(key)
+          obj[key] = electricity[key]
+        }
       })
       // 把时间类型插件的数据用moment包装一下
       obj['recDate'] = moment(obj['recDate'])
@@ -165,17 +164,17 @@ export default {
       this.$emit('close')
     },
     onActualAmountChange (value) {
-      this.actualAmount = value
-      if (typeof this.totalAmount === 'number' && typeof this.actualAmount === 'number') {
+      const totalAmount = this.form.getFieldValue('totalAmount')
+      if (typeof totalAmount === 'number' && typeof value === 'number') {
         this.form.getFieldDecorator('unitPrice')
-        this.form.setFieldsValue({ 'unitPrice': this.totalAmount / this.actualAmount })
+        this.form.setFieldsValue({ 'unitPrice': this.$tools.rounding(this.$tools.accDivide(totalAmount, value), 4) })
       }
     },
     onTotalAmountChange (value) {
-      this.totalAmount = value
-      if (typeof this.totalAmount === 'number' && typeof this.actualAmount === 'number') {
+      const actualAmount = this.form.getFieldValue('actualAmount')
+      if (typeof value === 'number' && typeof actualAmount === 'number') {
         this.form.getFieldDecorator('unitPrice')
-        this.form.setFieldsValue({ 'unitPrice': this.totalAmount / this.actualAmount })
+        this.form.setFieldsValue({ 'unitPrice': this.$tools.rounding(this.$tools.accDivide(value, actualAmount), 4) })
       }
     },
     handleWcListChange (wcName, wcNum, wcId) {

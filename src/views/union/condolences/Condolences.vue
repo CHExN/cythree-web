@@ -98,7 +98,7 @@
           >
             <a-icon v-if="record.status==='1'" v-hasPermission="'condolences:update'" type="check-circle" theme="twoTone" twoToneColor="#9451ff" title="确认"></a-icon>
           </a-popconfirm>
-          <a-badge v-hasNoPermission="'condolences:update'" status="warning" text="无权限"></a-badge>
+          <!-- <a-badge v-hasNoPermission="'condolences:update'" status="warning" text="无权限"></a-badge> -->
         </template>
       </a-table>
     </div>

@@ -1,6 +1,6 @@
 <template>
   <a-drawer
-    title="工会用品入库"
+    title="入库"
     :maskClosable="false"
     width=1000
     placement="right"
@@ -30,6 +30,16 @@
         <a-col :md="12" :sm="24">
           <a-form-item label='保管员' v-bind="formItemLayout">
             <a-input placeholder='保管员' autocomplete="off"  v-decorator="['storage']"/>
+          </a-form-item>
+        </a-col>
+        <a-col :md="12" :sm="24">
+          <a-form-item label='物资类别' v-bind="formItemLayout">
+            <a-select placeholder='物资类别' v-decorator="['typeApplication', {
+              initialValue: [dictData.typeApplication && dictData.typeApplication.length > 0 ? dictData.typeApplication[0].key : ''],
+              rules: [{ required: true, message: '请选择物资类别' }]
+            }]">
+              <a-select-option v-for="i in dictData.typeApplication" :key="i.key">{{ i.value }}</a-select-option>
+            </a-select>
           </a-form-item>
         </a-col>
       </a-row>
@@ -108,13 +118,26 @@
       <a-popconfirm title="确定放弃编辑？" @confirm="onClose" okText="确定" cancelText="取消">
         <a-button style="margin-right: .8rem">取消</a-button>
       </a-popconfirm>
-      <a-button type="primary" ghost  @click="subPutOut" :loading="putOutLoading">即入即出</a-button>
+      <a-button type="primary" ghost  @click="showModal" :loading="putOutLoading">即入即出</a-button>
       &nbsp;&nbsp;
+      <a-modal
+        title="选择出库到哪个部门"
+        v-model="modalVisible"
+        :mask='false'
+        :maskClosable="false"
+        :width='350'
+        style="left: 30%;top: 65%"
+        @ok="subPutOut"
+        okText="提交"
+        cancelText="取消">
+        <dept-input-tree @change="handleDeptChange" placeholder='请选择部门' ref="deptTree" style="width: 100%;"></dept-input-tree>
+      </a-modal>
       <a-button @click="handleSubmit" type="primary" :loading="putLoading">提交</a-button>
     </div>
   </a-drawer>
 </template>
 <script>
+import DeptInputTree from '../../system/dept/DeptInputTree'
 import moment from 'moment'
 moment.locale('zh-cn')
 const formItemLayout = {
@@ -124,6 +147,7 @@ const formItemLayout = {
 
 export default {
   name: 'UnionPutAdd',
+  components: { DeptInputTree },
   props: {
     putAddVisiable: {
       default: false
@@ -136,6 +160,9 @@ export default {
       putOutLoading: false,
       dataSource: [],
       open: false,
+      modalVisible: false,
+      dictData: {},
+      deptId: '',
       tableIndex: 0,
       formItemLayout,
       form: this.$form.createForm(this)
@@ -181,6 +208,9 @@ export default {
     }
   },
   methods: {
+    handleDeptChange (value) {
+      this.deptId = value || ''
+    },
     reset () {
       this.putLoading = false
       this.putOutLoading = false
@@ -210,22 +240,20 @@ export default {
           const date = values['date']
           console.log({
             ...values,
-            typeApplication: 6, // 工会用品
             storeroomList: unionList,
             date: date.format('YYYY-MM-DD')
           })
-          // this.putLoading = true
-          // this.$post('storeroomPut', {
-          //   ...values,
-          //   typeApplication: 6, // 工会用品
-          //   storeroomList: unionList,
-          //   date: date.format('YYYY-MM-DD')
-          // }).then((r) => {
-          //   this.reset()
-          //   this.$emit('success')
-          // }).catch(() => {
-          //   this.putLoading = false
-          // })
+          this.putLoading = true
+          this.$post('unionStoreroomPut', {
+            ...values,
+            storeroomList: unionList,
+            date: date.format('YYYY-MM-DD')
+          }).then((r) => {
+            this.reset()
+            this.$emit('success')
+          }).catch(() => {
+            this.putLoading = false
+          })
         }
       })
     },
@@ -293,42 +321,41 @@ export default {
     },
     subPutOut () {
       this.form.validateFields((err, values) => {
-        if (!err) {
-          let data = []
-          this.dataSource.forEach(item => {
-            if (item.isNew === false && item.editable === false) {
-              data.push(item)
-            }
-          })
-          if (data.length === 0) {
-            return this.$message.warning('入库名单至少要有一条数据')
+        if (!this.deptId) return this.$message.warning('请选择出库到哪个部门')
+        if (err) return
+        let data = []
+        this.dataSource.forEach(item => {
+          if (item.isNew === false && item.editable === false) {
+            data.push(item)
           }
-          this.modalVisible = false
-          let unionList = JSON.stringify(data, function (key, value) {
-            return key === 'key' || key === 'editable' || key === 'isNew' ? undefined : value
-          })
-          const date = values['date']
-          console.log({
-            ...values,
-            typeApplication: 6, // 工会用品
-            toDeptId: 16, // 默认出库到工会
-            date: date.format('YYYY-MM-DD'),
-            storeroomList: unionList
-          })
-          // this.putOutLoading = true
-          // this.$post('storeroomPut/inOut', {
-          //   ...values,
-          //   typeApplication: 6, // 工会用品
-          //   toDeptId: 16, // 默认出库到工会
-          //   date: date.format('YYYY-MM-DD'),
-          //   storeroomList: unionList
-          // }).then((r) => {
-          //   this.reset()
-          //   this.$emit('success')
-          // }).catch(() => {
-          //   this.putOutLoading = false
-          // })
+        })
+        if (data.length === 0) {
+          return this.$message.warning('入库名单至少要有一条数据')
         }
+        this.modalVisible = false
+        let unionList = JSON.stringify(data, function (key, value) {
+          return key === 'key' || key === 'editable' || key === 'isNew' ? undefined : value
+        })
+        const date = values['date']
+        console.log({
+          ...values,
+          toDeptId: this.deptId,
+          date: date.format('YYYY-MM-DD'),
+          storeroomList: unionList
+        })
+        this.putOutLoading = true
+        this.$post('unionStoreroomPut/inOut', {
+          ...values,
+          typeApplication: 6, // 工会用品
+          toDeptId: this.deptId,
+          date: date.format('YYYY-MM-DD'),
+          storeroomList: unionList
+        }).then((r) => {
+          this.reset()
+          this.$emit('success')
+        }).catch(() => {
+          this.putOutLoading = false
+        })
       })
     }
   },
@@ -337,6 +364,19 @@ export default {
       if (this.putAddVisiable) {
         this.form.getFieldDecorator('date')
         this.form.setFieldsValue({ date: moment() })
+        this.$get('dict/cy_storeroom', {
+        }).then((r) => {
+          let dictList = {}
+          r.data.forEach((item) => {
+            let fieldName = this.$tools.toHump(item.fieldName.toLowerCase())
+            if (dictList[fieldName]) {
+              dictList[fieldName].push({key: item.keyy, value: item.valuee})
+            } else {
+              dictList[fieldName] = [{key: item.keyy, value: item.valuee}]
+            }
+          })
+          this.dictData = {...this.dictData, ...dictList}
+        })
       }
     }
   }

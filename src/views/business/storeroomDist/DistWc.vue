@@ -127,7 +127,7 @@
 </template>
 <script>
 export default {
-  name: 'distWC',
+  name: 'DistWC',
   props: {
     distWcVisiable: {
       default: false

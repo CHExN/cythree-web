@@ -5,7 +5,7 @@
       <a-form layout="horizontal">
         <div :class="advanced ? null: 'fold'">
           <a-row>
-            <a-col :md="12" :sm="24" >
+            <a-col :md="8" :sm="24" >
               <a-form-item
                 label="角色"
                 :labelCol="{span: 5}"
@@ -13,7 +13,19 @@
                 <a-input v-model="queryParams.roleName"/>
               </a-form-item>
             </a-col>
-            <a-col :md="12" :sm="24" >
+            <a-col :md="8" :sm="24" >
+              <a-form-item
+                label="类型"
+                :labelCol="{span: 5}"
+                :wrapperCol="{span: 18, offset: 1}">
+                <a-select
+                  v-model="queryParams.type">
+                  <a-select-option key="1">成本核算</a-select-option>
+                  <a-select-option key="2">小程序</a-select-option>
+                </a-select>
+              </a-form-item>
+            </a-col>
+            <a-col :md="8" :sm="24" >
               <a-form-item
                 label="创建时间"
                 :labelCol="{span: 5}"
@@ -138,10 +150,23 @@ export default {
         title: '角色',
         dataIndex: 'roleName'
       }, {
+        title: '类型',
+        dataIndex: 'type',
+        customRender: (text, row, index) => {
+          switch (text) {
+            case '1':
+              return <a-tag color="blue">成本核算</a-tag>
+            case '2':
+              return <a-tag color="orange">小程序</a-tag>
+            default:
+              return text
+          }
+        }
+      }, {
         title: '描述',
         dataIndex: 'remark',
         scopedSlots: { customRender: 'remark' },
-        width: 350
+        width: '25%'
       }, {
         title: '创建时间',
         dataIndex: 'createTime',

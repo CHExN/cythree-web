@@ -2,7 +2,7 @@
   <a-modal
     title="合同联审单信息"
     :centered="true"
-    :width="1200"
+    :width="1100"
     :visible="contractInfoVisiable"
     :keyboard="false"
     :footer="null"
@@ -63,9 +63,7 @@
         </template>
         <a-step title="完成"></a-step>
       </a-steps>
-      <a-divider style="margin-bottom: 32px"/>
-    </a-card>
-    <a-card :bordered="false">
+      <a-divider/>
       <detail-list title="基本信息">
         <detail-list-item term="单位名称">北京市朝阳区环境卫生服务中心</detail-list-item>
         <detail-list-item term="承办部门">{{contractInfoData.deptName}}</detail-list-item>

@@ -2,7 +2,7 @@
   <a-modal
     title="编外合同信息"
     :centered="true"
-    :width="1200"
+    :width="1100"
     :visible="contractOutsideInfoVisiable"
     :keyboard="false"
     :footer="null"
@@ -12,22 +12,17 @@
         <template v-for="(k, index) in contractPeriod">
           <detail-list-item :key="index" :term="k">{{contractPeriodDate[index]}}</detail-list-item>
         </template>
-        <!-- <detail-list-item term="无固定期">{{contractOutsideInfoData.isFixedPeriod}}</detail-list-item> -->
         <detail-list-item term="续签备注">{{contractOutsideInfoData.remarkRenew}}</detail-list-item>
         <detail-list-item term="备注">{{contractOutsideInfoData.remark}}</detail-list-item>
       </detail-list>
-    </a-card>
-    <a-divider style="margin-bottom: 32px" v-if="contractPeriod.length > 0 && jobAgreement.length > 0"/>
-    <a-card :bordered="false" v-if="jobAgreement.length > 0">
-      <detail-list title="岗位协议信息">
+      <a-divider v-if="contractPeriod.length > 0 && jobAgreement.length > 0"/>
+      <detail-list title="岗位协议信息" :bordered="false" v-if="jobAgreement.length > 0">
         <template v-for="(k, index) in jobAgreement">
           <detail-list-item :key="index" :term="k">{{jobAgreementDate[index]}}</detail-list-item>
         </template>
       </detail-list>
-    </a-card>
-    <a-divider v-hasPermission="'staffOutside:view'" v-if="contractPeriod.length > 0 || jobAgreement.length > 0" style="margin-bottom: 32px"/>
-    <a-card v-hasPermission="'staffOutside:view'" :loading='loading' :bordered="false">
-      <detail-list title="人员信息">
+      <a-divider v-hasPermission="'staffOutside:view'" v-if="contractPeriod.length > 0 || jobAgreement.length > 0"/>
+      <detail-list title="人员信息" v-hasPermission="'staffOutside:view'" :loading='loading'>
         <detail-list-item term="姓名">{{staffOutsideData.name}}</detail-list-item>
         <detail-list-item term="分队">{{staffOutsideData.team}}</detail-list-item>
         <detail-list-item term="人员类型">{{staffOutsideData.temporary}}</detail-list-item>
@@ -43,7 +38,6 @@
         <detail-list-item term="座机联系电话">{{staffOutsideData.phoneLandLine}}</detail-list-item>
         <detail-list-item term="手机联系电话">{{staffOutsideData.phoneCell}}</detail-list-item>
         <detail-list-item term="出生年月">{{staffOutsideData.birthDate}}</detail-list-item>
-        <!-- <detail-list-item term="年龄">{{this.$tools.getAge(staffOutsideData.birthDate)}}</detail-list-item> -->
         <detail-list-item term="年龄">{{staffOutsideData.age}}</detail-list-item>
         <detail-list-item term="退休年龄">{{staffOutsideData.retirementAge}}</detail-list-item>
         <detail-list-item term="退休日期">{{staffOutsideData.retirementDate}}</detail-list-item>
@@ -52,8 +46,8 @@
         <detail-list-item term="岗位类别">{{staffOutsideData.technicalType}}</detail-list-item>
         <detail-list-item term="备注">{{staffOutsideData.remark}}</detail-list-item>
       </detail-list>
+      <a-divider v-hasPermission="'staffOutside:addDeletePhoto'"/>
     </a-card>
-    <a-divider v-hasPermission="'staffOutside:addDeletePhoto'" style="margin-bottom: 32px"/>
     <div>
       <div v-hasPermission="'staffOutside:addDeletePhoto'">
         <a-upload

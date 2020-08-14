@@ -20,7 +20,7 @@
                 <a-select
                   mode="multiple"
                   :allowClear="true"
-                  @change="handleOwnChange">
+                  v-model="queryParams.wcOwn">
                   <a-select-option v-for="i in filteredWcOwnOptions" :key="i">{{ i }}</a-select-option>
                 </a-select>
               </a-form-item>
@@ -32,6 +32,50 @@
                   :labelCol="{span: 5}"
                   :wrapperCol="{span: 18, offset: 1}">
                   <a-input v-model="queryParams.wcNum"/>
+                </a-form-item>
+              </a-col>
+              <a-col :md="12" :sm="24" >
+                <a-form-item
+                  label="建筑类型"
+                  :labelCol="{span: 5}"
+                  :wrapperCol="{span: 18, offset: 1}">
+                  <a-select
+                    :allowClear="true"
+                    v-model="queryParams.buildingType">
+                    <a-select-option v-for="i in Object.keys(dictData.buildingType||[])" :key="i">{{ dictData.buildingType[i] }}</a-select-option>
+                  </a-select>
+                </a-form-item>
+              </a-col>
+              <a-col :md="12" :sm="24" >
+                <a-form-item
+                  label="所属街乡"
+                  :labelCol="{span: 5}"
+                  :wrapperCol="{span: 18, offset: 1}">
+                  <a-input v-model="queryParams.streetTown"/>
+                </a-form-item>
+              </a-col>
+              <a-col :md="12" :sm="24" >
+                <a-form-item
+                  label="管理形式"
+                  :labelCol="{span: 5}"
+                  :wrapperCol="{span: 18, offset: 1}">
+                  <a-select
+                    :allowClear="true"
+                    v-model="queryParams.manageType">
+                    <a-select-option v-for="i in Object.keys(dictData.manageType||[])" :key="i">{{ dictData.manageType[i] }}</a-select-option>
+                  </a-select>
+                </a-form-item>
+              </a-col>
+              <a-col :md="12" :sm="24" >
+                <a-form-item
+                  label="是否销账"
+                  :labelCol="{span: 5}"
+                  :wrapperCol="{span: 18, offset: 1}">
+                  <a-select
+                    :allowClear="true"
+                    v-model="queryParams.writeOff">
+                    <a-select-option v-for="i in Object.keys(dictData.writeOff||[])" :key="i">{{ dictData.writeOff[i] }}</a-select-option>
+                  </a-select>
                 </a-form-item>
               </a-col>
             </template>
@@ -52,13 +96,14 @@
         <a-button type="primary" ghost @click="add" v-hasPermission="'wc:add'">新增</a-button>
         <a-button @click="batchDelete" v-hasPermission="'wc:delete'">删除</a-button>
         <!-- <a-button @click="exportExcel" v-hasPermission="'wc:export'">导出Excel</a-button> -->
-        <a-dropdown v-hasAnyPermission="'wc:export','wc:add'">
+        <a-dropdown>
           <a-menu slot="overlay">
             <a-menu-item key="download-template" @click="downloadTemplate">模板下载</a-menu-item>
             <a-menu-item key="import-data" v-hasPermission="'wc:add'">
               <a-upload class="upload-area" :fileList="fileList" :beforeUpload="importExcel">导入Excel</a-upload>
             </a-menu-item>
             <a-menu-item v-hasPermission="'wc:export'" key="export-data" @click="exportExcel">导出Excel</a-menu-item>
+            <a-menu-item key="batch-download-image" @click="batchDownloadImage">批量导出二维码</a-menu-item>
           </a-menu>
           <a-button>
             更多操作 <a-icon type="down" />
@@ -66,16 +111,14 @@
         </a-dropdown>
       </div>
       <div class="full-screen-btn-con">
-        <a-modal v-model="modal" centered :closable="false" :width="360">
+        <a-modal v-model="modal" centered :closable="false" :width="460">
             <div style="text-align: center;">
               <vue-qr
                 ref="Qrcode"
                 :text="qrCodeConfig.text"
                 :download="qrCodeConfig.name"
                 :margin="10"
-                :size="qrCodeConfig.size"
-                :dotScale="qrCodeConfig.dotScale"
-                :colorDark="qrCodeConfig.colorDark"/>
+                :size="400"/>
             </div>
             <template  slot="footer">
               <a-button type="primary" @click="downloadImg">下载二维码</a-button>
@@ -95,13 +138,26 @@
         <template slot="operation" slot-scope="text, record">
           <a-icon v-hasPermission="'wc:update'" type="setting" theme="twoTone" twoToneColor="#4a9ff5" @click="edit(record)" title="修改" />
           &nbsp;
-          <a-icon type="qrcode" @click="showImage(record)" title="二维码" />
+          <a-icon type="qrcode" @click="showImage(record)" title="二维码"/>
           &nbsp;
           <a-icon v-hasPermission="'wc:view'" type="eye" theme="twoTone" twoToneColor="#42b983" @click="view(record)" title="查看" />
           <!-- <a-badge v-hasNoPermission="'wc:update','wc:view'" status="warning" text="无权限"></a-badge> -->
         </template>
       </a-table>
     </div>
+    <template>
+      <div v-if="wcList.length > 0" hidden>
+        <div v-for="wc in wcList" :key="wc.wcId">
+          <vue-qr
+            :text="`https://wc.ncsll.com/wc/${wc.wcId}`"
+            :download="`QR-Code_${wc.wcNum}_${wc.wcName}`"
+            :margin="10"
+            :size="1500"
+            :callback="qrCallback"
+            :qid="`QR-Code_${wc.wcNum}_${wc.wcName}`"/>
+        </div>
+      </div>
+    </template>
     <!-- 公厕信息查看 -->
     <wc-info
       :wcInfoData="wcInfo.data"
@@ -141,17 +197,19 @@ import WcAdd from './WCAdd'
 import WcEdit from './WCEdit'
 import WcImportResult from './WCImportResult'
 import VueQr from 'vue-qr'
+import JSZip from 'jszip'
+import { saveAs } from 'file-saver'
 
 export default {
-  // test
   name: 'WC',
-  components: { WcInfo, WcAdd, WcEdit, WcImportResult, VueQr },
+  components: { WcInfo, WcAdd, WcEdit, WcImportResult, VueQr, JSZip, saveAs },
   data () {
     return {
+      wcList: [],
+      qrCodeUrls: [],
       modal: false,
       qrCodeConfig: {
         text: 'qiouweyroqiuweyroiquweryqiouweyroiquwery',
-        size: 300,
         name: '二维码'
       },
       // downloadFilename: '',
@@ -176,7 +234,7 @@ export default {
       wcOwnData: [],
       queryParams: {
         wcOwn: [],
-        wcSort: []
+        writeOff: '0'
       },
       filteredInfo: null,
       sortedInfo: null,
@@ -216,7 +274,6 @@ export default {
       }, {
         title: '公厕编号',
         dataIndex: 'wcNum',
-        scopedSlots: { customRender: 'wcNum' },
         sorter: true,
         sortOrder: sortedInfo.columnKey === 'wcNum' && sortedInfo.order
       }, {
@@ -271,22 +328,56 @@ export default {
   },
   mounted () {
     this.loadSelect()
-    this.fetch()
+    this.fetch({...this.queryParams})
   },
   methods: {
+    qrCallback (dataUrl, id) {
+      this.qrCodeUrls.push({picData: dataUrl, fileName: id}) // 把数据存进数组里面
+      if (this.qrCodeUrls.length !== this.wcList.length) return
+      console.log('全部插入完成')
+      this.handleBatchDownload()
+    },
     showImage (record) {
-      this.qrCodeConfig.name = `QR-Code_${record.wcName}_${record.wcNum}`
-      // this.qrCodeConfig.text = record.wcNum
+      this.qrCodeConfig.name = `QR-Code_${record.wcNum}_${record.wcName}`
       this.qrCodeConfig.text = `https://wc.ncsll.com/wc/${record.wcId}`
       this.modal = true
     },
     downloadImg () {
       const iconUrl = this.$refs.Qrcode.$el.src
+      const event = new MouseEvent('click')
       let a = document.createElement('a')
-      let event = new MouseEvent('click')
       a.download = this.qrCodeConfig.name
       a.href = iconUrl
       a.dispatchEvent(event)
+    },
+    batchDownloadImage () {
+      this.$message.loading('正在导出', 0)
+      let params = {...this.queryParams}
+      // 设置导出的数据为总数据条数
+      params.pageSize = 9999
+      params.pageNum = 1
+      this.$get('wc', {
+        ...params
+      }).then((r) => {
+        this.wcList = r.data.rows
+        this.$message.destroy()
+      })
+    },
+    // 压缩图片
+    handleBatchDownload () {
+      const zip = new JSZip()
+      this.qrCodeUrls.sort(this.$tools.compare('fileName'))
+      this.qrCodeUrls.forEach(item => {
+        const fileName = `${item.fileName}.jpg`
+        let arrData = item.picData.split(',')
+        zip.file(fileName, arrData[1], {base64: true}) // 向zip中添加文件
+      })
+      zip.generateAsync({type: 'blob'}).then((content) => {
+        saveAs(content, 'QR-Code公厕.zip')
+      })
+      // 重置
+      this.wcList = []
+      this.qrCodeUrls = []
     },
     handleClose () {
       this.wcImportResultVisible = false
@@ -301,7 +392,7 @@ export default {
       this.$upload('wc/import', formData).then((r) => {
         let data = r.data.data
         if (data.data.length) {
-          this.fetch()
+          this.search()
         }
         this.$message.destroy()
         this.importData = data.data
@@ -322,6 +413,10 @@ export default {
       // 每次展开，把隐藏的内容清空
       if (!this.advanced) {
         this.queryParams.wcNum = ''
+        this.queryParams.buildingType = ''
+        this.queryParams.streetTown = ''
+        this.queryParams.manageType = ''
+        this.queryParams.writeOff = '0'
       }
     },
     view (record) {
@@ -357,9 +452,18 @@ export default {
     handleWCInfoClose () {
       this.wcInfo.visiable = false
     },
-    handleOwnChange (value) {
-      this.queryParams.wcOwn = value || ''
-    },
+    // handleOwnChange (value) {
+    //   this.queryParams.wcOwn = value || []
+    // },
+    // handleBuildingTypeChange (value) {
+    //   this.queryParams.buildingType = value || ''
+    // },
+    // handleManageTypeChange (value) {
+    //   this.queryParams.manageType = value || ''
+    // },
+    // handleWriteOffChange (value) {
+    //   this.queryParams.writeOff = value || ''
+    // },
     batchDelete () {
       if (!this.selectedRowKeys.length) {
         this.$message.warning('请选择需要删除的记录')
@@ -405,6 +509,7 @@ export default {
       })
     },
     search () {
+      // this.$get('wc/test')
       let {sortedInfo, filteredInfo} = this
       let sortField, sortOrder
       // 获取当前列的排序和列的过滤规则
@@ -435,9 +540,9 @@ export default {
       // 重置查询参数
       this.queryParams = {
         wcOwn: [],
-        wcSort: []
+        writeOff: '0'
       }
-      this.fetch()
+      this.fetch({...this.queryParams})
     },
     handleTableChange (pagination, filters, sorter) {
       // 将这三个参数赋值给Vue data，用于后续使用

@@ -1,6 +1,6 @@
 <template>
   <a-drawer
-    title="食堂用品入库"
+    title="入库"
     :maskClosable="false"
     width=1220
     placement="right"
@@ -33,8 +33,16 @@
           </a-form-item>
         </a-col>
         <a-col :md="12" :sm="24">
+          <a-form-item label='物资类别' v-bind="formItemLayout">
+            <a-select @change="handleTypeApplicationChange" v-model="typeApplication">
+              <a-select-option key="8">食堂用品</a-select-option>
+              <a-select-option key="9">其他</a-select-option>
+            </a-select>
+          </a-form-item>
+        </a-col>
+        <a-col :md="12" :sm="24">
           <a-form-item label='供应商' v-bind="formItemLayout">
-            <a-select placeholder='供应商' v-decorator="['supplier', {
+            <a-select placeholder='供应商'  v-decorator="['supplier', {
               initialValue: [dictData.supplier && dictData.supplier.length > 0 ? dictData.supplier[0].key : ''],
               rules: [{ required: true, message: '请选择供应商' }]
             }]">
@@ -151,13 +159,26 @@
       <a-popconfirm title="确定放弃编辑？" @confirm="onClose" okText="确定" cancelText="取消">
         <a-button style="margin-right: .8rem">取消</a-button>
       </a-popconfirm>
-      <a-button type="primary" ghost  @click="subPutOut" :loading="putOutLoading">即入即出</a-button>
+      <a-button type="primary" ghost  @click="showModal" :loading="putOutLoading">即入即出</a-button>
       &nbsp;&nbsp;
+      <a-modal
+        title="选择出库到哪个部门"
+        v-model="modalVisible"
+        :mask='false'
+        :maskClosable="false"
+        :width='350'
+        style="left: 30%;top: 65%"
+        @ok="subPutOut"
+        okText="提交"
+        cancelText="取消">
+        <dept-input-tree @change="handleDeptChange" placeholder='请选择部门' ref="deptTree" style="width: 100%;"></dept-input-tree>
+      </a-modal>
       <a-button @click="handleSubmit" type="primary" :loading="putLoading">提交</a-button>
     </div>
   </a-drawer>
 </template>
 <script>
+import DeptInputTree from '../../system/dept/DeptInputTree'
 import moment from 'moment'
 moment.locale('zh-cn')
 const formItemLayout = {
@@ -167,6 +188,7 @@ const formItemLayout = {
 
 export default {
   name: 'CanteenPutAdd',
+  components: { DeptInputTree },
   props: {
     putAddVisiable: {
       default: false
@@ -182,7 +204,10 @@ export default {
       autoData: {},
       open: false,
       tableIndex: 0,
+      modalVisible: false,
       dictData: {},
+      typeApplication: '8',
+      deptId: '',
       formItemLayout,
       form: this.$form.createForm(this)
     }
@@ -238,6 +263,8 @@ export default {
       this.form.resetFields()
       this.dataSource = []
       this.autoData = {}
+      this.typeApplication = '8'
+      this.deptId = ''
       this.tableIndex = 0
     },
     onClose () {
@@ -248,17 +275,17 @@ export default {
       this.form.validateFields((err, values) => {
         if (!err) {
           let data = []
-          let isType = true
+          let isType = false
           this.dataSource.forEach(item => {
             if (item.isNew === false && item.editable === false) {
-              if (!item.type) isType = false
+              if (!item.type) isType = true
               data.push(item)
             }
           })
           if (data.length === 0) {
             return this.$message.warning('入库名单至少要有一条数据')
           }
-          if (!isType) {
+          if (this.typeApplication === '8' && isType) {
             return this.$message.warning('请检查类别列是否有空的')
           }
           let canteenList = JSON.stringify(data, function (key, value) {
@@ -268,7 +295,7 @@ export default {
           this.putLoading = true
           this.$post('storeroomPut', {
             ...values,
-            typeApplication: 8, // 食堂用品
+            typeApplication: this.typeApplication,
             storeroomList: canteenList,
             date: date.format('YYYY-MM-DD')
           }).then((r) => {
@@ -279,6 +306,9 @@ export default {
           })
         }
       })
+    },
+    handleTypeApplicationChange (value) {
+      this.typeApplication = value
     },
     newRow () {
       this.tableIndex++
@@ -350,7 +380,11 @@ export default {
       return option.componentOptions.children[0].text.toUpperCase().indexOf(input.toUpperCase()) >= 0
     },
     showModal () {
-      this.form.validateFields((err) => {
+      if (this.typeApplication === '8') {
+        this.deptId = '32' // 默认出库到食堂
+        return this.subPutOut()
+      }
+      this.form.validateFields((err, values) => {
         if (!err) {
           if (this.dataSource.length !== 0) {
             this.modalVisible = true
@@ -362,19 +396,23 @@ export default {
     },
     subPutOut () {
       this.form.validateFields((err, values) => {
+        console.log(this.deptId)
+        if (!this.deptId) {
+          return this.$message.warning('请选择出库到哪个部门')
+        }
         if (!err) {
           let data = []
-          let isType = true
+          let isType = false
           this.dataSource.forEach(item => {
             if (item.isNew === false && item.editable === false) {
-              if (!item.type) isType = false
+              if (!item.type) isType = true
               data.push(item)
             }
           })
           if (data.length === 0) {
             return this.$message.warning('入库名单至少要有一条数据')
           }
-          if (!isType) {
+          if (this.typeApplication === '8' && isType) {
             return this.$message.warning('请检查类别列是否有空的')
           }
           this.modalVisible = false
@@ -385,18 +423,25 @@ export default {
           const date = values['date']
           this.$post('storeroomPut/inOut', {
             ...values,
-            typeApplication: 8, // 食堂用品
-            toDeptId: 32, // 默认出库到食堂
+            typeApplication: this.typeApplication,
+            toDeptId: this.deptId,
             date: date.format('YYYY-MM-DD'),
             storeroomList: canteenList
           }).then((r) => {
-            this.reset()
             this.$emit('success')
+            if (this.typeApplication === '9') {
+              // 清空部门树选择
+              this.$refs.deptTree.reset()
+            }
+            this.reset()
           }).catch(() => {
             this.putOutLoading = false
           })
         }
       })
+    },
+    handleDeptChange (value) {
+      this.deptId = value || ''
     }
   },
   watch: {

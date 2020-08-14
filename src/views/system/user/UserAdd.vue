@@ -13,8 +13,7 @@
                    v-bind="formItemLayout"
                    :validateStatus="validateStatus"
                    :help="help">
-        <a-input v-model="user.username"
-                 @blur="handleUserNameBlur"
+        <a-input @blur="handleUserNameBlur"
                  autocomplete="off"
                  v-decorator="['username',{rules: [{ required: true, message: '用户名不能为空'}]}]"/>
       </a-form-item>
@@ -25,7 +24,6 @@
       </a-form-item>
       <a-form-item label='邮箱' v-bind="formItemLayout">
         <a-input
-          v-model="user.email"
           autocomplete="off"
           v-decorator="['email',{rules: [
             { type: 'email', message: '请输入正确的邮箱' },
@@ -34,7 +32,6 @@
       </a-form-item>
       <a-form-item label="手机" v-bind="formItemLayout">
         <a-input
-          v-model="user.mobile"
           autocomplete="off"
           v-decorator="['mobile']"/>
       </a-form-item>
@@ -42,10 +39,9 @@
         <a-select
           mode="multiple"
           :allowClear="true"
-          v-model="user.roleId"
           autocomplete="off"
           style="width: 100%;"
-          v-decorator="['role',{rules: [{ required: true, message: '请选择角色' }]}]">
+          v-decorator="['roleId',{rules: [{ required: true, message: '请选择角色' }]}]">
           <a-select-option v-for="r in roleData" :key="r.roleId">{{r.roleName}}</a-select-option>
         </a-select>
       </a-form-item>
@@ -55,29 +51,35 @@
           :dropdownStyle="{ maxHeight: '220px', overflow: 'auto' }"
           :treeData="deptTreeData"
           v-decorator="['deptId']"
-          autocomplete="off"
-          v-model="user.deptId">
+          autocomplete="off">
         </a-tree-select>
       </a-form-item>
       <a-form-item label='状态' v-bind="formItemLayout">
         <a-radio-group
-          v-model="user.status"
           autocomplete="off"
-          v-decorator="['status',{rules: [{ required: true, message: '请选择状态'}]}]">
+          v-decorator="['status',{ initialValue: '1', rules: [{ required: true, message: '请选择状态'}] }]">
           <a-radio-button value="0">锁定</a-radio-button>
           <a-radio-button value="1">有效</a-radio-button>
         </a-radio-group>
       </a-form-item>
-      <a-form-item label='性别' v-bind="formItemLayout">
+      <a-form-item label='账号类型' v-bind="formItemLayout">
         <a-radio-group
-          v-model="user.ssex"
+          autocomplete="off"
+          v-decorator="['type',{ initialValue: '1', rules: [{ required: true, message: '请选择账号类型'}] }]">
+          <a-radio-button value="0">通用</a-radio-button>
+          <a-radio-button value="1">成本核算</a-radio-button>
+          <a-radio-button value="2">小程序</a-radio-button>
+        </a-radio-group>
+      </a-form-item>
+      <!-- <a-form-item label='性别' v-bind="formItemLayout">
+        <a-radio-group
           autocomplete="off"
           v-decorator="['ssex',{rules: [{ required: true, message: '请选择性别' }]}]">
           <a-radio-button value="0">男</a-radio-button>
           <a-radio-button value="1">女</a-radio-button>
           <a-radio-button value="2">保密</a-radio-button>
         </a-radio-group>
-      </a-form-item>
+      </a-form-item> -->
     </a-form>
       <div class="drawer-bootom-button">
         <a-popconfirm title="确定放弃编辑？" @confirm="onClose" okText="确定" cancelText="取消">
@@ -101,9 +103,6 @@ export default {
   },
   data () {
     return {
-      user: {
-        username: ''
-      },
       loading: false,
       roleData: [],
       deptTreeData: [],
@@ -118,7 +117,6 @@ export default {
     reset () {
       this.validateStatus = ''
       this.help = ''
-      this.user.username = ''
       this.loading = false
       this.form.resetFields()
     },
@@ -133,9 +131,9 @@ export default {
       this.form.validateFields((err, values) => {
         if (!err && this.validateStatus === 'success') {
           this.loading = true
-          this.user.roleId = this.user.roleId.join(',')
+          console.log(values)
           this.$post('user', {
-            ...this.user
+            ...values
           }).then((r) => {
             this.reset()
             this.$emit('success')
@@ -146,7 +144,9 @@ export default {
       })
     },
     handleUserNameBlur () {
-      let username = this.user.username.trim()
+      let username = this.form.getFieldValue('username')
+      username = username ? username.trim() : ''
+      console.log(username)
       if (username.length) {
         if (username.length > 10) {
           this.validateStatus = 'error'
@@ -175,7 +175,7 @@ export default {
   watch: {
     userAddVisiable () {
       if (this.userAddVisiable) {
-        this.$get('role/allRole').then((r) => {
+        this.$get('role/getRole').then((r) => {
           this.roleData = r.data
         })
         this.$get('dept').then((r) => {

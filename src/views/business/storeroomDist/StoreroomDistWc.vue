@@ -106,7 +106,7 @@
 import RangeDate from '@/components/datetime/RangeDate'
 
 export default {
-  name: 'distWC',
+  name: 'StoreroomDistWc',
   components: { RangeDate },
   props: {
     storeroomDistWcVisiable: {

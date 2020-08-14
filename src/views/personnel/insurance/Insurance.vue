@@ -9,7 +9,7 @@
                 label="编制类别"
                 :labelCol="{span: 5}"
                 :wrapperCol="{span: 18, offset: 1}">
-                <a-select v-model="insOut">
+                <a-select v-model="queryParams.insideOrOutside">
                   <a-select-option value="2">全部</a-select-option>
                   <a-select-option value="0">编内</a-select-option>
                   <a-select-option value="1">编外</a-select-option>
@@ -22,7 +22,7 @@
                 :labelCol="{span: 5}"
                 :wrapperCol="{span: 18, offset: 1}">
                 <a-month-picker
-                  v-model="nowMonth"
+                  v-model="queryParams.nowMonth"
                   style="width: 100%;"
                   :allowClear="false"
                 />
@@ -62,7 +62,7 @@
       <div class="operator">
         <a-button type="primary" ghost @click="add" v-hasPermission="'insurance:add'">新增</a-button>
         <a-button @click="batchDelete" v-hasPermission="'insurance:delete'">删除</a-button>
-        <a-dropdown v-hasAnyPermission="'insurance:export','insurance:add'">
+        <a-dropdown>
           <a-menu slot="overlay">
             <a-menu-item key="download-template" @click="downloadTemplate">模板下载</a-menu-item>
             <a-menu-item key="import-data" v-hasPermission="'insurance:add'">
@@ -183,8 +183,6 @@ export default {
   components: { InsuranceAdd, InsuranceEdit, InsuranceInfo, InsuranceImportResult },
   data () {
     return {
-      insOut: '2',
-      nowMonth: moment(),
       radioValue: true,
       modalVisible: false,
       dateData: {
@@ -219,7 +217,10 @@ export default {
         dateForm: {},
         dateTo: {}
       },
-      queryParams: {},
+      queryParams: {
+        nowMonth: moment(),
+        insideOrOutside: '2'
+      },
       filteredInfo: null,
       sortedInfo: null,
       paginationInfo: null,
@@ -297,7 +298,7 @@ export default {
     }
   },
   mounted () {
-    this.fetch()
+    this.fetch({...this.queryParams})
   },
   methods: {
     handleMonthChange (value) {
@@ -374,7 +375,7 @@ export default {
       this.$upload('insurance/import', formData).then((r) => {
         let data = r.data.data
         if (data.data.length) {
-          this.fetch()
+          this.search()
         }
         this.file = ''
         this.$message.destroy()
@@ -513,7 +514,8 @@ export default {
     },
     exportExcel () {
       let {sortedInfo, filteredInfo} = this
-      let sortField, sortOrder, pageSize
+      let sortField, sortOrder, pageSize, params
+      params = {...this.queryParams}
       // 设置导出的数据为总数据条数
       if (this.pagination) {
         pageSize = this.pagination.total
@@ -525,14 +527,17 @@ export default {
         // 排序方式 ascend正序 descend倒序
         sortOrder = sortedInfo.order
       }
+      if (params.nowMonth) {
+        params.year = params.nowMonth.format('YYYY')
+        params.month = params.nowMonth.format('MM')
+        params.monthArr = this.monthData.slice(0, this.monthData.indexOf(params.month) + 1).join()
+        delete params.nowMonth
+      }
       this.$export('insurance/excel', {
-        insideOrOutside: this.insOut,
-        year: this.nowMonth.format('YYYY'),
-        monthL: this.nowMonth.format('MM'),
         sortField: sortField,
         sortOrder: sortOrder,
         pageSize: pageSize,
-        ...this.queryParams,
+        ...params,
         ...filteredInfo
       })
     },
@@ -565,17 +570,16 @@ export default {
       // 重置列排序规则
       this.sortedInfo = null
       // 重置查询参数
-      this.queryParams = {}
+      this.queryParams = {
+        nowMonth: moment(),
+        insideOrOutside: '2'
+      }
       // 重置日期选择data
       this.dateData2 = {
         dateForm: {},
         dateTo: {}
       }
-      // 重置月份
-      this.nowMonth = moment()
-      // 重置编制类别
-      this.insOut = '2'
-      this.fetch()
+      this.fetch({...this.queryParams})
     },
     handleTableChange (pagination, filters, sorter) {
       // 将这三个参数赋值给Vue data，用于后续使用
@@ -604,12 +608,12 @@ export default {
         params.pageSize = this.pagination.defaultPageSize
         params.pageNum = this.pagination.defaultCurrent
       }
-      if (this.nowMonth) {
-        params.year = this.nowMonth.format('YYYY')
-        params.month = this.nowMonth.format('MM')
+      if (params.nowMonth) {
+        params.year = params.nowMonth.format('YYYY')
+        params.month = params.nowMonth.format('MM')
+        delete params.nowMonth
       }
       this.$get('insurance', {
-        insideOrOutside: this.insOut,
         ...params
       }).then((r) => {
         let data = r.data

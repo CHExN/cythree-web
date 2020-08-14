@@ -42,7 +42,7 @@
                   label="状态"
                   :labelCol="{span: 5}"
                   :wrapperCol="{span: 18, offset: 1}">
-                  <a-select v-model="status">
+                  <a-select v-model="queryParams.status">
                     <a-select-option value="0,1">全部</a-select-option>
                     <a-select-option value="0">未分配完</a-select-option>
                     <a-select-option value="1">已分配完</a-select-option>
@@ -88,7 +88,7 @@
     </div>
     <div>
       <div class="operator">
-        <a-button v-hasPermission="'wcStoreroom:view'" type="primary" ghost @click="showModal">查看记录</a-button>
+        <!-- <a-button v-hasPermission="'wcStoreroom:view'" type="primary" ghost @click="showModal">查看记录</a-button> -->
         <a-button v-hasPermission="'wcStoreroom:view'" @click="downloadTemplate">模板下载</a-button>
         <a-dropdown>
           <a-menu slot="overlay">
@@ -102,7 +102,7 @@
             更多操作 <a-icon type="down" />
           </a-button>
         </a-dropdown>
-        &nbsp;
+        <!-- &nbsp;
         <a-modal
           title="选择查看月份"
           v-model="modalVisible"
@@ -131,7 +131,7 @@
             :mode="mode"
             @panelChange="handlePanelChange"
           />
-        </a-modal>
+        </a-modal> -->
       </div>
       <!-- 表格区域 -->
       <a-table ref="TableInfo"
@@ -172,7 +172,7 @@
         <template slot="operation" slot-scope="text, record">
           <a-icon type="setting" theme="twoTone" twoToneColor="#4a9ff5" @click="unit(record)" title="单位转换"/>
           &nbsp;
-          <a-icon v-hasPermission="'wc:wcName','wcStoreroom:add'" type="fork" @click="dist(record)" title="分配"/>
+          <a-icon v-hasPermission="'wc:wcName,wcStoreroom:add'" type="fork" @click="dist(record)" title="分配"/>
         </template>
       </a-table>
     </div>
@@ -191,12 +191,12 @@
       :distWcVisiable="distWc.visiable">
     </dist-wc>
     <!-- 查看记录 -->
-    <storeroom-dist-wc
+    <!-- <storeroom-dist-wc
       :dateTitle="dateTitle"
       :dateData="dateData"
       :storeroomDistWcVisiable="storeroomDistWc.visiable"
       @close="handleStoreroomDistWcClose">
-    </storeroom-dist-wc>
+    </storeroom-dist-wc> -->
     <!-- 导入结果 -->
     <import-result
       @close="handleClose"
@@ -212,12 +212,13 @@
 <script>
 import UnitConversion from './UnitConversion'
 import DistWc from './DistWc'
-import StoreroomDistWc from './StoreroomDistWc'
+// import StoreroomDistWc from './StoreroomDistWc'
 import ImportResult from '@/components/view/ImportResult'
 
 export default {
   name: 'StoreroomDist',
-  components: { UnitConversion, DistWc, StoreroomDistWc, ImportResult },
+  // components: { UnitConversion, DistWc, StoreroomDistWc, ImportResult },
+  components: { UnitConversion, DistWc, ImportResult },
   data () {
     return {
       fileList: [],
@@ -226,10 +227,9 @@ export default {
       errors: [],
       successColumns: [],
       importResultVisible: false,
-      status: '0',
       advanced: false,
       radioValue: true,
-      modalVisible: false,
+      // modalVisible: false,
       storeroomInfo: {
         visiable: false,
         data: {}
@@ -240,18 +240,18 @@ export default {
       distWc: {
         visiable: false
       },
-      storeroomDistWc: {
-        visiable: false
-      },
-      dateData: {
-        dateForm: {},
-        dateTo: {}
-      },
-      dateTitle: '',
+      // storeroomDistWc: {
+      //   visiable: false
+      // },
+      // dateData: {
+      //   dateForm: {},
+      //   dateTo: {}
+      // },
+      // dateTitle: '',
       dataSource: [],
-      monthValue: [],
-      monthData: ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12'],
-      mode: ['month', 'month'],
+      // monthValue: [],
+      // monthData: ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12'],
+      // mode: ['month', 'month'],
       dictData: {},
       filteredInfo: null,
       sortedInfo: null,
@@ -265,9 +265,9 @@ export default {
         showTotal: (total, range) => `显示 ${range[0]} ~ ${range[1]} 条记录，共 ${total} 条记录`
       },
       queryParams: {
-        // typeApplication: '1,2,4',
         typeApplication: '1,4',
-        toDeptIds: '26,27,28,29'
+        toDeptIds: '26,27,28,29',
+        status: '0'
       },
       loading: false
     }
@@ -344,7 +344,7 @@ export default {
   mounted () {
     this.loading = true
     this.loadSelect()
-    this.fetch()
+    this.fetch({...this.queryParams})
   },
   methods: {
     handleClose () {
@@ -357,7 +357,7 @@ export default {
       this.$upload('storeroom/import', formData).then((r) => {
         let data = r.data.data
         if (data.data.length) {
-          this.fetch()
+          this.search()
         }
         this.$message.destroy()
         this.importData = data.data
@@ -409,8 +409,6 @@ export default {
         sortOrder = sortedInfo.order
       }
       this.$export('storeroom/distExcel', {
-        // status: this.status,
-        status: '0',
         sortField: sortField,
         sortOrder: sortOrder,
         pageSize: pageSize,
@@ -431,6 +429,7 @@ export default {
         this.queryParams.toDeptIds = '26,27,28,29'
         this.queryParams.ids = ''
         this.queryParams.type = ''
+        this.queryParams.status = '0'
       }
     },
     handleStoreroomInfoClose () {
@@ -460,73 +459,67 @@ export default {
       this.$message.success('分配成功')
       this.search()
     },
-    handleStoreroomDistWcClose () {
-      this.storeroomDistWc.visiable = false
-    },
-    handleTypeApplicationChange (value) {
-      this.queryParams.typeApplication = value || '1,4'
-    },
-    handleToDeptIdsChange (value) {
-      this.queryParams.toDeptIds = value || '26,27,28,29'
-    },
-    showModal () {
-      this.modalVisible = true
-    },
-    viewDist () {
-      if (JSON.stringify(this.dateData.dateForm) !== '{}') {
-        this.modalVisible = false
-        this.storeroomDistWc.visiable = true
-      } else {
-        this.$message.warning('请选择查看月份')
-      }
-    },
-    onRadioChange (e) {
-      // 切换radio时 重置日期选择data
-      this.dateData = {
-        dateForm: {},
-        dateTo: {}
-      }
-      this.monthValue = []
-    },
-    handleMonthChange (value) {
-      if (!value) {
-        this.dateData.dateForm = {}
-        this.dateTitle = ''
-        return
-      }
-      this.dateData.dateForm = {
-        year: value.format('YYYY'),
-        month: value.format('MM')
-      }
-      this.dateTitle = value.format('YYYY年MM月')
-    },
-    handlePanelChange (value, mode) {
-      let yearForm = value[0].format('YYYY')
-      let yearTo = value[1].format('YYYY')
-      let monthForm = value[0].format('MM')
-      let monthTo = value[1].format('MM')
-      if (yearForm === yearTo) {
-        this.dateData.dateForm = {
-          year: yearForm,
-          month: this.monthData.slice(this.monthData.indexOf(monthForm), this.monthData.indexOf(monthTo) + 1).join(',')
-        }
-      } else {
-        this.dateData.dateForm = {
-          year: yearForm,
-          month: this.monthData.slice(this.monthData.indexOf(monthForm)).join(',')
-        }
-        this.dateData.dateTo = {
-          year: yearTo,
-          month: this.monthData.slice(0, this.monthData.indexOf(monthTo) + 1).join(',')
-        }
-      }
-      this.monthValue = value
-      this.mode = [
-        mode[0] === 'date' ? 'month' : mode[0],
-        mode[1] === 'date' ? 'month' : mode[1]
-      ]
-      this.dateTitle = `${value[0].format('YYYY年MM月')} ~ ${value[1].format('YYYY年MM月')}`
-    },
+    // handleStoreroomDistWcClose () {
+    //   this.storeroomDistWc.visiable = false
+    // },
+    // showModal () {
+    //   this.modalVisible = true
+    // },
+    // viewDist () {
+    //   if (JSON.stringify(this.dateData.dateForm) !== '{}') {
+    //     this.modalVisible = false
+    //     this.storeroomDistWc.visiable = true
+    //   } else {
+    //     this.$message.warning('请选择查看月份')
+    //   }
+    // },
+    // onRadioChange (e) {
+    //   // 切换radio时 重置日期选择data
+    //   this.dateData = {
+    //     dateForm: {},
+    //     dateTo: {}
+    //   }
+    //   this.monthValue = []
+    // },
+    // handleMonthChange (value) {
+    //   if (!value) {
+    //     this.dateData.dateForm = {}
+    //     this.dateTitle = ''
+    //     return
+    //   }
+    //   this.dateData.dateForm = {
+    //     year: value.format('YYYY'),
+    //     month: value.format('MM')
+    //   }
+    //   this.dateTitle = value.format('YYYY年MM月')
+    // },
+    // handlePanelChange (value, mode) {
+    //   let yearForm = value[0].format('YYYY')
+    //   let yearTo = value[1].format('YYYY')
+    //   let monthForm = value[0].format('MM')
+    //   let monthTo = value[1].format('MM')
+    //   if (yearForm === yearTo) {
+    //     this.dateData.dateForm = {
+    //       year: yearForm,
+    //       month: this.monthData.slice(this.monthData.indexOf(monthForm), this.monthData.indexOf(monthTo) + 1).join(',')
+    //     }
+    //   } else {
+    //     this.dateData.dateForm = {
+    //       year: yearForm,
+    //       month: this.monthData.slice(this.monthData.indexOf(monthForm)).join(',')
+    //     }
+    //     this.dateData.dateTo = {
+    //       year: yearTo,
+    //       month: this.monthData.slice(0, this.monthData.indexOf(monthTo) + 1).join(',')
+    //     }
+    //   }
+    //   this.monthValue = value
+    //   this.mode = [
+    //     mode[0] === 'date' ? 'month' : mode[0],
+    //     mode[1] === 'date' ? 'month' : mode[1]
+    //   ]
+    //   this.dateTitle = `${value[0].format('YYYY年MM月')} ~ ${value[1].format('YYYY年MM月')}`
+    // },
     search () {
       let {sortedInfo, filteredInfo} = this
       let sortField, sortOrder
@@ -555,12 +548,11 @@ export default {
       this.sortedInfo = null
       // 重置查询参数
       this.queryParams = {
-        // typeApplication: '1,2,4',
         typeApplication: '1,4',
-        toDeptIds: '26,27,28,29'
+        toDeptIds: '26,27,28,29',
+        status: '0'
       }
-      this.status = '0'
-      this.fetch()
+      this.fetch({...this.queryParams})
     },
     handleTableChange (pagination, filters, sorter) {
       this.paginationInfo = pagination
@@ -578,7 +570,6 @@ export default {
       this.dictData = {
         typeApplication: {
           1: '保洁物品',
-          // 2: '劳保物品',
           4: '维修用品'
         },
         toDeptIds: {
@@ -602,10 +593,7 @@ export default {
         params.pageSize = this.pagination.defaultPageSize
         params.pageNum = this.pagination.defaultCurrent
       }
-      params.typeApplication = this.queryParams.typeApplication
-      params.toDeptIds = this.queryParams.toDeptIds
       this.$get('storeroom/storeroomDist', {
-        status: this.status,
         ...params
       }).then((r) => {
         let data = r.data

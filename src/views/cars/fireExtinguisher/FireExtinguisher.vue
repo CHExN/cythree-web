@@ -110,7 +110,7 @@
       <div class="operator">
         <a-button type="primary" ghost @click="add" v-hasPermission="'fireExtinguisher:add'">新增</a-button>
         <a-button @click="batchDelete" v-hasPermission="'fireExtinguisher:delete'">删除</a-button>
-        <a-dropdown v-hasAnyPermission="'fireExtinguisher:add','fireExtinguisher:export'">
+        <a-dropdown>
           <a-menu slot="overlay">
             <a-menu-item key="download-template" @click="downloadTemplate">模板下载</a-menu-item>
             <a-menu-item key="import-data" v-hasPermission="'fireExtinguisher:add'">
@@ -145,7 +145,7 @@
           <a-icon v-hasPermission="'fireExtinguisher:update'" type="setting" theme="twoTone" twoToneColor="#4a9ff5" @click="edit(record)" title="修改"></a-icon>
           &nbsp;
           <a-icon v-hasPermission="'fireExtinguisher:view'" type="eye" theme="twoTone" twoToneColor="#42b983" @click="view(record)" title="查看"></a-icon>
-          <a-badge v-hasNoPermission="'fireExtinguisher:update','fireExtinguisher:view'" status="warning" text="无权限"></a-badge>
+          <!-- <a-badge v-hasNoPermission="'fireExtinguisher:update'" status="warning" text="无权限"></a-badge> -->
         </template>
       </a-table>
     </div>
@@ -284,7 +284,7 @@ export default {
       this.$upload('fireExtinguisher/import', formData).then((r) => {
         let data = r.data.data
         if (data.data.length) {
-          this.fetch()
+          this.search()
         }
         this.$message.destroy()
         this.importData = data.data

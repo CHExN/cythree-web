@@ -14,11 +14,11 @@
         <a-col :span="12" style="font-size: 1rem">
           <p>账户：{{user.username}}</p>
           <p :title="user.roleName">角色：{{user.roleName? user.roleName: '暂无角色'}}</p>
-          <p>性别：{{sex}}</p>
+          <!-- <p>性别：{{sex}}</p> -->
           <p>电话：{{user.mobile ? user.mobile : '暂未绑定电话'}}</p>
           <p>邮箱：{{user.email ? user.email : '暂未绑定邮箱'}}</p>
           <p>部门：{{user.deptName? user.deptName: '暂无部门'}}</p>
-          <p>描述：{{user.description}}</p>
+          <!-- <p>描述：{{user.description}}</p> -->
         </a-col>
       </a-row>
     </a-card>

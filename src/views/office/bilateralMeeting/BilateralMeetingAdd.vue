@@ -17,9 +17,20 @@
             {rules: [{required: true, message: '申请人不能为空'}]}
           ]"/>
       </a-form-item>
+      <a-form-item label='申请日期' v-bind="formItemLayout">
+        <a-date-picker
+          placeholder='申请日期'
+          format='YYYY-MM-DD'
+          style="width: 100%;"
+          v-decorator="['applicationDate',
+            {rules: [{ required: true, message: '申请日期不能为空'}]}
+          ]"
+        />
+      </a-form-item>
       <a-form-item label='议题' v-bind="formItemLayout">
-        <a-input
+        <a-textarea
           placeholder='拟上会议题'
+          :auto-size="{ minRows: 5, maxRows: 500 }"
           autocomplete="off"
           v-decorator="['bilateralMeeting',
             {rules: [{required: true, message: '拟上会议题不能为空'}]}
@@ -28,6 +39,7 @@
       <a-form-item label='梗概' v-bind="formItemLayout">
         <a-textarea
           placeholder='提议事由梗概'
+          :auto-size="{ minRows: 10, maxRows: 500 }"
           autocomplete="off"
           v-decorator="['proposedCauseSummary',
             {rules: [{required: true, message: '提议事由梗概不能为空'}]}
@@ -58,6 +70,8 @@
   </a-drawer>
 </template>
 <script>
+import moment from 'moment'
+moment.locale('zh-cn')
 const formItemLayout = {
   labelCol: { span: 4 },
   wrapperCol: { span: 17 }
@@ -145,6 +159,7 @@ export default {
         if (!err) {
           this.loading = true
           let fileUidList = this.fileList.map(file => { return file.uid })
+          values.applicationDate = values.applicationDate.format('YYYY-MM-DD')
           this.$post('bilateralMeeting', {
             ...values,
             fileId: this.fileList.length ? fileUidList : null
@@ -158,6 +173,14 @@ export default {
           this.$message.warning('格式出错，请检查表单')
         }
       })
+    }
+  },
+  watch: {
+    bilateralMeetingAddVisiable () {
+      if (this.bilateralMeetingAddVisiable) {
+        this.form.getFieldDecorator('applicationDate')
+        this.form.setFieldsValue({ applicationDate: moment() })
+      }
     }
   }
 }

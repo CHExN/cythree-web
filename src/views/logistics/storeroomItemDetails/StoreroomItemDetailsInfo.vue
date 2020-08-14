@@ -32,6 +32,9 @@
             <span v-else-if="text.charAt(0) === '付'">
               付 <a-tag color="purple">{{text.substring(1) || text}}</a-tag>
             </span>
+            <span v-else-if="text.substr(7, 3) === '合计'">
+              <a-tag color="red">{{text.substring(0, 7) || text}}</a-tag> 合计
+            </span>
             <span v-else>{{text}}</span>
           </template>
         </a-table>
@@ -128,6 +131,113 @@ export default {
     }
   },
   watch: {
+    // storeroomItemDetailsInfoVisiable () {
+    //   if (this.storeroomItemDetailsInfoVisiable) {
+    //     this.dataSource = []
+    //     this.loading = true
+    //     this.$get('storeroom/storeroomOutItem', {
+    //       name: this.storeroomItemDetailsInfoData.name,
+    //       type: this.storeroomItemDetailsInfoData.type
+    //     }).then((r) => {
+    //       this.loading = false
+    //       // let quantity = this.dataSource[0].quantityPut
+    //       // let amount = this.dataSource[0].amountPut
+    //       let quantity = 0
+    //       let amount = 0
+    //       let quantityOut = 0
+    //       let amountOut = 0
+    //       r.data.forEach((element, index) => {
+    //         if (element.isIn === '1') {
+    //           // 添加入库进货信息
+    //           this.dataSource.push({
+    //             num: element.putNum,
+    //             date: element.date,
+    //             info: `进${element.name}`,
+    //             quantityPut: element.amount,
+    //             unitPricePut: element.money,
+    //             amountPut: this.$tools.accMultiply(element.amount, element.money),
+    //             quantityOut: null,
+    //             unitPriceOut: null,
+    //             amountOut: null,
+    //             quantity: null,
+    //             unitPrice: null,
+    //             amount: null
+    //           })
+    //           // 计算进入多少
+    //           quantity = this.$tools.accAdd(quantity, element.amount)
+    //           amount = this.$tools.accAdd(amount, this.$tools.accMultiply(element.amount, element.money))
+    //         } else {
+    //           // 添加出库到某某部门信息
+    //           this.dataSource.push({
+    //             num: element.outNum,
+    //             date: element.date,
+    //             info: `付${element.toDeptName}`,
+    //             quantityPut: null,
+    //             unitPricePut: null,
+    //             amountPut: null,
+    //             quantityOut: element.amount,
+    //             unitPriceOut: element.money,
+    //             amountOut: this.$tools.accMultiply(element.amount, element.money),
+    //             quantity: null,
+    //             unitPrice: null,
+    //             amount: null
+    //           })
+    //           // 计算结存的
+    //           quantity = this.$tools.accSubtract(quantity, element.amount)
+    //           amount = this.$tools.accSubtract(amount, this.$tools.accMultiply(element.amount, element.money))
+    //           // 计算发出多少
+    //           quantityOut = this.$tools.accAdd(quantityOut, element.amount)
+    //           amountOut = this.$tools.accAdd(amountOut, this.$tools.accMultiply(element.amount, element.money))
+    //         }
+    //         // 如果是第一条数据则跳过
+    //         if (index === 0) return
+    //         // 被比较的月份
+    //         let compareMonth = r.data[index - 1].date.split('-')[1]
+    //         // 循环的月份
+    //         let elementMonth = element.date.split('-')[1]
+    //         // 判断月份，如果变化了，就加一条‘本月合计’行
+    //         if (compareMonth !== elementMonth) {
+    //           this.dataSource.push({
+    //             num: null,
+    //             date: null,
+    //             info: `${this.dataSource[this.dataSource.length - 1].date.substr(0, 7)}合计`,
+    //             quantityPut: this.$tools.accAdd(quantityOut, quantity),
+    //             unitPricePut: this.storeroomItemDetailsInfoData.money,
+    //             amountPut: this.$tools.accAdd(amountOut, amount),
+    //             quantityOut: quantityOut,
+    //             unitPriceOut: quantityOut === 0 ? 0 : this.storeroomItemDetailsInfoData.money,
+    //             amountOut: amountOut,
+    //             quantity: quantity,
+    //             unitPrice: quantity === 0 ? 0 : this.storeroomItemDetailsInfoData.money,
+    //             amount: amount
+    //           })
+    //           // 重置
+    //           quantityOut = 0
+    //           amountOut = 0
+    //         }
+    //       })
+    //       // 判断如果循环完毕了，但是最后一条不是合计，那就加一条合计行
+    //       if (this.dataSource[this.dataSource.length - 1].num === null) return
+    //       this.dataSource.push({
+    //         num: null,
+    //         date: null,
+    //         info: `${this.dataSource[this.dataSource.length - 1].date.substr(0, 7)}合计`,
+    //         quantityPut: this.$tools.accAdd(quantityOut, quantity),
+    //         unitPricePut: this.storeroomItemDetailsInfoData.money,
+    //         amountPut: this.$tools.accAdd(amountOut, amount),
+    //         quantityOut: quantityOut,
+    //         unitPriceOut: this.storeroomItemDetailsInfoData.money,
+    //         amountOut: amountOut,
+    //         quantity: quantity,
+    //         unitPrice: quantity === 0 ? 0 : this.storeroomItemDetailsInfoData.money,
+    //         amount: amount
+    //       })
+    //       // 重置
+    //       quantityOut = 0
+    //       amountOut = 0
+    //     })
+    //   }
+    // }
     storeroomItemDetailsInfoVisiable () {
       if (this.storeroomItemDetailsInfoVisiable) {
         this.dataSource = []
@@ -165,15 +275,15 @@ export default {
               this.dataSource.push({
                 num: null,
                 date: null,
-                info: '本月合计',
-                quantityPut: this.storeroomItemDetailsInfoData.amount,
+                info: `${this.dataSource[this.dataSource.length - 1].date.substr(0, 7)}合计`,
+                quantityPut: this.$tools.accAdd(quantityOut, quantity),
                 unitPricePut: this.storeroomItemDetailsInfoData.money,
-                amountPut: this.$tools.accMultiply(this.storeroomItemDetailsInfoData.amount, this.storeroomItemDetailsInfoData.money),
+                amountPut: this.$tools.accAdd(amountOut, amount),
                 quantityOut: quantityOut,
-                unitPriceOut: this.storeroomItemDetailsInfoData.money,
+                unitPriceOut: quantityOut === 0 ? 0 : this.storeroomItemDetailsInfoData.money,
                 amountOut: amountOut,
                 quantity: quantity,
-                unitPrice: quantity === 0 ? '' : this.storeroomItemDetailsInfoData.money,
+                unitPrice: quantity === 0 ? 0 : this.storeroomItemDetailsInfoData.money,
                 amount: amount
               })
               // 重置
@@ -201,27 +311,25 @@ export default {
               unitPrice: null,
               amount: null
             })
-            // 判断如果循环完毕了，就加一条‘本月合计’行
-            if (r.data.length === index + 1) {
-              this.dataSource.push({
-                num: null,
-                date: null,
-                info: '本月合计',
-                quantityPut: 0,
-                unitPricePut: 0,
-                amountPut: 0,
-                quantityOut: quantityOut,
-                unitPriceOut: this.storeroomItemDetailsInfoData.money,
-                amountOut: amountOut,
-                quantity: quantity,
-                unitPrice: quantity === 0 ? 0 : this.storeroomItemDetailsInfoData.money,
-                amount: amount
-              })
-              // 重置
-              quantityOut = 0
-              amountOut = 0
-            }
           })
+          // 判断如果循环完毕了，就加一条‘本月合计’行
+          this.dataSource.push({
+            num: null,
+            date: null,
+            info: `${this.dataSource[this.dataSource.length - 1].date.substr(0, 7)}合计`,
+            quantityPut: this.$tools.accAdd(quantityOut, quantity),
+            unitPricePut: this.storeroomItemDetailsInfoData.money,
+            amountPut: this.$tools.accAdd(amountOut, amount),
+            quantityOut: quantityOut,
+            unitPriceOut: this.storeroomItemDetailsInfoData.money,
+            amountOut: amountOut,
+            quantity: quantity,
+            unitPrice: quantity === 0 ? 0 : this.storeroomItemDetailsInfoData.money,
+            amount: amount
+          })
+          // 重置
+          quantityOut = 0
+          amountOut = 0
         })
       }
     }

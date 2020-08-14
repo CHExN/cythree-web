@@ -8,7 +8,7 @@
       :padding="['auto', 'auto', '40', '50']">
       <v-tooltip />
       <v-axis />
-      <v-bar position="date*money"/>
+      <v-bar :position="position"/>
     </v-chart>
   </div>
 </template>
@@ -27,30 +27,34 @@ export default {
         return []
       }
     },
-    scale: {
-      type: Array,
-      default: () => {
-        return [{
-          dataKey: 'date'
-        }, {
-          dataKey: 'money',
-          min: 1,
-          max: 22
-        }]
-      }
-    },
-    tooltip: {
-      type: Array,
-      default: () => {
-        return [
-          'date*money',
-          (date, money) => ({
-            name: date,
-            value: money
-          })
-        ]
-      }
+    position: {
+      type: String,
+      default: 'date*money'
     }
+    // scale: {
+    //   type: Array,
+    //   default: () => {
+    //     return [{
+    //       dataKey: 'date'
+    //     }, {
+    //       dataKey: 'money',
+    //       min: 1,
+    //       max: 22
+    //     }]
+    //   }
+    // },
+    // tooltip: {
+    //   type: Array,
+    //   default: () => {
+    //     return [
+    //       'date*money',
+    //       (name, value) => ({
+    //         name: name,
+    //         value: value
+    //       })
+    //     ]
+    //   }
+    // }
   },
   data () {
     return {

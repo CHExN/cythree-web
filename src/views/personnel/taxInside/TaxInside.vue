@@ -10,7 +10,7 @@
                 :labelCol="{span: 5}"
                 :wrapperCol="{span: 18, offset: 1}">
                 <a-month-picker
-                  v-model="nowMonth"
+                  v-model="queryParams.nowMonth"
                   style="width: 100%;"
                   :allowClear="false"
                 />
@@ -71,7 +71,7 @@
       <div class="operator">
         <a-button type="primary" ghost @click="add" v-hasPermission="'taxInside:add'">新增</a-button>
         <a-button @click="batchDelete" v-hasPermission="'taxInside:delete'">删除</a-button>
-        <a-dropdown v-hasAnyPermission="'taxInside:export','taxInside:add'">
+        <a-dropdown>
           <a-menu slot="overlay">
             <a-menu-item key="download-template" @click="downloadTemplate">模板下载</a-menu-item>
             <a-menu-item key="import-data" v-hasPermission="'taxInside:add'">
@@ -171,7 +171,6 @@ export default {
   components: { TaxInsideAdd, TaxInsideEdit, TaxInsideInfo, ImportResult },
   data () {
     return {
-      nowMonth: moment(),
       monthData: ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12'],
       modalVisible: false,
       fileList: [],
@@ -198,7 +197,9 @@ export default {
         dateForm: {},
         dateTo: {}
       },
-      queryParams: {},
+      queryParams: {
+        nowMonth: moment()
+      },
       dictData: {},
       filteredInfo: null,
       sortedInfo: null,
@@ -289,7 +290,7 @@ export default {
       this.$upload('taxInside/import', formData).then((r) => {
         let data = r.data.data
         if (data.data.length) {
-          this.fetch()
+          this.search()
         }
         this.file = ''
         this.$message.destroy()
@@ -403,7 +404,7 @@ export default {
     exportExcel () {
       let { sortedInfo, filteredInfo } = this
       let sortField, sortOrder, pageSize, params
-      params = this.queryParams
+      params = {...this.queryParams}
       // 设置导出的数据为总数据条数
       if (this.pagination) {
         pageSize = this.pagination.total
@@ -415,10 +416,11 @@ export default {
         // 排序方式 ascend正序 descend倒序
         sortOrder = sortedInfo.order
       }
-      if (this.nowMonth) {
-        params.year = this.nowMonth.format('YYYY')
-        params.month = this.nowMonth.format('MM')
+      if (params.nowMonth) {
+        params.year = params.nowMonth.format('YYYY')
+        params.month = params.nowMonth.format('MM')
         params.monthArr = this.monthData.slice(0, this.monthData.indexOf(params.month) + 1).join()
+        delete params.nowMonth
       }
       this.$export('taxInside/excel', {
         sortField: sortField,
@@ -457,10 +459,10 @@ export default {
       // 重置列排序规则
       this.sortedInfo = null
       // 重置查询参数
-      this.queryParams = {}
-      // 重置月份
-      this.nowMonth = moment()
-      this.fetch()
+      this.queryParams = {
+        nowMonth: moment()
+      }
+      this.fetch({...this.queryParams})
     },
     handleTableChange (pagination, filters, sorter) {
       // 将这三个参数赋值给Vue data，用于后续使用
@@ -488,7 +490,7 @@ export default {
           }
         })
         this.dictData = dictList
-        this.fetch()
+        this.fetch({...this.queryParams})
       })
     },
     fetch (params = {}) {
@@ -505,10 +507,11 @@ export default {
         params.pageSize = this.pagination.defaultPageSize
         params.pageNum = this.pagination.defaultCurrent
       }
-      if (this.nowMonth) {
-        params.year = this.nowMonth.format('YYYY')
-        params.month = this.nowMonth.format('MM')
+      if (params.nowMonth) {
+        params.year = params.nowMonth.format('YYYY')
+        params.month = params.nowMonth.format('MM')
         params.monthArr = this.monthData.slice(0, this.monthData.indexOf(params.month) + 1).join()
+        delete params.nowMonth
       }
       this.$get('taxInside', {
         ...params

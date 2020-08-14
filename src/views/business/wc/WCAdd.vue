@@ -274,7 +274,8 @@
         />
       </a-form-item>
       <a-form-item label='公厕地址' v-bind="formItemLayout">
-        <a-input
+        <a-textarea
+          auto-size
           placeholder='公厕地址'
           autocomplete="off"
           v-decorator="['wcAddress']"
@@ -286,6 +287,35 @@
           autocomplete="off"
           v-decorator="['wcNowStatus']"
         />
+      </a-form-item>
+      <a-form-item label='水费单号' v-bind="formItemLayout">
+        <a-input
+          placeholder='水费单号'
+          autocomplete="off"
+          v-decorator="['waterNum']"
+        />
+      </a-form-item>
+      <a-form-item label='电费单号' v-bind="formItemLayout">
+        <a-input
+          placeholder='电费单号'
+          autocomplete="off"
+          v-decorator="['electricityNum']"
+        />
+      </a-form-item>
+      <a-form-item label='缴费号' v-bind="formItemLayout">
+        <a-input
+          placeholder='缴费号'
+          autocomplete="off"
+          v-decorator="['paymentNum']"
+        />
+      </a-form-item>
+      <a-form-item label='是否销账' v-bind="formItemLayout">
+        <a-select
+          v-decorator="['writeOff', {
+            initialValue: [dictData.writeOff && JSON.stringify(dictData.writeOff)!=='{}' ? Object.keys(dictData.writeOff)[0] : '']
+          }]">
+          <a-select-option v-for="i in Object.keys(dictData.writeOff||[])" :key="i">{{ dictData.writeOff[i] }}</a-select-option>
+        </a-select>
       </a-form-item>
     </a-form>
     <div class="drawer-bootom-button">

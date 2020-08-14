@@ -73,7 +73,7 @@
           <a-icon v-hasPermission="'fixedAssetsAcceptance:update'" type="setting" theme="twoTone" twoToneColor="#4a9ff5" @click="edit(record)" title="修改"></a-icon>
           &nbsp;
           <a-icon v-hasPermission="'fixedAssetsAcceptance:view'" type="eye" theme="twoTone" twoToneColor="#42b983" @click="view(record)" title="查看"></a-icon>
-          <a-badge v-hasNoPermission="'fixedAssetsAcceptance:update','fixedAssetsAcceptance:view'" status="warning" text="无权限"></a-badge>
+          <!-- <a-badge v-hasNoPermission="'fixedAssetsAcceptance:update'" status="warning" text="无权限"></a-badge> -->
         </template>
       </a-table>
     </div>
@@ -151,13 +151,25 @@ export default {
         dataIndex: 'name'
       }, {
         title: '合同编号',
-        dataIndex: 'num'
+        dataIndex: 'num',
+        width: '25%'
+      }, {
+        title: '实际金额',
+        align: 'right',
+        dataIndex: 'moneyTrue',
+        customRender: (text, row, index) => {
+          return this.$tools.addZero(this.$tools.toNumFormant(text))
+        }
       }, {
         title: '出库单号',
-        dataIndex: 'storeroomOutNum'
+        dataIndex: 'storeroomOutNum',
+        align: 'center'
       }, {
-        title: '安装完成日期',
-        dataIndex: 'installCompleteDate'
+        title: '资产存放点',
+        dataIndex: 'location'
+      // }, {
+      //   title: '安装完成日期',
+      //   dataIndex: 'installCompleteDate'
       }, {
         title: '验收日期',
         dataIndex: 'acceptanceDate'

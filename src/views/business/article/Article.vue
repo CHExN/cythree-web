@@ -94,6 +94,15 @@ import RangeDate from '@/components/datetime/RangeDate'
 import ArticleAdd from './ArticleAdd'
 import ArticleEdit from './ArticleEdit'
 // import ArticleInfo from './ArticleInfo'
+// import axios from 'axios'
+
+// let request = axios.create({
+//   baseURL: 'https://www.meipian.cn/',
+//   responseType: 'json',
+//   validateStatus (status) {
+//     return status === 200
+//   }
+// })
 
 export default {
   name: 'Article',
@@ -173,6 +182,16 @@ export default {
     this.fetch()
   },
   methods: {
+    test () {
+      // this.$post('static/action/load_columns_article.php?userid=31274368&maxid=230207812&containerid=0', {
+      //   ...values
+      // }).then((r) => {
+      //   this.reset()
+      //   this.$emit('success')
+      // }).catch(() => {
+      //   this.loading = false
+      // })
+    },
     onSelectChange (selectedRowKeys) {
       this.selectedRowKeys = selectedRowKeys
     },

@@ -148,21 +148,23 @@ const rowColData = {
     bw: {row: 8, col: 6}
   },
   Application: {
-    num: {row: 1, col: 6},
+    num: {row: 1, col: 7},
     typeApplicationToDict: {row: 2, col: 2},
-    deptName: {row: 2, col: 4},
-    handle: {row: 2, col: 6},
+    deptName: {row: 2, col: 5},
+    handle: {row: 2, col: 8},
     description: {row: 3, col: 1},
-    money: {row: 3, col: 2},
+    money1: {row: 3, col: 2},
+    money2: {row: 3, col: 4},
+    money3: {row: 3, col: 7},
     isIn: {row: 4, col: 2}
   },
   Plan: {
-    typeApplicationToDict: {row: 2, col: 2},
-    deptName: {row: 2, col: 10},
-    purDept: {row: 5, col: 3},
-    appDept: {row: 5, col: 6},
-    handle: {row: 5, col: 8},
-    date: {row: 5, col: 10}
+    typeApplicationToDict: {row: 2, col: 1},
+    deptName: {row: 2, col: 8},
+    purDept: {row: 5, col: 1},
+    appDept: {row: 5, col: 4},
+    handle: {row: 5, col: 6},
+    date: {row: 5, col: 8}
   },
   WcCostAccount: {
     title: {row: 0, col: 1}

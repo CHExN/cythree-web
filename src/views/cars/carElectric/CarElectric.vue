@@ -94,7 +94,7 @@
       <div class="operator">
         <a-button type="primary" ghost @click="add" v-hasPermission="'carElectric:add'">新增</a-button>
         <a-button @click="batchDelete" v-hasPermission="'carElectric:delete'">删除</a-button>
-        <a-dropdown v-hasAnyPermission="'carElectric:add','carElectric:export'">
+        <a-dropdown>
           <a-menu slot="overlay">
             <a-menu-item key="download-template" @click="downloadTemplate">模板下载</a-menu-item>
             <a-menu-item key="import-data" v-hasPermission="'carElectric:add'">
@@ -280,7 +280,7 @@ export default {
       this.$upload('carElectric/import', formData).then((r) => {
         let data = r.data.data
         if (data.data.length) {
-          this.fetch()
+          this.search()
         }
         this.$message.destroy()
         this.importData = data.data

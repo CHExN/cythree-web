@@ -104,7 +104,7 @@
           <a-button v-hasPermission="'contractInside:deleteTrue'" @click="batchDelete">删除</a-button>
           <a-button v-hasNoPermission="'contractInside:deleteTrue'" disabled title="无权限">删除</a-button>
         </span>
-        <a-dropdown v-hasAnyPermission="'contractInside:export'">
+        <a-dropdown v-hasAnyPermission="'contractInside:export,contractInside:restore'">
           <a-menu slot="overlay">
             <a-menu-item key="export-data" @click="exportExcel" v-hasPermission="'contractInside:export'">导出Excel</a-menu-item>
             <a-menu-item key="deleted" @click="setDeleted">{{deleted === 0 ? '查看回收站' : '回到页面'}}</a-menu-item>

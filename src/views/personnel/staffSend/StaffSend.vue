@@ -222,7 +222,7 @@
           <a-button v-hasPermission="'staffSend:deleteTrue'" @click="batchDelete">删除</a-button>
           <a-button v-hasNoPermission="'staffSend:deleteTrue'" disabled title="无权限">删除</a-button>
         </span>
-        <a-dropdown>
+        <a-dropdown v-hasAnyPermission="'staffSend:export,staffSend:restore'">
           <a-menu slot="overlay">
             <a-menu-item key="export-data" @click="exportExcel" v-hasPermission="'staffSend:export'">导出Excel</a-menu-item>
             <!-- <a-menu-item key="staff-increase" @click="showModal(0)">增加人员报表</a-menu-item> -->
@@ -641,7 +641,7 @@ export default {
         // 排序方式 ascend正序 descend倒序
         sortOrder = sortedInfo.order
       }
-      this.$export('staffSend/excel', {
+      this.$export('staffSend/export', {
         isLeave: this.isLeave,
         sortField: sortField,
         sortOrder: sortOrder,

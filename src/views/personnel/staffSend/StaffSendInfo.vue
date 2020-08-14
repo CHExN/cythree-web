@@ -22,8 +22,8 @@
         <detail-list-item term="银行卡归属">{{staffSendInfoData.bankCardAttribution}}</detail-list-item>
         <detail-list-item term="备注">{{staffSendInfoData.remark}}</detail-list-item>
       </detail-list>
+      <a-divider v-hasPermission="'staffSend:addDeletePhoto'"/>
     </a-card>
-    <a-divider v-hasPermission="'staffSend:addDeletePhoto'" style="margin-bottom: 32px"/>
     <div>
       <div v-hasPermission="'staffSend:addDeletePhoto'">
         <a-upload

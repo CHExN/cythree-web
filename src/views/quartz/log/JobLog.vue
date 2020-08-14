@@ -70,7 +70,7 @@
                :loading="loading"
                :rowSelection="{selectedRowKeys: selectedRowKeys, onChange: onSelectChange}"
                @change="handleTableChange" :scroll="{ x: 1210 }">
-        <template slot="method" slot-scope="text, record">
+        <template slot="method" slot-scope="text">
           <a-popover placement="topLeft">
             <template slot="content">
               <div>{{text}}</div>
@@ -78,7 +78,7 @@
             <p style="width: 200px;margin-bottom: 0">{{text}}</p>
           </a-popover>
         </template>
-        <template slot="params" slot-scope="text, record">
+        <template slot="params" slot-scope="text">
           <a-popover placement="topLeft">
             <template slot="content">
               <div style="max-width: 300px;">{{text}}</div>
@@ -86,7 +86,7 @@
             <p style="width: 80px;margin-bottom: 0">{{text}}</p>
           </a-popover>
         </template>
-        <template slot="error" slot-scope="text, record">
+        <template slot="error" slot-scope="text">
           <a-popover placement="topLeft">
             <template slot="content">
               <div style="max-width: 300px;">{{text}}</div>

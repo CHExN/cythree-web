@@ -425,22 +425,22 @@ export default {
       let newData = []
       this.selectedRows.forEach(item => {
         let data = {
-          num: item.num,
+          num: `NO.${item.num || ''}`,
           typeApplicationToDict: this.dictData.typeApplication[item.typeApplication],
           deptName: item.deptName,
           handle: item.handle,
           description: `采购说明 (采购用途、采购数量、功能要求等): ${item.description || ''}`,
-          money: `预计金额:${item.money}\n`,
           isIn: `采购计划:（ 内□ / 外□ ）`
         }
-        let money = `采购计划：\n`
         this.$get('application/applicationPlan', {
           applicationId: item.id
         }).then((r) => {
-          r.data.forEach(item => {
-            money = `${money}${item.name}:${item.amount} ${item.unit}\n`
-          })
-          data.money = `${money}预计金额:${item.money}\n`
+          let planStrings = []
+          r.data.forEach(item => planStrings.push(`${item.name}:${item.amount} ${item.unit}`.replace(/[（]/g, '(').replace(/[）]/g, ')')))
+          if (item.money) planStrings.push(`预计金额: ${item.money}`)
+          data.money1 = `${planStrings.length > 0 ? '采购计划:\n' : ''}${planStrings.slice(0, 27).join('\n')}`
+          data.money2 = `${planStrings.length > 27 ? '\n' : ''}${planStrings.slice(27, 54).join('\n')}`
+          data.money3 = `${planStrings.length > 54 ? '\n' : ''}${planStrings.slice(54).join('\n')}`
           newData.push(data)
         })
       })
@@ -464,12 +464,12 @@ export default {
         newData.push({
           num: item.num,
           id: item.id,
-          typeApplicationToDict: this.dictData.typeApplication[item.typeApplication],
-          deptName: item.deptName,
-          purDept: item.purDept, // 采购部门负责人
-          appDept: item.appDept, // 申请部门负责人
-          handle: item.handle,
-          date: item.createDate
+          typeApplicationToDict: `类别:${this.dictData.typeApplication[item.typeApplication] || ''}`,
+          deptName: `部门:${item.deptName || ''}`,
+          purDept: `采购部门负责人:${item.purDept || ''}`, // 采购部门负责人
+          appDept: `申请部门负责人:${item.appDept || ''}`, // 申请部门负责人
+          handle: `经办人:${item.handle || ''}`,
+          date: `日期:${item.createDate || ''}`
         })
         this.$get('application/applicationPlan', {
           applicationId: item.id
@@ -494,10 +494,10 @@ export default {
         newData.forEach(item => {
           let spread = newSpread('Plan')
           spread = fixedForm(spread, 'Plan', item)
-          spread = floatForm(spread, 'Plan', planArr[`${item.id}`])
+          spread = floatForm(spread, 'Plan', planArr[item.id])
           let fileName = `采购计划单_${item.num}.xlsx`
           saveExcel(spread, fileName)
-          floatReset(spread, 'Plan', planArr[`${item.id}`].length)
+          floatReset(spread, 'Plan', planArr[item.id].length)
         })
       })
     },

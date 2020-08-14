@@ -25,7 +25,7 @@
             { pattern: '^0?(13[0-9]|15[012356789]|17[013678]|18[0-9]|14[57])[0-9]{8}$', message: '请输入正确的手机号'}
           ]}]"/>
       </a-form-item>
-      <a-form-item label='部门' v-bind="formItemLayout">
+      <!-- <a-form-item label='部门' v-bind="formItemLayout">
         <a-tree-select
           :allowClear="true"
           :dropdownStyle="{ maxHeight: '220px', overflow: 'auto' }"
@@ -54,7 +54,7 @@
             { max: 100, message: '长度不能超过100个字符'}
           ]}]">
         </a-textarea>
-      </a-form-item>
+      </a-form-item> -->
     </a-form>
     <div class="drawer-bootom-button">
       <a-popconfirm title="确定放弃编辑？" @confirm="onClose" okText="确定" cancelText="取消">
@@ -81,11 +81,11 @@ export default {
     return {
       formItemLayout,
       form: this.$form.createForm(this),
-      deptTreeData: [],
-      userDept: [],
+      // deptTreeData: [],
+      // userDept: [],
       userId: '',
-      roleId: '',
-      status: '',
+      // roleId: '',
+      // status: '',
       username: '',
       loading: false
     }
@@ -106,15 +106,8 @@ export default {
     },
     setFormValues ({...user}) {
       this.userId = user.userId
-      let fields = ['email', 'ssex', 'description', 'mobile']
-      // Object.keys(user).forEach((key) => {
-      //   if (fields.indexOf(key) !== -1) {
-      //     this.form.getFieldDecorator(key)
-      //     let obj = {}
-      //     obj[key] = user[key]
-      //     this.form.setFieldsValue(obj)
-      //   }
-      // })
+      // let fields = ['email', 'ssex', 'description', 'mobile']
+      let fields = ['email', 'mobile']
       let obj = {}
       Object.keys(user).forEach((key) => {
         if (fields.indexOf(key) !== -1) {
@@ -123,33 +116,35 @@ export default {
         }
       })
       this.form.setFieldsValue(obj)
-      if (user.deptId) {
-        this.userDept = [user.deptId]
-      }
-      this.status = user.status
-      this.roleId = user.roleId
+      // if (user.deptId) {
+      //   this.userDept = [user.deptId]
+      // }
+      // this.status = user.status
+      // this.roleId = user.roleId
       this.username = user.username
     },
-    onDeptChange (value) {
-      this.userDept = value
-    },
+    // onDeptChange (value) {
+    //   this.userDept = value
+    // },
     handleSubmit () {
       this.form.validateFields((err, values) => {
         if (!err) {
           this.loading = true
-          let user = this.form.getFieldsValue()
-          user.userId = this.userId
-          user.deptId = this.userDept
-          user.roleId = this.roleId
-          user.status = this.status
-          user.username = this.username
+          // let user = this.form.getFieldsValue()
+          // user.userId = this.userId
+          // user.deptId = this.userDept
+          // user.roleId = this.roleId
+          // user.status = this.status
+          // user.username = this.username
           this.$put('user/profile', {
-            ...user
+            ...values,
+            username: this.username,
+            userId: this.userId
           }).then((r) => {
             this.loading = false
             this.$emit('success')
             // 更新其state
-            this.$get(`user/${user.username}`).then((r) => {
+            this.$get(`user/${this.username}`).then((r) => {
               this.setUser(r.data)
             })
           }).catch(() => {
@@ -158,15 +153,15 @@ export default {
         }
       })
     }
-  },
-  watch: {
-    profileEditVisiable () {
-      if (this.profileEditVisiable) {
-        this.$get('dept').then((r) => {
-          this.deptTreeData = r.data.rows.children
-        })
-      }
-    }
+  // },
+  // watch: {
+  //   profileEditVisiable () {
+  //     if (this.profileEditVisiable) {
+  //       this.$get('dept').then((r) => {
+  //         this.deptTreeData = r.data.rows.children
+  //       })
+  //     }
+  //   }
   }
 }
 </script>

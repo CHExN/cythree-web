@@ -31,13 +31,9 @@
           v-decorator="['manager']"/>
       </a-form-item>
       <a-form-item label='合同金额' v-bind="formItemLayout">
-        <a-input-number
-          :min="0.01"
-          :max="10000000"
-          :precision="2"
-          :formatter="value => value"
-          style="width: 100%;"
+        <a-input
           placeholder='合同金额'
+          autocomplete="off"
           v-decorator="['money']"/>
       </a-form-item>
       <a-form-item label='实际金额' v-bind="formItemLayout">
@@ -209,8 +205,8 @@ export default {
         obj[key] = fixedAssetsAcceptance[key]
       })
       // 把时间类型插件的数据用moment包装一下
-      obj['installCompleteDate'] = moment(obj['installCompleteDate'])
-      obj['acceptanceDate'] = moment(obj['acceptanceDate'])
+      if (obj['installCompleteDate']) obj['installCompleteDate'] = moment(obj['installCompleteDate'])
+      if (obj['acceptanceDate']) obj['acceptanceDate'] = moment(obj['acceptanceDate'])
       this.form.setFieldsValue(obj)
     },
     onClose () {

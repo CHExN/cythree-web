@@ -143,7 +143,8 @@ export default {
     },
     connect () {
       // this.socket = new SockJS('http://localhost:9527/webSocketHandshake')
-      this.socket = new SockJS('http://114.115.154.244:9527/webSocketHandshake')
+      // this.socket = new SockJS('http://114.115.154.244:9527/webSocketHandshake')
+      this.socket = new SockJS('https://wc.ncsll.com/api/webSocketHandshake')
       this.stompClient = Stomp.over(this.socket)
       this.stompClient.debug = () => {} // 禁用调试功能，将调试更改为空函数
       this.stompClient.connect(

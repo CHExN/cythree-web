@@ -2,7 +2,7 @@
   <a-modal
     title="编内人员信息"
     :centered="true"
-    :width="1200"
+    :width="1100"
     :visible="staffInsideInfoVisiable"
     :keyboard="false"
     :footer="null"
@@ -25,8 +25,8 @@
         <detail-list-item term="有无残疾证">{{getIsDisabilityCertificate(staffInsideInfoData.isDisabilityCertificate)}}</detail-list-item>
         <detail-list-item term="残疾证编号">{{staffInsideInfoData.disabilityCertificateNumber}}</detail-list-item>
         <detail-list-item term="伤残鉴定等级">{{staffInsideInfoData.disabilityIdentificationLevel}}</detail-list-item>
-        <detail-list-item term="家庭住址">{{staffInsideInfoData.address}}</detail-list-item>
         <detail-list-item term="身份证号码">{{staffInsideInfoData.idNum}}</detail-list-item>
+        <detail-list-item term="家庭住址">{{staffInsideInfoData.address}}</detail-list-item>
         <detail-list-item term="座机联系电话">{{staffInsideInfoData.phoneLandLine}}</detail-list-item>
         <detail-list-item term="手机联系电话">{{staffInsideInfoData.phoneCell}}</detail-list-item>
         <detail-list-item term="出生年月">{{staffInsideInfoData.birthDate}}</detail-list-item>
@@ -46,26 +46,22 @@
         <detail-list-item term="证书编号">{{staffInsideInfoData.certificateNum}}</detail-list-item>
         <detail-list-item term="入职状态">{{staffInsideInfoData.entryStatus}}</detail-list-item>
       </detail-list>
-    </a-card>
-    <a-divider v-hasPermission="'contractInside:view'" v-if="contractPeriod.length > 0" style="margin-bottom: 32px"/>
-    <a-card v-hasPermission="'contractInside:view'" v-if="contractPeriod.length > 0" :bordered="false">
-      <detail-list title="合同信息">
+      <a-divider v-hasPermission="'contractInside:view'" v-if="contractPeriod.length > 0"/>
+      <detail-list title="合同信息" v-hasPermission="'contractInside:view'" v-if="contractPeriod.length > 0">
         <template v-for="(k, index) in contractPeriod">
           <detail-list-item :key="index" :term="k">{{contractPeriodDate[index]}}</detail-list-item>
         </template>
         <detail-list-item term="续签备注">{{contractInsideData.remarkRenew}}</detail-list-item>
         <detail-list-item term="备注">{{contractInsideData.remark}}</detail-list-item>
       </detail-list>
-    </a-card>
-    <a-divider v-hasPermission="'contractInside:view'" v-if="jobAgreement.length > 0"  style="margin-bottom: 32px"/>
-    <a-card v-hasPermission="'contractInside:view'" v-if="jobAgreement.length > 0" :bordered="false">
-      <detail-list title="岗位协议信息">
+      <a-divider v-hasPermission="'contractInside:view'" v-if="jobAgreement.length > 0"/>
+      <detail-list title="岗位协议信息" v-hasPermission="'contractInside:view'" v-if="jobAgreement.length > 0">
         <template v-for="(k, index) in jobAgreement">
           <detail-list-item :key="index" :term="k">{{jobAgreementDate[index]}}</detail-list-item>
         </template>
       </detail-list>
+      <a-divider v-hasPermission="'staffInside:addDeletePhoto'"/>
     </a-card>
-    <a-divider v-hasPermission="'staffInside:addDeletePhoto'" style="margin-bottom: 32px"/>
     <div>
       <div v-hasPermission="'staffInside:addDeletePhoto'">
         <a-upload

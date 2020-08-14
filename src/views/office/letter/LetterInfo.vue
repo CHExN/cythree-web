@@ -2,7 +2,7 @@
   <a-modal
     title="介绍信信息"
     :centered="true"
-    :width="1000"
+    :width="800"
     :visible="letterInfoVisiable"
     :keyboard="false"
     :footer="null"
@@ -40,10 +40,8 @@
         </template>
         <a-step title="完成"></a-step>
       </a-steps>
-      <a-divider style="margin-bottom: 32px"/>
-    </a-card>
-    <a-card :bordered="false">
-      <detail-list title="基本信息">
+      <a-divider/>
+      <detail-list>
         <detail-list-item term="部门">{{letterInfoData.deptName}}</detail-list-item>
         <detail-list-item term="备注">{{letterInfoData.remark}}</detail-list-item>
         <detail-list-item term="介绍信人">{{letterInfoData.letterUser}}</detail-list-item>

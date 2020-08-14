@@ -8,7 +8,7 @@
     :footer="null"
     @cancel="handleCancleClick">
     <a-card :bordered="false">
-      <detail-list title="基础信息">
+      <detail-list>
         <detail-list-item term="职工姓名">{{condolencesInfoData.name}}</detail-list-item>
         <detail-list-item term="性别">{{getSexx(condolencesInfoData.sexx)}}</detail-list-item>
         <detail-list-item term="年龄">{{condolencesInfoData.age}}</detail-list-item>

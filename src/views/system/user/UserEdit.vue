@@ -54,15 +54,25 @@
       <a-form-item label='状态' v-bind="formItemLayout">
         <a-radio-group
           autocomplete="off"
-          v-decorator="[
-            'status',
-            {rules: [{ required: true, message: '请选择状态' }]}
-          ]">
+          v-decorator="['status',{
+            rules: [{ required: true, message: '请选择状态' }]
+          }]">
           <a-radio-button value="0">锁定</a-radio-button>
           <a-radio-button value="1">有效</a-radio-button>
         </a-radio-group>
       </a-form-item>
-      <a-form-item label='性别' v-bind="formItemLayout">
+      <a-form-item label='账号类型' v-bind="formItemLayout">
+        <a-radio-group
+          autocomplete="off"
+          v-decorator="['type',{
+            rules: [{ required: true, message: '请选择账号类型' }]
+          }]">
+          <a-radio-button value="0">通用</a-radio-button>
+          <a-radio-button value="1">成本核算</a-radio-button>
+          <a-radio-button value="2">小程序</a-radio-button>
+        </a-radio-group>
+      </a-form-item>
+      <!-- <a-form-item label='性别' v-bind="formItemLayout">
         <a-radio-group
           autocomplete="off"
           v-decorator="[
@@ -73,7 +83,7 @@
           <a-radio-button value="1">女</a-radio-button>
           <a-radio-button value="2">保密</a-radio-button>
         </a-radio-group>
-      </a-form-item>
+      </a-form-item> -->
     </a-form>
     <div class="drawer-bootom-button">
       <a-popconfirm title="确定放弃编辑？" @confirm="onClose" okText="确定" cancelText="取消">
@@ -125,7 +135,8 @@ export default {
     setFormValues ({...user}) {
       this.userId = user.userId
       let obj = {}
-      let fields = ['username', 'email', 'status', 'ssex', 'mobile']
+      // let fields = ['username', 'email', 'status', 'ssex', 'mobile']
+      let fields = ['username', 'email', 'status', 'type', 'mobile']
       Object.keys(user).forEach((key) => {
         if (fields.indexOf(key) !== -1) {
           this.form.getFieldDecorator(key)
@@ -174,7 +185,7 @@ export default {
   watch: {
     userEditVisiable () {
       if (this.userEditVisiable) {
-        this.$get('role/allRole').then((r) => {
+        this.$get('role/getRole').then((r) => {
           this.roleData = r.data
         })
         this.$get('dept').then((r) => {

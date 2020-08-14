@@ -7,7 +7,7 @@
     :keyboard="false"
     :footer="null"
     @cancel="handleCancleClick">
-    <a-card :bordered="false">
+    <a-card :bordered="false" style="margin-bottom: -32px">
       <a-steps progressDot :current="current" :status='status'>
         <a-step title="创建">
           <a-step-item-group slot="description">
@@ -40,41 +40,26 @@
         </template>
         <a-step title="完成"></a-step>
       </a-steps>
-      <a-divider style="margin-bottom: 32px"/>
+      <a-divider/>
     </a-card>
     <a-card :bordered="false">
       <detail-list title="基本信息">
         <detail-list-item term="部门">{{bilateralMeetingInfoData.deptName}}</detail-list-item>
         <detail-list-item term="申请人">{{bilateralMeetingInfoData.applicant}}</detail-list-item>
+        <detail-list-item term="申请日期">{{bilateralMeetingInfoData.applicationDate}}</detail-list-item>
+        <!-- <detail-list-item term="上会时间">{{bilateralMeetingInfoData.meetingTime ?  this.$tools.getDateTime(bilateralMeetingInfoData.meetingTime) : '未定'}}</detail-list-item> -->
+      </detail-list>
+      <detail-list :col="1">
         <detail-list-item term="拟上会议题">{{bilateralMeetingInfoData.bilateralMeeting}}</detail-list-item>
         <detail-list-item term="提议事由梗概">{{bilateralMeetingInfoData.proposedCauseSummary}}</detail-list-item>
-        <detail-list-item term="上会时间">{{bilateralMeetingInfoData.meetingTime ?  this.$tools.getDateTime(bilateralMeetingInfoData.meetingTime) : '未定'}}</detail-list-item>
       </detail-list>
       <a-divider style="margin-bottom: 32px"/>
       <detail-list title="意见信息">
-        <!-- <a-card-grid
-          v-for="(item, index) in data"
-          :key="index"
-          style="width:25%;height:100px;textAlign:'center'"
-        >
-          <a-comment :author="item.name" style="left: -18px;top: -22px">
-            <a slot="actions">编辑</a>
-            <p slot="content">{{bilateralMeetingInfoData[item.value] ? bilateralMeetingInfoData[item.value] : '- -'}}</p>
-            <a-tooltip slot="datetime">
-              <span>{{bilateralMeetingInfoData[item.date]}}</span>
-            </a-tooltip>
-          </a-comment>
-        </a-card-grid> -->
         <a-list itemLayout="horizontal" :dataSource="data">
         <a-list-item slot="renderItem" slot-scope="item">
           <a slot="actions" v-if="user.username===item.username" @click="handleEditorialOpinion(item)">编辑</a>
-          <!-- <a slot="actions">删除</a> -->
           <a-list-item-meta :description="item.text">
             <span slot="title" >{{bilateralMeetingInfoData[item.value] ? bilateralMeetingInfoData[item.value] : '暂无'}}</span>
-            <!-- <a-avatar
-              slot="avatar"
-              src="https://zos.alipayobjects.com/rmsportal/ODTLcjxAfvqbxHnVXCYX.png"
-            /> -->
           </a-list-item-meta>
         </a-list-item>
       </a-list>

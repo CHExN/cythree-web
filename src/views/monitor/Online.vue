@@ -71,6 +71,21 @@ export default {
         dataIndex: 'username',
         scopedSlots: { customRender: 'username' }
       }, {
+        title: '账号类型',
+        dataIndex: 'type',
+        customRender: (text, row, index) => {
+          switch (text) {
+            case '0':
+              return '通用'
+            case '1':
+              return '成本核算'
+            case '2':
+              return '小程序'
+            default:
+              return text
+          }
+        }
+      }, {
         title: '登录时间',
         dataIndex: 'loginTime'
       }, {

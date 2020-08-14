@@ -301,14 +301,16 @@ export default {
           let contractPeriodArr = this.form.getFieldValue('contractPeriod') || []
           contractPeriodArr = contractPeriodArr.filter(d => d)
           let contractPeriodDateArr = []
-          const contractPeriodDate = this.form.getFieldValue('contractPeriodDate') || []
+          let contractPeriodDate = this.form.getFieldValue('contractPeriodDate') || []
+          contractPeriodDate = contractPeriodDate[0] === undefined ? [] : contractPeriodDate
           contractPeriodDate.forEach(element => {
             contractPeriodDateArr.push(`${element[0].format('YYYY-MM-DD')}~${element[1].format('YYYY-MM-DD')}`)
           })
           let jobAgreementArr = this.form.getFieldValue('jobAgreement') || []
           jobAgreementArr = jobAgreementArr.filter(d => d)
           let jobAgreementDateArr = []
-          const jobAgreementDate = this.form.getFieldValue('jobAgreementDate') || []
+          let jobAgreementDate = this.form.getFieldValue('jobAgreementDate') || []
+          jobAgreementDate = jobAgreementDate[0] === undefined ? [] : jobAgreementDate
           jobAgreementDate.forEach(element => {
             jobAgreementDateArr.push(`${element[0].format('YYYY-MM-DD')}~${element[1].format('YYYY-MM-DD')}`)
           })

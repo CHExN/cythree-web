@@ -2,7 +2,7 @@
   <a-modal
     title="采购申请信息"
     :centered="true"
-    :width="1200"
+    :width="1100"
     :visible="applicationInfoVisiable"
     :keyboard="false"
     :footer="null"
@@ -56,16 +56,12 @@
         </a-step>
         <a-step title="完成"></a-step>
       </a-steps>
-      <a-divider style="margin-bottom: 32px"/>
-    </a-card>
-    <a-card :bordered="false">
+      <a-divider/>
       <detail-list title="申请单">
         <detail-list-item term="编号">{{applicationInfoData.num}}</detail-list-item>
         <detail-list-item term="物资类别">{{applicationInfoData.typeApplicationToDict}}</detail-list-item>
         <detail-list-item term="申请部门">{{applicationInfoData.deptName}}</detail-list-item>
         <detail-list-item term="经办人">{{applicationInfoData.handle}}</detail-list-item>
-        <!-- <detail-list-item term="采购部门负责人">{{applicationInfoData.purDept}}</detail-list-item> -->
-        <!-- <detail-list-item term="申请部门负责人">{{applicationInfoData.appDept}}</detail-list-item> -->
         <detail-list-item term="预计金额">{{$tools.addZero($tools.toNumFormant(applicationInfoData.money))}}</detail-list-item>
         <detail-list-item term="采购说明">{{applicationInfoData.description}}</detail-list-item>
       </detail-list>
@@ -79,43 +75,41 @@
                  rowKey="id">
         </a-table>
       </detail-list>
-      <div style="margin-top: 32px;">
-        <div v-hasPermission="'application:addDeletePhoto'">
-          <a-upload
-            accept="image/jpg,image/png,image/jpeg,image/bmp"
-            listType="picture-card"
-            :fileList="fileList"
-            :remove="handleRemove"
-            :customRequest="customRequest"
-            :beforeUpload="handleBeforeUpload"
-            @preview="handlePreview"
-            @change="handleChange">
-            <div v-if="fileList.length < 8">
-              <a-icon type="plus" />
-              <div class="ant-upload-text">Upload</div>
-            </div>
-          </a-upload>
-          <a-modal :visible="previewVisible" :footer="null" @cancel="handleCancel">
-            <img alt="example" style="width: 100%;" :src="previewImage" />
-          </a-modal>
-        </div>
-        <div v-hasNoPermission="'application:addDeletePhoto'">
-          <a-upload
-            accept="image/jpg,image/png,image/jpeg,image/bmp"
-            listType="picture-card"
-            :fileList="fileList"
-            :showUploadList="{ showPreviewIcon: true, showRemoveIcon: false }"
-            :customRequest="customRequest"
-            :beforeUpload="handleBeforeUpload"
-            @preview="handlePreview"
-            @change="handleChange">
-          </a-upload>
-          <a-modal :visible="previewVisible" :footer="null" @cancel="handleCancel">
-            <img alt="example" style="width: 100%;" :src="previewImage" />
-          </a-modal>
-        </div>
-      </div>
     </a-card>
+    <div v-hasPermission="'application:addDeletePhoto'">
+      <a-upload
+        accept="image/jpg,image/png,image/jpeg,image/bmp"
+        listType="picture-card"
+        :fileList="fileList"
+        :remove="handleRemove"
+        :customRequest="customRequest"
+        :beforeUpload="handleBeforeUpload"
+        @preview="handlePreview"
+        @change="handleChange">
+        <div v-if="fileList.length < 8">
+          <a-icon type="plus" />
+          <div class="ant-upload-text">Upload</div>
+        </div>
+      </a-upload>
+      <a-modal :visible="previewVisible" :footer="null" @cancel="handleCancel">
+        <img alt="example" style="width: 100%;" :src="previewImage" />
+      </a-modal>
+    </div>
+    <div v-hasNoPermission="'application:addDeletePhoto'">
+      <a-upload
+        accept="image/jpg,image/png,image/jpeg,image/bmp"
+        listType="picture-card"
+        :fileList="fileList"
+        :showUploadList="{ showPreviewIcon: true, showRemoveIcon: false }"
+        :customRequest="customRequest"
+        :beforeUpload="handleBeforeUpload"
+        @preview="handlePreview"
+        @change="handleChange">
+      </a-upload>
+      <a-modal :visible="previewVisible" :footer="null" @cancel="handleCancel">
+        <img alt="example" style="width: 100%;" :src="previewImage" />
+      </a-modal>
+    </div>
   </a-modal>
 </template>
 <script>

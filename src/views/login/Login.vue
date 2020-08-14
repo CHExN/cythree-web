@@ -18,7 +18,6 @@
         <a-tab-pane tab="" key="1"> -->
           <!-- <a-alert type="error" :closable="true" v-show="error" :message="error" showIcon
                    style="margin-bottom: 24px;"></a-alert> -->
-
         <!-- </a-tab-pane> -->
         <!-- <a-tab-pane tab="手机号登录" key="2">
           <a-form-item>
@@ -87,7 +86,8 @@ export default {
             let password = this.form.getFieldValue('password')
             this.$post('login', {
               username: name,
-              password: password
+              password: password,
+              type: '1'
             }).then((r) => {
               let data = r.data.data
               this.saveLoginData(data)

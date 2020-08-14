@@ -212,7 +212,7 @@ export default {
       }, {
         title: '型号',
         dataIndex: 'type',
-        width: '8%'
+        width: '10%'
       }, {
         title: '入库数量',
         dataIndex: 'amount',
@@ -230,27 +230,27 @@ export default {
         scopedSlots: { customRender: 'money' },
         sorter: true,
         sortOrder: sortedInfo.columnKey === 'money' && sortedInfo.order,
-        width: '9%'
+        width: '8%'
       }, {
         title: '物资类别',
         dataIndex: 'typeApplication',
         customRender: (text, row, index) => {
           return this.dictData.typeApplication[text]
         },
-        width: '7%'
+        width: '8%'
       }, {
         title: '供应商',
         dataIndex: 'supplier',
         customRender: (text, row, index) => {
           return this.dictData.supplier[text]
         },
-        width: '9%'
+        width: '8%'
       }, {
         title: '入库日期',
         dataIndex: 'date',
         sorter: true,
         sortOrder: sortedInfo.columnKey === 'date' && sortedInfo.order,
-        width: '9%'
+        width: '8%'
       }, {
         title: '入库单号',
         dataIndex: 'putNum',

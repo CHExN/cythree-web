@@ -124,7 +124,7 @@ export default {
       this.$upload('test/import', formData).then((r) => {
         let data = r.data.data
         if (data.data.length) {
-          this.fetch()
+          this.search()
         }
         this.importData = data.data
         this.errors = data.error
