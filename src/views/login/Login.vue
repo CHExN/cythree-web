@@ -132,7 +132,7 @@ export default {
     }),
     saveLoginData (data) {
       this.setToken(data.token)
-      this.setExpireTime(data.exipreTime)
+      this.setExpireTime(data.expireTime)
       this.setUser(data.user)
       this.setPermissions(data.permissions)
       this.setRoles(data.roles)

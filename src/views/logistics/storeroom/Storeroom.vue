@@ -94,7 +94,30 @@
     </div>
     <div>
       <div class="operator">
-        <a-button type="primary" ghost v-hasPermission="'storeroomOut:add'" @click="addStoreroomOut">出库</a-button>
+        <a-row>
+          <a-col :md="2" :sm="24" >
+            <a-button style="height: 37px" type="primary" ghost v-hasPermission="'storeroomOut:add'" @click="addStoreroomOut">出库</a-button>
+          </a-col>
+          <a-col :md="11" :sm="24" >
+            <a-spin :spinning="loading">
+              <a-alert type="info" showIcon style="width: 90%">
+                <div slot="message">
+                  全 {{ pagination.total }} 条记录，总价格为 ￥{{ $tools.addZero($tools.toNumFormant(allTotalPrice)) }}
+                  <a style="margin-left: 24px" @click="exportExcel">点击导出</a>
+                </div>
+              </a-alert>
+            </a-spin>
+          </a-col>
+          <a-col :md="11" :sm="24" >
+            <a-spin :spinning="selectedTotalPriceLoading">
+              <a-alert type="info" showIcon style="width: 90%">
+                <div slot="message">
+                  已选中 {{ selectedRowKeys.length }} 条记录，总价格为 ￥{{ $tools.addZero($tools.toNumFormant(selectedTotalPrice)) }}
+                </div>
+              </a-alert>
+            </a-spin>
+          </a-col>
+        </a-row>
       </div>
       <!-- 表格区域 -->
       <a-table ref="TableInfo"
@@ -106,12 +129,6 @@
                :scroll="{ x: 900 }"
                rowKey="id"
                @change="handleTableChange">
-        <template slot="amount" slot-scope="text">
-          <span>{{ $tools.toNumFormant(text) }}</span>
-        </template>
-        <template slot="money" slot-scope="text">
-          <span>{{ $tools.addZero($tools.toNumFormant(text)) }}</span>
-        </template>
       </a-table>
     </div>
     <!-- 出库 -->
@@ -149,12 +166,16 @@ export default {
         defaultPageSize: 10,
         showQuickJumper: true,
         showSizeChanger: true,
-        showTotal: (total, range) => `显示 ${range[0]} ~ ${range[1]} 条记录，共 ${total} 条记录`
+        showTotal: (total, range) => `显示 ${range[0]} ~ ${range[1]} 条记录，共 ${total} 条记录`,
+        total: 0
       },
       queryParams: {
         createTimeFrom: '',
         createTimeTo: ''
       },
+      allTotalPrice: 0,
+      selectedTotalPrice: 0,
+      selectedTotalPriceLoading: false,
       loading: false
     }
   },
@@ -164,33 +185,57 @@ export default {
       sortedInfo = sortedInfo || {}
       return [{
         title: '物品名称',
-        dataIndex: 'name'
+        dataIndex: 'name',
+        ellipsis: true,
+        customRender: (text, row, index) => {
+          return <a-popover placement="topLeft" content={text}>{text}</a-popover>
+        }
       }, {
         title: '型号',
         dataIndex: 'type',
-        width: '7%'
-      }, {
-        title: '库存',
-        dataIndex: 'amount',
-        scopedSlots: { customRender: 'amount' },
-        sorter: true,
-        sortOrder: sortedInfo.columnKey === 'amount' && sortedInfo.order,
-        width: '7%'
+        width: '9%',
+        ellipsis: true,
+        customRender: (text, row, index) => {
+          return <a-popover placement="topLeft" content={text}>{text}</a-popover>
+        }
       }, {
         title: '单位',
         dataIndex: 'unit',
         width: '5%'
       }, {
+        title: '库存',
+        dataIndex: 'amount',
+        align: 'right',
+        scopedSlots: { customRender: 'amount' },
+        sorter: true,
+        sortOrder: sortedInfo.columnKey === 'amount' && sortedInfo.order,
+        customRender: (text, row, index) => {
+          return this.$tools.toNumFormant(text)
+        },
+        width: '7%'
+      }, {
         title: '单价',
         dataIndex: 'money',
+        align: 'right',
         scopedSlots: { customRender: 'money' },
         sorter: true,
         sortOrder: sortedInfo.columnKey === 'money' && sortedInfo.order,
-        width: '8%'
+        customRender: (text, row, index) => {
+          return this.$tools.addZero(this.$tools.toNumFormant(text))
+        },
+        width: '9%'
       }, {
-        title: '收据',
-        dataIndex: 'receipt',
-        width: '5%'
+        title: '总价',
+        dataIndex: 'totalPrice',
+        align: 'right',
+        customRender: (text, row, index) => {
+          return this.$tools.addZero(this.$tools.toNumFormant(text))
+        },
+        width: '9%'
+      // }, {
+      //   title: '收据',
+      //   dataIndex: 'receipt',
+      //   width: '5%'
       }, {
         title: '物资类别',
         dataIndex: 'typeApplication',
@@ -204,7 +249,7 @@ export default {
         customRender: (text, row, index) => {
           return this.dictData.supplier[text]
         },
-        width: '9%'
+        width: '7%'
       }, {
         title: '入库日期',
         dataIndex: 'date',
@@ -218,7 +263,7 @@ export default {
       }, {
         title: '备注',
         dataIndex: 'remark',
-        width: '8%'
+        width: '7%'
       }]
     }
   },
@@ -228,6 +273,18 @@ export default {
   methods: {
     onSelectChange (selectedRowKeys) {
       this.selectedRowKeys = selectedRowKeys
+      console.log(selectedRowKeys)
+      if (!selectedRowKeys || selectedRowKeys.length === 0) {
+        console.log('this.selectedTotalPrice = 0')
+        this.selectedTotalPrice = 0
+        return
+      }
+      this.selectedTotalPriceLoading = true
+      this.$get('storeroom/selectedTotalPrice', { ids: selectedRowKeys }).then(({ data }) => {
+        console.log('this.$get(storeroom/selectedTotalPrice) data =>', data)
+        this.selectedTotalPrice = data
+        this.selectedTotalPriceLoading = false
+      })
     },
     toggleAdvanced () {
       this.advanced = !this.advanced
@@ -310,6 +367,28 @@ export default {
         this.queryParams.createTimeTo = value[1]
       }
     },
+    exportExcel () {
+      let {sortedInfo, filteredInfo} = this
+      let sortField, sortOrder, pageSize
+      // 设置导出的数据为总数据条数
+      if (this.pagination) {
+        pageSize = this.pagination.total
+      }
+      // 获取当前列的排序和列的过滤规则
+      if (sortedInfo) {
+        // 列名
+        sortField = sortedInfo.field
+        // 排序方式 ascend正序 descend倒序
+        sortOrder = sortedInfo.order
+      }
+      this.$export('storeroom/excel', {
+        sortField: sortField,
+        sortOrder: sortOrder,
+        pageSize: pageSize,
+        ...this.queryParams,
+        ...filteredInfo
+      })
+    },
     search () {
       let {sortedInfo, filteredInfo} = this
       let sortField, sortOrder
@@ -328,6 +407,8 @@ export default {
     reset () {
       // 取消选中
       this.selectedRowKeys = []
+      this.selectedTotalPrice = 0
+      this.selectedTotalPriceLoading = false
       // 重置分页
       this.$refs.TableInfo.pagination.current = this.pagination.defaultCurrent
       if (this.paginationInfo) {
@@ -353,9 +434,6 @@ export default {
       this.paginationInfo = pagination
       this.filteredInfo = filters
       this.sortedInfo = sorter
-
-      console.log(sorter)
-
       this.fetch({
         sortField: sorter.field,
         sortOrder: sorter.order,
@@ -406,13 +484,14 @@ export default {
       }
       this.$get('storeroom', {
         ...params
-      }).then((r) => {
-        let data = r.data
+      }).then(({ data }) => {
+        console.log(data)
         const pagination = { ...this.pagination }
-        pagination.total = data.total
+        pagination.total = data.storeroomsDetail.total
         this.loading = false
-        this.dataSource = data.rows
+        this.dataSource = data.storeroomsDetail.records
         this.pagination = pagination
+        this.allTotalPrice = data.storeroomsTotalPrice
       })
     }
   }
@@ -420,5 +499,5 @@ export default {
 </script>
 
 <style lang="less" scoped>
-@import "../../../../static/less/Common";
+  @import "../../../../static/less/Common";
 </style>

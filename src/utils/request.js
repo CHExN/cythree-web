@@ -62,7 +62,7 @@ CYTHREE_REQUEST.interceptors.response.use((config) => {
       case 401:
         notification.warn({
           message: '系统提示',
-          description: '很抱歉，您无法访问该资源，可能是因为没有相应权限或者登录已失效'
+          description: '很抱歉，您无法访问该资源，可能是因为升级系统导致登录已失效或者没有相应权限'
         })
         break
       default:

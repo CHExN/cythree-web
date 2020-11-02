@@ -257,17 +257,18 @@ export default {
       return [{
         title: '总序号',
         dataIndex: 'sortNum1',
-        width: 90
+        width: '6%'
       }, {
         title: '分队序号',
         dataIndex: 'sortNum2',
-        width: 90
+        width: '7%'
       }, {
         title: '姓名',
         dataIndex: 'staffName'
       }, {
         title: '证照号码',
-        dataIndex: 'staffIdCard'
+        dataIndex: 'staffIdCard',
+        width: '16%'
       }, {
         title: '分队',
         dataIndex: 'team'

@@ -221,19 +221,23 @@ export default {
     columns () {
       return [{
         title: '序号',
-        dataIndex: 'sortNum'
+        dataIndex: 'sortNum',
+        width: '6%'
       }, {
         title: '姓名',
-        dataIndex: 'staffName'
+        dataIndex: 'staffName',
+        width: '10%'
       }, {
         title: '证照类型',
         dataIndex: 'idCardType',
         customRender: (text, row, index) => {
           return this.dictData.idCardType[text]
-        }
+        },
+        width: '10%'
       }, {
         title: '证照号码',
-        dataIndex: 'staffIdCard'
+        dataIndex: 'staffIdCard',
+        width: '16%'
       }, {
         title: '本期收入',
         dataIndex: 'currentIncomeSum'

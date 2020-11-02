@@ -240,16 +240,19 @@ export default {
     columns () {
       return [{
         title: '总序号',
-        dataIndex: 'sortNum1'
+        dataIndex: 'sortNum1',
+        width: '6%'
       }, {
         title: '分队序号',
-        dataIndex: 'sortNum2'
+        dataIndex: 'sortNum2',
+        width: '7%'
       }, {
         title: '姓名',
         dataIndex: 'name'
       }, {
         title: '身份证号',
-        dataIndex: 'idNum'
+        dataIndex: 'idNum',
+        width: '16%'
       }, {
         title: '分队',
         dataIndex: 'team'

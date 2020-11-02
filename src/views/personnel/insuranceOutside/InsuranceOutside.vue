@@ -178,13 +178,15 @@ export default {
     columns () {
       return [{
         title: '序号',
-        dataIndex: 'sortNum'
+        dataIndex: 'sortNum',
+        width: '6%'
       }, {
         title: '姓名',
         dataIndex: 'name'
       }, {
         title: '身份证号',
-        dataIndex: 'idNum'
+        dataIndex: 'idNum',
+        width: '16%'
       }, {
         title: '性别',
         dataIndex: 'gender',
@@ -202,7 +204,8 @@ export default {
           { text: '女', value: '0' },
           { text: '男', value: '1' }
         ],
-        filterMultiple: false
+        filterMultiple: false,
+        width: '6%'
       }, {
         title: '户籍性质',
         dataIndex: 'householdRegistrationType',
@@ -244,7 +247,8 @@ export default {
           { text: '新参', value: '0' },
           { text: '转入', value: '1' }
         ],
-        filterMultiple: false
+        filterMultiple: false,
+        width: '6%'
       }, {
         title: '养老保险',
         dataIndex: 'pensionInsuranceBase',

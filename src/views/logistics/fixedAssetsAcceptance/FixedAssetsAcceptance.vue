@@ -148,31 +148,39 @@ export default {
     columns () {
       return [{
         title: '项目名称',
-        dataIndex: 'name'
+        dataIndex: 'name',
+        width: '12%'
       }, {
         title: '合同编号',
         dataIndex: 'num',
-        width: '25%'
+        ellipsis: true,
+        customRender: (text, row, index) => <a-popover placement="topLeft" content={text}>{text}</a-popover>,
+        width: '16%'
       }, {
         title: '实际金额',
         align: 'right',
         dataIndex: 'moneyTrue',
         customRender: (text, row, index) => {
           return this.$tools.addZero(this.$tools.toNumFormant(text))
-        }
+        },
+        width: '9%'
       }, {
         title: '出库单号',
         dataIndex: 'storeroomOutNum',
-        align: 'center'
+        customRender: (text, row, index) => {
+          if (!text) return text
+          return text.split(',').map(tagName => {
+            return <a-tag style="height: 24px; margin-top: 3px; margin-bottom: 3px; font-size:100%">{tagName}</a-tag>
+          })
+        }
       }, {
         title: '资产存放点',
-        dataIndex: 'location'
-      // }, {
-      //   title: '安装完成日期',
-      //   dataIndex: 'installCompleteDate'
+        dataIndex: 'location',
+        width: '15%'
       }, {
         title: '验收日期',
-        dataIndex: 'acceptanceDate'
+        dataIndex: 'acceptanceDate',
+        width: '8%'
       }, {
         title: '操作',
         dataIndex: 'operation',

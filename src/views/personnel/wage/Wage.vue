@@ -256,13 +256,15 @@ export default {
     columns () {
       return [{
         title: '序号',
-        dataIndex: 'sortNum'
+        dataIndex: 'sortNum',
+        width: '6%'
       }, {
         title: '姓名',
         dataIndex: 'staffName'
       }, {
         title: '证照号码',
-        dataIndex: 'staffIdCard'
+        dataIndex: 'staffIdCard',
+        width: '16%'
       }, {
         title: '岗位等级',
         dataIndex: 'postLevel'

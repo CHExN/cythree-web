@@ -28,10 +28,34 @@
             <template v-if="advanced">
               <a-col :md="12" :sm="24" >
                 <a-form-item
+                  label="分队"
+                  :labelCol="{span: 5}"
+                  :wrapperCol="{span: 18, offset: 1}">
+                  <a-input v-model="queryParams.wcOwn"/>
+                </a-form-item>
+              </a-col>
+              <a-col :md="12" :sm="24" >
+                <a-form-item
+                  label="物品编号"
+                  :labelCol="{span: 5}"
+                  :wrapperCol="{span: 18, offset: 1}">
+                  <a-textarea auto-size v-model="queryParams.storeroomIds"/>
+                </a-form-item>
+              </a-col>
+              <a-col :md="12" :sm="24" >
+                <a-form-item
                   label="公厕编号"
                   :labelCol="{span: 5}"
                   :wrapperCol="{span: 18, offset: 1}">
                   <a-input v-model="queryParams.wcNum"/>
+                </a-form-item>
+              </a-col>
+              <a-col :md="12" :sm="24" >
+                <a-form-item
+                  label="公厕名"
+                  :labelCol="{span: 5}"
+                  :wrapperCol="{span: 18, offset: 1}">
+                  <a-input v-model="queryParams.wcName"/>
                 </a-form-item>
               </a-col>
               <a-col :md="12" :sm="24" >
@@ -48,14 +72,6 @@
                     style="width: 100%;"
                     @panelChange="handlePanelChange"
                   />
-                </a-form-item>
-              </a-col>
-              <a-col :md="12" :sm="24" >
-                <a-form-item
-                  label="公厕名"
-                  :labelCol="{span: 5}"
-                  :wrapperCol="{span: 18, offset: 1}">
-                  <a-input v-model="queryParams.wcName"/>
                 </a-form-item>
               </a-col>
               <a-col :md="12" :sm="24" >

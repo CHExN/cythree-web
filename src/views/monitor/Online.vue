@@ -76,11 +76,11 @@ export default {
         customRender: (text, row, index) => {
           switch (text) {
             case '0':
-              return '通用'
+              return <a-tag color="green">通用</a-tag>
             case '1':
-              return '成本核算'
+              return <a-tag color="blue">成本核算</a-tag>
             case '2':
-              return '小程序'
+              return <a-tag color="orange">小程序</a-tag>
             default:
               return text
           }

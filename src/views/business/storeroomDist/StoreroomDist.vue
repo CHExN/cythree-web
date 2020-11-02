@@ -417,7 +417,7 @@ export default {
       })
     },
     exportWc () {
-      this.$export('storeroom/distWc', {pageSize: 99999})
+      this.$export('storeroom/distWc', {pageSize: 9999999})
     },
     downloadTemplate () {
       this.$download('storeroom/template', {}, '物资分配_导入模板.xlsx')

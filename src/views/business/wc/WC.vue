@@ -137,8 +137,8 @@
                @change="handleTableChange">
         <template slot="operation" slot-scope="text, record">
           <a-icon v-hasPermission="'wc:update'" type="setting" theme="twoTone" twoToneColor="#4a9ff5" @click="edit(record)" title="修改" />
-          &nbsp;
-          <a-icon type="qrcode" @click="showImage(record)" title="二维码"/>
+          <!-- &nbsp;
+          <a-icon type="qrcode" @click="showImage(record)" title="二维码"/> -->
           &nbsp;
           <a-icon v-hasPermission="'wc:view'" type="eye" theme="twoTone" twoToneColor="#42b983" @click="view(record)" title="查看" />
           <!-- <a-badge v-hasNoPermission="'wc:update','wc:view'" status="warning" text="无权限"></a-badge> -->
