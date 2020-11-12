@@ -248,25 +248,30 @@ export default {
         width: '7%'
       }, {
         title: '姓名',
-        dataIndex: 'name'
+        dataIndex: 'name',
+        width: '12%'
       }, {
         title: '身份证号',
         dataIndex: 'idNum',
-        width: '16%'
+        width: '25%'
       }, {
         title: '分队',
-        dataIndex: 'team'
+        dataIndex: 'team',
+        width: '12%'
       }, {
         title: '合同期总数',
         dataIndex: 'contractPeriod',
-        scopedSlots: { customRender: 'contractPeriod' }
+        scopedSlots: { customRender: 'contractPeriod' },
+        width: '12%'
       }, {
         title: '职位协议总数',
         dataIndex: 'jobAgreement',
-        scopedSlots: { customRender: 'jobAgreement' }
+        scopedSlots: { customRender: 'jobAgreement' },
+        width: '12%'
       }, {
         title: '备注',
-        dataIndex: 'remark'
+        dataIndex: 'remark',
+        width: '10%'
       }, {
         title: '操作',
         dataIndex: 'operation',

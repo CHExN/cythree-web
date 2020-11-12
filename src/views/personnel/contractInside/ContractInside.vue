@@ -210,24 +210,30 @@ export default {
     columns () {
       return [{
         title: '序号',
-        dataIndex: 'sortNum'
+        dataIndex: 'sortNum',
+        width: '8%'
       }, {
         title: '姓名',
-        dataIndex: 'name'
+        dataIndex: 'name',
+        width: '12%'
       }, {
         title: '身份证号',
-        dataIndex: 'idNum'
+        dataIndex: 'idNum',
+        width: '23%'
       }, {
         title: '合同期总数',
         dataIndex: 'contractPeriod',
-        scopedSlots: { customRender: 'contractPeriod' }
+        scopedSlots: { customRender: 'contractPeriod' },
+        width: '15%'
       }, {
         title: '职位协议总数',
         dataIndex: 'jobAgreement',
-        scopedSlots: { customRender: 'jobAgreement' }
+        scopedSlots: { customRender: 'jobAgreement' },
+        width: '15%'
       }, {
         title: '备注',
-        dataIndex: 'remark'
+        dataIndex: 'remark',
+        width: '10%'
       }, {
         title: '操作',
         dataIndex: 'operation',
@@ -250,7 +256,7 @@ export default {
         onOk () {
           that.loading = true
           that.$put('contractInside/togetherRestore', {
-            contractOutsideIds: that.selectedRowKeys.join(',')
+            contractInsideIds: that.selectedRowKeys.join(',')
           }).then(() => {
             that.loading = false
             that.$message.success('已全部恢复')

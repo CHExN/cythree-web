@@ -94,21 +94,22 @@
     </div>
     <div>
       <div class="operator">
-        <a-row>
-          <a-col :md="2" :sm="24" >
+        <a-row type="flex" justify="space-between">
+          <a-col :md="3" :sm="24" >
             <a-button style="height: 37px" type="primary" ghost v-hasPermission="'storeroomOut:add'" @click="addStoreroomOut">出库</a-button>
+            <a-button style="height: 37px" v-hasPermission="'storeroom:export'" @click="exportExcel">导出</a-button>
           </a-col>
-          <a-col :md="11" :sm="24" >
+          <a-col :md="10" :sm="24" >
             <a-spin :spinning="loading">
               <a-alert type="info" showIcon style="width: 90%">
                 <div slot="message">
                   全 {{ pagination.total }} 条记录，总价格为 ￥{{ $tools.addZero($tools.toNumFormant(allTotalPrice)) }}
-                  <a style="margin-left: 24px" @click="exportExcel">点击导出</a>
+                  <!-- <a style="margin-left: 24px" @click="exportExcel">点击导出</a> -->
                 </div>
               </a-alert>
             </a-spin>
           </a-col>
-          <a-col :md="11" :sm="24" >
+          <a-col :md="10" :sm="24" >
             <a-spin :spinning="selectedTotalPriceLoading">
               <a-alert type="info" showIcon style="width: 90%">
                 <div slot="message">
@@ -273,15 +274,12 @@ export default {
   methods: {
     onSelectChange (selectedRowKeys) {
       this.selectedRowKeys = selectedRowKeys
-      console.log(selectedRowKeys)
       if (!selectedRowKeys || selectedRowKeys.length === 0) {
-        console.log('this.selectedTotalPrice = 0')
         this.selectedTotalPrice = 0
         return
       }
       this.selectedTotalPriceLoading = true
       this.$get('storeroom/selectedTotalPrice', { ids: selectedRowKeys }).then(({ data }) => {
-        console.log('this.$get(storeroom/selectedTotalPrice) data =>', data)
         this.selectedTotalPrice = data
         this.selectedTotalPriceLoading = false
       })

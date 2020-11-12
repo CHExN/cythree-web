@@ -798,7 +798,7 @@ export default {
     exportAllExcel () {
       this.$export('staffOutside/allExport', {
         isLeave: this.isLeave,
-        pageSize: 99999
+        pageSize: this.pagination.total
       })
     },
     exportExcel () {

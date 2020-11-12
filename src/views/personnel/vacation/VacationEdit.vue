@@ -223,7 +223,7 @@ export default {
     },
     setFormValues ({...vacation}) {
       this.id = vacation.id
-      let forbids = ['createTime', 'modifyTime']
+      let forbids = ['createTime', 'modifyTime', 'names']
       let obj = {}
       Object.keys(vacation).forEach((key) => {
         if (forbids.indexOf(key) === -1) {
@@ -254,7 +254,7 @@ export default {
     },
     handleStaffInsideListChange (name, staffId) {
       this.form.getFieldDecorator('name')
-      this.form.setFieldsValue({ name: name })
+      this.form.setFieldsValue({ name })
       this.staffId = staffId
     },
     handleStaffInsideListClose () {
@@ -262,7 +262,7 @@ export default {
     },
     handleStaffOutsideListChange (name, staffId) {
       this.form.getFieldDecorator('name')
-      this.form.setFieldsValue({ name: name })
+      this.form.setFieldsValue({ name })
       this.staffId = staffId
     },
     handleStaffOutsideListClose () {

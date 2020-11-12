@@ -241,6 +241,7 @@ export default {
       paginationInfo: null,
       dataSource: [],
       selectedRowKeys: [],
+      // 字典集
       dictData: {},
       loading: false,
       pagination: {
@@ -354,7 +355,7 @@ export default {
       this.$message.loading('正在导出', 0)
       let params = {...this.queryParams}
       // 设置导出的数据为总数据条数
-      params.pageSize = 9999
+      params.pageSize = 99999
       params.pageNum = 1
       this.$get('wc', {
         ...params

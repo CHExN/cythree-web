@@ -412,13 +412,16 @@ export default {
       filteredInfo = filteredInfo || {}
       return [{
         title: '序号',
-        dataIndex: 'sortNum'
+        dataIndex: 'sortNum',
+        width: '5%'
       }, {
         title: '姓名',
-        dataIndex: 'name'
+        dataIndex: 'name',
+        width: '8%'
       }, {
         title: '事由',
-        dataIndex: 'cause'
+        dataIndex: 'cause',
+        width: '8%'
       }, {
         title: '人员类型',
         dataIndex: 'type',
@@ -441,7 +444,8 @@ export default {
         filterMultiple: true,
         filteredValue: filteredInfo.type || null,
         // onFilter 用于筛选当前数据
-        onFilter: (value, record) => record.type.includes(value)
+        onFilter: (value, record) => record.type.includes(value),
+        width: '10%'
       }, {
         title: '性别',
         dataIndex: 'gender',
@@ -464,7 +468,8 @@ export default {
         filterMultiple: false,
         filteredValue: filteredInfo.gender || null,
         // onFilter 用于筛选当前数据
-        onFilter: (value, record) => record.gender.includes(value)
+        onFilter: (value, record) => record.gender.includes(value),
+        width: '10%'
       // }, {
       //   title: '部门',
       //   dataIndex: 'deptName'
@@ -496,13 +501,16 @@ export default {
         filterMultiple: true,
         filteredValue: filteredInfo.post || null,
         // onFilter 用于筛选当前数据
-        onFilter: (value, record) => record.post.includes(value)
+        onFilter: (value, record) => record.post.includes(value),
+        width: '12%'
       }, {
         title: '岗位等级',
-        dataIndex: 'postLevel'
+        dataIndex: 'postLevel',
+        width: '15%'
       }, {
         title: '现任职务',
-        dataIndex: 'technicalType'
+        dataIndex: 'technicalType',
+        width: '15%'
       }, {
         title: '户籍性质',
         dataIndex: 'householdRegistrationType',
@@ -528,7 +536,8 @@ export default {
           { text: '本地非农业', value: '3' }
         ],
         // filterMultiple 用于指定多选和单选(true多/false单)
-        filterMultiple: true
+        filterMultiple: true,
+        width: '15%'
       }, {
         title: '操作',
         dataIndex: 'operation',

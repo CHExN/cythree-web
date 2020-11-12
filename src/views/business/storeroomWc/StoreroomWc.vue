@@ -107,7 +107,6 @@
       <div class="operator">
         <a-button @click="batchDelete" v-hasPermission="'wcStoreroom:delete'">删除</a-button>
         <a-button @click="deleteAll" v-hasPermission="'wcStoreroom:delete'" :loading="loadingDelete">删除全部</a-button>
-        <!-- <a-button @click="batchDelete">删除</a-button> -->
       </div>
       <!-- 表格区域 -->
       <a-table ref="TableInfo"
@@ -275,8 +274,8 @@ export default {
           month: this.monthData.slice(0, this.monthData.indexOf(monthTo) + 1).join(',')
         }
       }
-      console.log(`[${value[0].format('YYYY-MM-DD')}, ${value[1].format('YYYY-MM-DD')}]`)
-      console.log(this.dateData)
+      // console.log(`[${value[0].format('YYYY-MM-DD')}, ${value[1].format('YYYY-MM-DD')}]`)
+      // console.log(this.dateData)
       this.monthValue = value
       this.mode = [
         mode[0] === 'date' ? 'month' : mode[0],
@@ -309,7 +308,8 @@ export default {
     deleteAll () {
       this.loadingDelete = true
       let params = {...this.queryParams}
-      params.pageSize = 999999999
+      // params.pageSize = 999999999
+      params.pageSize = this.pagination.total
       params.pageNum = 1
       this.$get('wcStoreroom/ids', {
         yearForm: this.dateData.dateForm.year || '',

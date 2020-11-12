@@ -79,12 +79,16 @@
                @change="handleTableChange">
         <template v-for="month in 12" :slot="`month${month}`" slot-scope="text, record">
           <a-popover v-if="record[`month${month}Remark`]" placement="topLeft" :key="month">
-            <div slot="content">
-              <div v-for="i in record[`month${month}Remark`].split(',')" :key="i">
-                <span>{{i}}</span><br/>
+            <div slot="content" style="text-align: right;">
+              <div v-for="(item, index) in record[`month${month}Remark`].split(',')" :key="index">
+                <span>{{item}}</span><br/>
               </div>
             </div>
-            {{text}}
+            <div v-for="(item, index) in text.split('\n')" :key="index">
+              <span>{{text.split('\n').length === (index + 1) ? item : item + '\n'}}</span>
+            </div>
+            <!-- 替换字符串为\n -->
+            <!-- {{ text.replace(';', '\n') }} -->
           </a-popover>
         </template>
       </a-table>
